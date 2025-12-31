@@ -3,9 +3,13 @@ spring:
         name: happy-pet-shop
 
     datasource:
-        url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
+        url: "jdbc:postgresql://localhost:5432/postgres"
         username: root
         password: root
+#    datasource:
+#        url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
+#        username: postgres
+#        password: lamthaiyennhi20051011
 
     jpa:
         hibernate:
