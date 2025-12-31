@@ -1,0 +1,79 @@
+package com.funcoders.happy_pet_shop.service;
+
+import com.funcoders.happy_pet_shop.dto.request.ProductCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.ProductUpdateRequest;
+import com.funcoders.happy_pet_shop.dto.response.ProductResponse;
+import com.funcoders.happy_pet_shop.entity.ProductEntity;
+import com.funcoders.happy_pet_shop.exception.AppException;
+import com.funcoders.happy_pet_shop.exception.ErrorType;
+import com.funcoders.happy_pet_shop.mapper.ProductionMapper;
+import com.funcoders.happy_pet_shop.repository.ProductRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class ProductService {
+    ProductRepository productRepository;
+    ProductionMapper productionMapper;
+
+    @Transactional
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ProductResponse createProduct(ProductCreationRequest request) {
+        ProductEntity productEntity = productionMapper.toProductEntity(request);
+        return productionMapper.toResponse(productRepository.save(productEntity));
+    }
+
+    public ProductResponse getProductById(String id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+        return productionMapper.toResponse(product);
+    }
+
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(productionMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductResponse> getAllProductsPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAll(pageable)
+                .stream()
+                .map(productionMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ProductResponse updateProduct(String id, ProductUpdateRequest request) {
+//        SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().map(grantedAuthority -> {return grantedAuthority.toString();});
+
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+
+        productionMapper.updateProduct(productEntity, request);
+
+        return productionMapper.toResponse(productRepository.save(productEntity));
+    }
+
+    @Transactional
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public void deleteProduct(String id) {
+        if (!productRepository.existsById(id)) {
+            throw new AppException(ErrorType.NOT_FOUND);
+        }
+        productRepository.deleteById(id);
+    }
+}
