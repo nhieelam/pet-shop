@@ -1,7 +1,7 @@
 package com.funcoders.happy_pet_shop.configuration;
 
-import com.funcoders.happy_pet_shop.entity.RoleEntity;
-import com.funcoders.happy_pet_shop.entity.UserEntity;
+import com.funcoders.happy_pet_shop.entity.Role;
+import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
@@ -33,21 +33,21 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         log.info("Application init...");
 
         if (!userRepository.existsByUserName("admin")) {
-            RoleEntity adminRole = RoleEntity.builder()
+            Role adminRole = Role.builder()
                     .roleName("ADMIN")
                     .description("Quản trị hệ thống")
                     .build();
 
-            RoleEntity userRole = roleRepository.save(
-                    RoleEntity.builder()
+            Role userRole = roleRepository.save(
+                    Role.builder()
                             .roleName("USER")
                             .description("Người dùng thường")
                             .build());
 
-            Set<RoleEntity> roles = new HashSet<>();
+            Set<Role> roles = new HashSet<>();
             roles.add(adminRole);
 
-            UserEntity admin = UserEntity.builder()
+            User admin = User.builder()
                     .userName("admin")
                     .password(passwordEncoder.encode("Asdf1234!"))
                     .roles(roles)

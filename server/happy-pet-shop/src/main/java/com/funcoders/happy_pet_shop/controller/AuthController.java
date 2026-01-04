@@ -3,6 +3,7 @@ package com.funcoders.happy_pet_shop.controller;
 import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
 import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
 import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
+import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
@@ -43,5 +44,12 @@ public class AuthController {
     public ApiResponse<IntrospectResponse> introspect(@Valid @RequestBody IntrospectRequest request) throws JOSEException, ParseException {
         IntrospectResponse response = authService.introspect(request);
         return new ApiResponse<IntrospectResponse>(response, "Introspect successfully");
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        AuthResponse response = authService.refreshToken(request);
+
+        return new ApiResponse(response, "Refresh token successfully");
     }
 }

@@ -2,7 +2,7 @@ package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
-import com.funcoders.happy_pet_shop.entity.UserEntity;
+import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.UserMapper;
@@ -31,7 +31,7 @@ public class UserService {
             throw new AppException(ErrorType.BAD_REQUEST);
         }
 
-        UserEntity userEntity = userMapper.toUserEntity(request);
+        User userEntity = userMapper.toUserEntity(request);
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userMapper.toUserResponse(userRepository.save(userEntity));
@@ -39,7 +39,7 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public UserResponse getUserById(String id) {
-        UserEntity user = userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
         return userMapper.toUserResponse(user);
     }
@@ -61,7 +61,7 @@ public class UserService {
     }
 
     public UserResponse updateUser(String id, UserCreationRequest request) {
-        UserEntity user = userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         user.setUserName(request.getUsername());
