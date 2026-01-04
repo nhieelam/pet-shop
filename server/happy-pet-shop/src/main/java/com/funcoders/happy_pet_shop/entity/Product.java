@@ -1,6 +1,5 @@
 package com.funcoders.happy_pet_shop.entity;
 
-import com.funcoders.happy_pet_shop.constant.Category;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductEntity {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;

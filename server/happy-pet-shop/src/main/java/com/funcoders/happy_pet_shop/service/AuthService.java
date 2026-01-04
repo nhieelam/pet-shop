@@ -3,10 +3,11 @@ package com.funcoders.happy_pet_shop.service;
 import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
 import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
 import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
+import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
 import com.funcoders.happy_pet_shop.entity.InvalidatedToken;
-import com.funcoders.happy_pet_shop.entity.UserEntity;
+import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
@@ -53,7 +54,7 @@ public class AuthService {
     protected long EXPIRATION_TIME;
 
     public AuthResponse authenticate(AuthRequest request) {
-        UserEntity user = userRepository.findByUserName(request.getUserName())
+        User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
@@ -101,7 +102,29 @@ public class AuthService {
         }
     }
 
-    private String generateToken(UserEntity user) {
+    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        SignedJWT signedJWT = verifyToken(request.getToken());
+        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(claimsSet.getJWTID())
+                .expiryTime(claimsSet.getExpirationTime())
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        User userEntity = userRepository.findByUserName(claimsSet.getSubject())
+                .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
+
+        String newToken = generateToken(userEntity);
+
+        return AuthResponse.builder()
+                .authenticated(true)
+                .token(newToken)
+                .build();
+    }
+
+    private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
                 .subject(user.getUserName())
@@ -126,7 +149,7 @@ public class AuthService {
         }
     }
 
-    private String buildScope(UserEntity user) {
+    private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 
         user.getRoles().forEach(role -> {

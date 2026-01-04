@@ -16,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
@@ -33,10 +33,5 @@ public class UserEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_name")
     )
-    Set<RoleEntity> roles;
-
-    public static void main(String[] args) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-        System.out.println(passwordEncoder.encode("Asdf1234!"));
-    }
+    Set<Role> roles;
 }

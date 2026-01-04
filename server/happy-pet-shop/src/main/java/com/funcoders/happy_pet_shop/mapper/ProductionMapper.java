@@ -3,15 +3,15 @@ package com.funcoders.happy_pet_shop.mapper;
 import com.funcoders.happy_pet_shop.dto.request.ProductCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ProductUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ProductResponse;
-import com.funcoders.happy_pet_shop.entity.ProductEntity;
+import com.funcoders.happy_pet_shop.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProductionMapper {
-    ProductEntity toProductEntity(ProductCreationRequest request);
+    Product toProductEntity(ProductCreationRequest request);
 
-    void updateProduct(@MappingTarget ProductEntity productEntity, ProductUpdateRequest request);
+    void updateProduct(@MappingTarget Product productEntity, ProductUpdateRequest request);
 
-    ProductResponse toResponse(ProductEntity productEntity);
+    ProductResponse toResponse(Product productEntity);
 }

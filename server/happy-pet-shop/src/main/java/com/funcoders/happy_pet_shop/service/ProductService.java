@@ -3,7 +3,7 @@ package com.funcoders.happy_pet_shop.service;
 import com.funcoders.happy_pet_shop.dto.request.ProductCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ProductUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ProductResponse;
-import com.funcoders.happy_pet_shop.entity.ProductEntity;
+import com.funcoders.happy_pet_shop.entity.Product;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.ProductionMapper;
@@ -30,12 +30,12 @@ public class ProductService {
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse createProduct(ProductCreationRequest request) {
-        ProductEntity productEntity = productionMapper.toProductEntity(request);
+        Product productEntity = productionMapper.toProductEntity(request);
         return productionMapper.toResponse(productRepository.save(productEntity));
     }
 
     public ProductResponse getProductById(String id) {
-        ProductEntity product = productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
         return productionMapper.toResponse(product);
     }
@@ -60,7 +60,7 @@ public class ProductService {
     public ProductResponse updateProduct(String id, ProductUpdateRequest request) {
 //        SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().map(grantedAuthority -> {return grantedAuthority.toString();});
 
-        ProductEntity productEntity = productRepository.findById(id)
+        Product productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         productionMapper.updateProduct(productEntity, request);

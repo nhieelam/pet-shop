@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RoleEntity {
+public class Role {
     @Id
     @Column(nullable = false, unique = true, length = 50)
     String roleName;

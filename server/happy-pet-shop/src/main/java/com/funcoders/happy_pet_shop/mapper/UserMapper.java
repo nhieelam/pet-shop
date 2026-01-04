@@ -3,7 +3,7 @@ package com.funcoders.happy_pet_shop.mapper;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
-import com.funcoders.happy_pet_shop.entity.UserEntity;
+import com.funcoders.happy_pet_shop.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -12,10 +12,10 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
     @Mapping(source = "username", target = "userName")
     @Mapping(target = "roles", ignore = true)
-    UserEntity toUserEntity(UserCreationRequest request);
+    User toUserEntity(UserCreationRequest request);
 
-    void updateUser(@MappingTarget UserEntity userEntity, UserUpdateRequest request);
+    void updateUser(@MappingTarget User userEntity, UserUpdateRequest request);
 
     @Mapping(source = "userName", target = "username")
-    UserResponse toUserResponse(UserEntity userEntity);
+    UserResponse toUserResponse(User userEntity);
 }
