@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -36,21 +37,21 @@ public class UserController {
 
     // Lấy user theo id, admin hoặc chính user
     @GetMapping("/{id}")
-    public ApiResponse<UserResponse> getUserById(@PathVariable String id) {
+    public ApiResponse<UserResponse> getUserById(@PathVariable UUID id) {
         UserResponse user = userService.getUserById(id);
         return new ApiResponse<>(user, "User details");
     }
 
     // Cập nhật user, admin hoặc chính user
     @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody UserCreationRequest request) {
+    public ApiResponse<UserResponse> updateUser(@PathVariable UUID id, @RequestBody UserCreationRequest request) {
         UserResponse updated = userService.updateUser(id, request);
         return new ApiResponse<>(updated, "User updated successfully");
     }
 
     // Xóa user, chỉ admin
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteUser(@PathVariable String id) {
+    public ApiResponse<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return new ApiResponse<>(null, "User deleted successfully");
     }

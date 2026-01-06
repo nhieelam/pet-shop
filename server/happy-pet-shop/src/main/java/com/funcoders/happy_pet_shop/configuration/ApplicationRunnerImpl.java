@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.configuration;
 
+import com.funcoders.happy_pet_shop.constant.UserRole;
 import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
@@ -33,22 +34,34 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         log.info("Application init...");
 
         if (!userRepository.existsByUserName("admin")) {
+//            ROLES
             Role adminRole = Role.builder()
-                    .roleName("ADMIN")
-                    .description("Quản trị hệ thống")
+                    .roleName(UserRole.ADMIN_ROLE)
+                    .description("Administrator")
                     .build();
 
             Role userRole = roleRepository.save(
                     Role.builder()
-                            .roleName("USER")
-                            .description("Người dùng thường")
+                            .roleName(UserRole.USER_ROLE)
+                            .description("Customers")
                             .build());
 
+            Role staffRole = roleRepository.save(
+                    Role.builder()
+                            .roleName(UserRole.STAFF_ROLE)
+                            .description("Staffs")
+                            .build());
+
+            Role managedAdminRole = roleRepository.save(adminRole);
+            roleRepository.save(userRole);
+            roleRepository.save(staffRole);
+//            USERS
             Set<Role> roles = new HashSet<>();
-            roles.add(adminRole);
+            roles.add(managedAdminRole);
 
             User admin = User.builder()
                     .userName("admin")
+                    .phone("0911111111")
                     .password(passwordEncoder.encode("Asdf1234!"))
                     .roles(roles)
                     .build();
