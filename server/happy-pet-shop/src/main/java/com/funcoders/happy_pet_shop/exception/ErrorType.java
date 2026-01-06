@@ -16,7 +16,8 @@ public enum ErrorType {
     USER_NOT_FOUND("Người dùng không tồn tại", 1001, HttpStatus.NOT_FOUND),
     USERNAME_ALREADY_EXISTS("Username đã tồn tại", 1002, HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND("Role không tồn tại", 1003, HttpStatus.NOT_FOUND),
-    INVALID_PASSWORD("Mật khẩu không hợp lệ", 1004, HttpStatus.BAD_REQUEST);
+    INVALID_PASSWORD("Mật khẩu không hợp lệ", 1004, HttpStatus.BAD_REQUEST),
+    INVALID_CATEGORY("Thể loại không hợp lệ", 1005, HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final int errorCode;

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public UserResponse getUserById(String id) {
+    public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
         return userMapper.toUserResponse(user);
@@ -53,14 +54,14 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public void deleteUser(String id) {
+    public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new AppException(ErrorType.NOT_FOUND);
         }
         userRepository.deleteById(id);
     }
 
-    public UserResponse updateUser(String id, UserCreationRequest request) {
+    public UserResponse updateUser(UUID id, UserCreationRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 

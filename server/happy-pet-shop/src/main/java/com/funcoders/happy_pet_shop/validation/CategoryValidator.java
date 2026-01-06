@@ -1,6 +1,6 @@
 package com.funcoders.happy_pet_shop.validation;
 
-import com.funcoders.happy_pet_shop.constant.Category;
+import com.funcoders.happy_pet_shop.constant.UserStatus;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -22,7 +22,7 @@ public class CategoryValidator implements ConstraintValidator<CategoryConstraint
     @Override
     public void initialize(CategoryConstraint constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
-        validCategories = Arrays.stream(Category.values())
+        validCategories = Arrays.stream(UserStatus.values())
                 .map(Enum::name)
                 .collect(Collectors.toSet());
 

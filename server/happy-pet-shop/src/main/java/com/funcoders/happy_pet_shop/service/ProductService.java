@@ -3,10 +3,12 @@ package com.funcoders.happy_pet_shop.service;
 import com.funcoders.happy_pet_shop.dto.request.ProductCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ProductUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ProductResponse;
+import com.funcoders.happy_pet_shop.entity.Category;
 import com.funcoders.happy_pet_shop.entity.Product;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.ProductionMapper;
+import com.funcoders.happy_pet_shop.repository.CategoryRepository;
 import com.funcoders.happy_pet_shop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +28,18 @@ import java.util.stream.Collectors;
 public class ProductService {
     ProductRepository productRepository;
     ProductionMapper productionMapper;
+    CategoryRepository categoryRepository;
 
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse createProduct(ProductCreationRequest request) {
         Product productEntity = productionMapper.toProductEntity(request);
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorType.INVALID_CATEGORY));
+
+        productEntity.setCategory(category);
+
         return productionMapper.toResponse(productRepository.save(productEntity));
     }
 
@@ -62,6 +71,11 @@ public class ProductService {
 
         Product productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorType.INVALID_CATEGORY));
+
+        productEntity.setCategory(category);
 
         productionMapper.updateProduct(productEntity, request);
 
