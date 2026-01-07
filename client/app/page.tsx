@@ -1,65 +1,82 @@
-import Image from "next/image";
+"use client";
 
+import Link from "next/link";
+import ListProducts from "./components/listProducts";
+import ListServices from "./components/listServices";
 export default function Home() {
+  const products = [
+    {
+      id: 1,
+      name: "Thức ăn cao cấp cho chó",
+      price: "₫350.000",
+      icon: "🐕",
+      description: "Dinh dưỡng hoàn chỉnh, ngon lành",
+    },
+    {
+      id: 2,
+      name: "Bộ đồ chơi cho mèo",
+      price: "₫250.000",
+      icon: "🐱",
+      description: "Vui nhộn, an toàn cho thú cưng",
+    },
+    {
+      id: 3,
+      name: "Giường ngủ cao cấp",
+      price: "₫500.000",
+      icon: "🛏️",
+      description: "Thoải mái, ấm áp cho thú cưng",
+    },
+    {
+      id: 4,
+      name: "Bộ spa & chăm sóc",
+      price: "₫450.000",
+      icon: "✨",
+      description: "Làm đẹp chuyên nghiệp cho thú cưng",
+    },
+  ];
+
+  const services = [
+    {
+      title: "Dịch vụ tắm & chăm sóc",
+      description: "Làm sạch và chăm sóc lông được chuyên nghiệp cho mọi loài thú cưng",
+      icon: "🧴",
+    },
+    {
+      title: "Khám sức khỏe",
+      description: "Kiểm tra sức khỏe định kỳ, tiêm chủng và tư vấn y tế chuyên nghiệp",
+      icon: "⚕️",
+    },
+    {
+      title: "Huấn luyện thú cưng",
+      description: "Chương trình huấn luyện chuyên nghiệp, dạy dỗ hành vi tốt",
+      icon: "🎖️",
+    },
+    {
+      title: "Dịch vụ lưu trú",
+      description: "Cơ sở lưu trú an toàn, thoải mái với chăm sóc tận tâm",
+      icon: "🏡",
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="w-full">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl sm:text-6xl font-bold mb-6">
+            Happy Pet Shop🐾
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl sm:text-2xl mb-8 opacity-90">
+            Cửa hàng thú cưng hàng đầu cung cấp thức ăn, đồ chơi, phụ kiện chất lượng cao và dịch vụ chăm sóc toàn diện với đội ngũ chuyên viên tận tâm, giàu kinh nghiệm.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      {/* Featured Products Section */}
+      <ListProducts />
+
+      {/* Services Section */}
+      <ListServices />
     </div>
   );
 }
