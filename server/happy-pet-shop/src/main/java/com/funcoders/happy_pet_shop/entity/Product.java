@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -49,6 +50,12 @@ public class Product {
 
     @Column(nullable = false)
     int quantity;
+
+    @Column(name = "image_url")
+    String imageUrl;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    Set<Inventory> inventories;
 
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;

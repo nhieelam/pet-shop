@@ -1,6 +1,8 @@
 package com.funcoders.happy_pet_shop.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -27,4 +29,9 @@ public class Staff {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
+
+    @Min(1)
+    @Max(3)
+    @Column(nullable = false)
+    int shift;
 }

@@ -46,5 +46,7 @@ public class ProductUpdateRequest {
 
     @Size(max = 100, message = "Xuất xứ không quá 100 ký tự")
     String origin;
+
+    String imageUrl;
 }
 
