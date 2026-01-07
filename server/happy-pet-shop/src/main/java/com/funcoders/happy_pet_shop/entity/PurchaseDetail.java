@@ -36,11 +36,11 @@ public class PurchaseDetail {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "purchase_id", nullable = false)
-    Purchase purchase;   // Phiếu nhập hàng
+    Purchase purchase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    Inventory inventory;     // Sản phẩm được nhập
+    Inventory inventory;
 
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal unitPrice;
