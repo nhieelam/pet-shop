@@ -103,18 +103,17 @@ export default function CartPage() {
   // Handle checkout
   const handleCheckout = () => {
     const selectedItems = items.filter((item) => item.isSelected);
-    const total = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    
+    if (selectedItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      return;
+    }
 
-    alert(`
-      Tiến hành thanh toán cho ${selectedItems.length} sản phẩm
-      Tổng cộng: ${new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(total)}
-    `);
-
-    // TODO: Navigate to checkout page
-    // router.push("/checkout");
+    // Store selected items in sessionStorage for payment page
+    sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+    
+    // Navigate to payment page with source parameter
+    window.location.href = "/payment?source=cart";
   };
 
   // Check if all items are selected

@@ -117,10 +117,20 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const totalPrice = product.price * quantity;
-    alert(`Thanh toán cho ${quantity} x ${product.name}\nTổng tiền: ₫${totalPrice.toLocaleString("vi-VN")}`);
+    // Create checkout item from current product and quantity
+    const checkoutProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      image: product.image,
+    };
     
-    // TODO: Redirect to payment page
+    // Store in sessionStorage for payment page
+    sessionStorage.setItem("checkoutProduct", JSON.stringify(checkoutProduct));
+    
+    // Navigate to payment page with source parameter
+    window.location.href = "/payment?source=product";
   };
 
   const handleAddComment = () => {
