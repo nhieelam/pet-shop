@@ -2,17 +2,33 @@
 
 interface CategoryFilterProps {
   categories: string[];
-  activeCategory: string;
-  onCategoryChange: (category: string) => void;
+  selectedCategories: string[];
+  onCategoriesChange: (categories: string[]) => void;
   layout?: "sidebar" | "tabs";
 }
 
 export default function CategoryFilter({
   categories,
-  activeCategory,
-  onCategoryChange,
+  selectedCategories,
+  onCategoriesChange,
   layout = "sidebar",
 }: CategoryFilterProps) {
+  // Handle category toggle
+  const handleToggleCategory = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      // Remove category if already selected
+      onCategoriesChange(selectedCategories.filter((cat) => cat !== category));
+    } else {
+      // Add category if not selected
+      onCategoriesChange([...selectedCategories, category]);
+    }
+  };
+
+  // Clear all selections
+  const handleClearAll = () => {
+    onCategoriesChange([]);
+  };
+
   // Tab layout for horizontal display
   if (layout === "tabs") {
     return (
@@ -21,13 +37,13 @@ export default function CategoryFilter({
           {categories.map((category) => (
             <button
               key={category}
-              onClick={() => onCategoryChange(category)}
+              onClick={() => handleToggleCategory(category)}
               className={`px-4 py-2 rounded-lg font-medium transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                activeCategory === category
+                selectedCategories.includes(category)
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-800 hover:bg-gray-200"
               }`}
-              aria-pressed={activeCategory === category}
+              aria-pressed={selectedCategories.includes(category)}
               aria-label={`Lọc theo danh mục ${category}`}
             >
               {category}
@@ -41,23 +57,51 @@ export default function CategoryFilter({
   // Sidebar layout (default)
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Danh mục</h3>
-      <div className="flex flex-col gap-3">
-        {categories.map((category) => (
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-gray-800">Danh mục</h3>
+        {selectedCategories.length > 0 && (
           <button
-            key={category}
-            onClick={() => onCategoryChange(category)}
-            className={`text-left px-4 py-2 rounded-lg font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              activeCategory === category
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-            }`}
-            aria-pressed={activeCategory === category}
-            aria-label={`Lọc theo danh mục ${category}`}
+            onClick={handleClearAll}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition"
+            aria-label="Xóa tất cả danh mục đã chọn"
           >
-            {category}
+            Xóa
           </button>
-        ))}
+        )}
+      </div>
+      <div className="flex flex-col gap-3">
+        {categories.map((category) => {
+          const isSelected = selectedCategories.includes(category);
+          return (
+            <label
+              key={category}
+              className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition"
+            >
+              {/* Checkbox */}
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => handleToggleCategory(category)}
+                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                aria-label={`Chọn danh mục ${category}`}
+              />
+              {/* Label Text */}
+              <span
+                className={`font-medium transition ${
+                  isSelected ? "text-blue-600 font-semibold" : "text-gray-800"
+                }`}
+              >
+                {category}
+              </span>
+              {/* Selected Count Badge */}
+              {isSelected && (
+                <span className="ml-auto bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                  ✓
+                </span>
+              )}
+            </label>
+          );
+        })}
       </div>
     </div>
   );

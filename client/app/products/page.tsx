@@ -210,7 +210,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function ProductsPage() {
   // State management
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000000);
@@ -221,9 +221,11 @@ export default function ProductsPage() {
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...mockProducts];
 
-    // Filter by category
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((product) => product.category === selectedCategory);
+    // Filter by selected categories (if any are selected)
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedCategories.includes(product.category)
+      );
     }
 
     // Filter by search query (case-insensitive)
@@ -256,7 +258,7 @@ export default function ProductsPage() {
     });
 
     return filtered;
-  }, [selectedCategory, searchQuery, minPrice, maxPrice, sortBy]);
+  }, [selectedCategories, searchQuery, minPrice, maxPrice, sortBy]);
 
   // Pagination calculations
   const totalItems = filteredAndSortedProducts.length;
@@ -266,8 +268,8 @@ export default function ProductsPage() {
   const paginatedProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
-  const handleCategoryChange = useCallback((category: string) => {
-    setSelectedCategory(category);
+  const handleCategoryChange = useCallback((categories: string[]) => {
+    setSelectedCategories(categories);
     setCurrentPage(1);
   }, []);
 
@@ -317,8 +319,8 @@ export default function ProductsPage() {
             {/* Category Filter */}
             <CategoryFilter
               categories={categories}
-              activeCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
+              selectedCategories={selectedCategories}
+              onCategoriesChange={handleCategoryChange}
               layout="sidebar"
             />
 
@@ -339,8 +341,8 @@ export default function ProductsPage() {
             <div className="mb-6 lg:hidden">
               <CategoryFilter
                 categories={categories}
-                activeCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
+                selectedCategories={selectedCategories}
+                onCategoriesChange={handleCategoryChange}
                 layout="tabs"
               />
             </div>
@@ -350,8 +352,8 @@ export default function ProductsPage() {
               <div>
                 <p className="text-gray-700">
                   Tìm thấy <span className="font-bold text-blue-600">{totalItems}</span> sản phẩm
-                  {selectedCategory !== "All" && (
-                    <span> trong danh mục <span className="font-semibold">{selectedCategory}</span></span>
+                  {selectedCategories.length > 0 && (
+                    <span> trong danh mục <span className="font-semibold">{selectedCategories.join(", ")}</span></span>
                   )}
                 </p>
               </div>
@@ -385,7 +387,7 @@ export default function ProductsPage() {
                 </p>
                 <button
                   onClick={() => {
-                    setSelectedCategory("All");
+                    setSelectedCategories([]);
                     setSearchQuery("");
                     setMinPrice(0);
                     setMaxPrice(1000000);
