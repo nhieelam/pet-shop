@@ -9,7 +9,6 @@ interface PriceFilterProps {
   currentSort: string;
 }
 
-// Predefined price range options
 const PRICE_RANGES = [
   { label: "Tất cả giá", min: 0, max: 10000000 },
   { label: "Dưới ₫100,000", min: 0, max: 100000 },
@@ -26,7 +25,6 @@ export default function PriceFilter({
   onSort,
   currentSort,
 }: PriceFilterProps) {
-  // Find current selected range
   const findCurrentRange = () => {
     return PRICE_RANGES.find(
       (range) => range.min === minPrice && range.max === maxPrice
@@ -42,7 +40,6 @@ export default function PriceFilter({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      {/* Price Range Select */}
       <h3 className="text-xl font-bold text-gray-800 mb-4">Lọc theo giá</h3>
 
       <div className="mb-6">
@@ -74,7 +71,6 @@ export default function PriceFilter({
       </div>
 
 
-      {/* Quick Sort Options */}
       <h3 className="text-xl font-bold text-gray-800 mb-4">Sắp xếp</h3>
       <div className="mb-6">
         <select

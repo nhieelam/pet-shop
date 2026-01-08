@@ -9,7 +9,6 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Debounce search with 300ms delay
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       onSearch(searchTerm);

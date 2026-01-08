@@ -13,23 +13,18 @@ export default function CategoryFilter({
   onCategoriesChange,
   layout = "sidebar",
 }: CategoryFilterProps) {
-  // Handle category toggle
   const handleToggleCategory = (category: string) => {
     if (selectedCategories.includes(category)) {
-      // Remove category if already selected
       onCategoriesChange(selectedCategories.filter((cat) => cat !== category));
     } else {
-      // Add category if not selected
       onCategoriesChange([...selectedCategories, category]);
     }
   };
 
-  // Clear all selections
   const handleClearAll = () => {
     onCategoriesChange([]);
   };
 
-  // Tab layout for horizontal display
   if (layout === "tabs") {
     return (
       <div className="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
@@ -54,7 +49,6 @@ export default function CategoryFilter({
     );
   }
 
-  // Sidebar layout (default)
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center justify-between mb-4">
@@ -77,7 +71,6 @@ export default function CategoryFilter({
               key={category}
               className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition"
             >
-              {/* Checkbox */}
               <input
                 type="checkbox"
                 checked={isSelected}
@@ -85,7 +78,6 @@ export default function CategoryFilter({
                 className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
                 aria-label={`Chọn danh mục ${category}`}
               />
-              {/* Label Text */}
               <span
                 className={`font-medium transition ${
                   isSelected ? "text-blue-600 font-semibold" : "text-gray-800"
@@ -93,7 +85,6 @@ export default function CategoryFilter({
               >
                 {category}
               </span>
-              {/* Selected Count Badge */}
               {isSelected && (
                 <span className="ml-auto bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                   ✓

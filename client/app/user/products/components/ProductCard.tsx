@@ -33,14 +33,12 @@ export default function ProductCard({
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
-      {/* Image Container */}
       <Link href={`/detailedProduct/${id}`} className="block">
         <div
           className="relative h-64 bg-gray-200 overflow-hidden cursor-pointer"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-        {/* Product Image */}
         <img
           src={image}
           alt={name}
@@ -49,12 +47,10 @@ export default function ProductCard({
           }`}
         />
 
-        {/* Stock Badge */}
         <div className="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
           {availableAmount > 0 ? "Còn hàng" : "Hết hàng"}
         </div>
 
-        {/* Overlay with Buttons */}
         {isHovered && (
           <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center gap-3 transition-all duration-300">
             <button
@@ -78,19 +74,15 @@ export default function ProductCard({
         </div>
       </Link>
 
-      {/* Product Info */}
       <div className="p-4 flex-grow flex flex-col">
-        {/* Name */}
         <Link href={`/detailedProduct/${id}`}>
           <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-14 hover:text-blue-600 transition-colors">
             {name}
           </h3>
         </Link>
 
-        {/* Description */}
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>
 
-        {/* Stock Info */}
         <div className="mb-4">
           <p className="text-xs text-gray-500">
             Số lượng có sẵn:{" "}
@@ -104,7 +96,6 @@ export default function ProductCard({
           </p>
         </div>
 
-        {/* Price and Action Buttons */}
         <div className="border-t pt-3 mt-auto flex items-center justify-between">
           <span className="text-2xl font-bold text-blue-600">
             ₫{price.toLocaleString("vi-VN")}

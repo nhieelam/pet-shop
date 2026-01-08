@@ -45,13 +45,10 @@ export default function ProfileHeader() {
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Header Background */}
       <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
-      {/* Profile Content */}
       <div className="px-6 pb-6">
         <div className="flex flex-col md:flex-row md:items-end gap-6 -mt-16 mb-6 relative z-10">
-          {/* Avatar */}
           <div className="flex flex-col items-center md:items-start">
             <img
               src={user.avatar}
@@ -63,7 +60,6 @@ export default function ProfileHeader() {
             </p>
           </div>
 
-          {/* User Info */}
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">{user.name}</h2>
             <div className="space-y-2 text-gray-600">
@@ -78,7 +74,6 @@ export default function ProfileHeader() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={() => setIsEditOpen(true)}
@@ -96,14 +91,12 @@ export default function ProfileHeader() {
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
       {isEditOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Chỉnh sửa hồ sơ</h3>
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
-              {/* Avatar URL */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   URL Avatar
@@ -117,7 +110,6 @@ export default function ProfileHeader() {
                 />
               </div>
 
-              {/* Name */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Tên đầy đủ
@@ -132,7 +124,6 @@ export default function ProfileHeader() {
                 />
               </div>
 
-              {/* Phone */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Số điện thoại
@@ -147,7 +138,6 @@ export default function ProfileHeader() {
                 />
               </div>
 
-              {/* Buttons */}
               <div className="flex gap-3">
                 <button
                   type="submit"

@@ -19,38 +19,31 @@ export default function Pagination({
   startIndex,
   endIndex,
 }: PaginationProps) {
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is less than max
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show first page
       pages.push(1);
 
-      // Show ellipsis if needed
       if (currentPage > 3) {
         pages.push("...");
       }
 
-      // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
 
-      // Show ellipsis if needed
       if (currentPage < totalPages - 2) {
         pages.push("...");
       }
 
-      // Show last page
       pages.push(totalPages);
     }
 
@@ -78,7 +71,6 @@ export default function Pagination({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-      {/* Results Info */}
       <div className="text-center mb-6">
         <p className="text-gray-700 font-medium">
           Hiển thị{" "}
@@ -88,9 +80,7 @@ export default function Pagination({
         </p>
       </div>
 
-      {/* Pagination Controls */}
       <div className="flex items-center justify-center gap-2 flex-wrap">
-        {/* Previous Button */}
         <button
           onClick={handlePrevious}
           disabled={currentPage === 1}
@@ -100,7 +90,6 @@ export default function Pagination({
           ← Trước
         </button>
 
-        {/* Page Numbers */}
         {pageNumbers.map((page, index) => (
           <div key={index}>
             {page === "..." ? (
@@ -123,7 +112,6 @@ export default function Pagination({
           </div>
         ))}
 
-        {/* Next Button */}
         <button
           onClick={handleNext}
           disabled={currentPage === totalPages}
