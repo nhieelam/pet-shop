@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import ProfileHeader from "../components/ProfileHeader";
-import AddressList from "../components/AddressList";
-import InvoiceHistory from "../components/InvoiceHistory";
+import ProfileHeader from "./components/ProfileHeader";
+import AddressList from "./components/AddressList";
+import InvoiceHistory from "./components/InvoiceHistory";
 import OverviewTab from "./components/overview";
 
 export default function ProfilePage() {

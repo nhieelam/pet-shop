@@ -1,23 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-interface Address {
-  id: string;
-  label: string;
-  phone: string;
-  fullAddress: string;
-  isDefault: boolean;
-}
-
-interface AddressFormData {
-  id: string;
-  name: string;
-  phone: string;
-  location: string;
-  address: string;
-  type: "house" | "office";
-}
+import { Address, AddressFormData } from "../type";
 
 const mockAddresses: Address[] = [
   {
