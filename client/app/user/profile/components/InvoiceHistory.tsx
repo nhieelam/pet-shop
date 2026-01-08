@@ -135,7 +135,8 @@ export default function InvoiceHistory() {
                 <td className="px-6 py-4 text-sm text-gray-600">{fmtDate(invoice.date)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">{invoice.items} sản phẩm</td>
                 <td className="px-6 py-4 text-sm font-semibold text-blue-600">{fmtMoney(invoice.totalAmount)}</td>
-                <td className="px-6 py-4 text-sm"><StatusBadge status={invoice.status} /></td>
+                <td className="px-6 py-4 text-sm">
+                  <StatusBadge status={invoice.status} /></td>
                 <td className="px-6 py-4 text-center text-sm">
                   <button className="text-blue-600 hover:text-blue-800 font-semibold">Xem chi tiết</button>
                 </td>
