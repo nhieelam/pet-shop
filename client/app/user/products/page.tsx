@@ -5,6 +5,7 @@ import CategoryFilter from "./components/CategoryFilter";
 import PriceFilter from "./components/PriceFilter";
 import SearchBar from "./components/SearchBar";
 import Pagination from "./components/Pagination";
+
 import { useProductManager } from "./hooks/useProductManager";
 import { mockProducts, CATEGORIES, ITEMS_PER_PAGE } from "./constants";
 

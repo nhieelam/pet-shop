@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import CartItemRow from "@/app/components/CartItemRow";
-import CartSummary from "@/app/components/CartSummary";
-import SelectAllBar from "@/app/components/SelectAllBar";
+import CartItemRow from "./components/CartItemRow";
+import CartSummary from "./components/CartSummary";
+import SelectAllBar from "./components/SelectAllBar";
 
 interface CartItem {
   id: string;
@@ -14,7 +14,6 @@ interface CartItem {
   isSelected: boolean;
 }
 
-// Mock cart data with actual pet products
 const mockCartItems: CartItem[] = [
   {
     id: "prod_001",
@@ -61,7 +60,6 @@ const mockCartItems: CartItem[] = [
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>(mockCartItems);
 
-  // Handle toggle item selection
   const handleToggleSelect = (id: string) => {
     setItems(
       items.map((item) =>
@@ -70,12 +68,10 @@ export default function CartPage() {
     );
   };
 
-  // Handle select all items
   const handleSelectAll = (selectAll: boolean) => {
     setItems(items.map((item) => ({ ...item, isSelected: selectAll })));
   };
 
-  // Handle increment quantity
   const handleIncrement = (id: string) => {
     setItems(
       items.map((item) =>

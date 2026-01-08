@@ -18,7 +18,6 @@ interface UseProductManagerOptions {
 }
 
 interface UseProductManagerReturn {
-  // State
   selectedCategories: string[];
   searchQuery: string;
   minPrice: number;
@@ -26,7 +25,6 @@ interface UseProductManagerReturn {
   sortBy: SortOption;
   currentPage: number;
   
-  // Computed values
   filteredAndSortedProducts: Product[];
   paginatedProducts: Product[];
   totalItems: number;
@@ -34,7 +32,6 @@ interface UseProductManagerReturn {
   startIndex: number;
   endIndex: number;
   
-  // Handlers
   handleCategoryChange: (categories: string[]) => void;
   handleSearch: (query: string) => void;
   handlePriceFilterChange: (min: number, max: number) => void;
@@ -60,14 +57,12 @@ export function useProductManager({
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
 
-    // Filter by category
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((product) =>
         selectedCategories.includes(product.category)
       );
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter((product) =>
@@ -75,12 +70,10 @@ export function useProductManager({
       );
     }
 
-    // Filter by price range
     filtered = filtered.filter(
       (product) => product.price >= minPrice && product.price <= maxPrice
     );
 
-    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
@@ -147,7 +140,6 @@ export function useProductManager({
   }, []);
 
   return {
-    // State
     selectedCategories,
     searchQuery,
     minPrice,
@@ -155,7 +147,6 @@ export function useProductManager({
     sortBy,
     currentPage,
     
-    // Computed values
     filteredAndSortedProducts,
     paginatedProducts,
     totalItems,
@@ -163,7 +154,6 @@ export function useProductManager({
     startIndex,
     endIndex,
     
-    // Handlers
     handleCategoryChange,
     handleSearch,
     handlePriceFilterChange,

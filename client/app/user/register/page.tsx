@@ -1,130 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useRegisterForm } from "./hooks/useRegisterForm";
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    userName: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    acceptTerms: false,
-  });
-
-  const [errors, setErrors] = useState<{
-    fullName?: string;
-    userName?: string;
-    phone?: string;
-    password?: string;
-    confirmPassword?: string;
-    acceptTerms?: string;
-  }>({});
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Tên không được để trống";
-    } else if (formData.fullName.length < 3) {
-      newErrors.fullName = "Tên phải có ít nhất 3 ký tự";
-    }
-
-    if (!formData.userName) {
-      newErrors.userName = "userName không được để trống";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.userName)) {
-      newErrors.userName = "userName không hợp lệ";
-    }
-
-    if (!formData.phone) {
-      newErrors.phone = "Số điện thoại không được để trống";
-    } else if (!/^0\d{9,10}$/.test(formData.phone)) {
-      newErrors.phone = "Số điện thoại phải bắt đầu bằng 0 và có 10-11 chữ số";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Mật khẩu không được để trống";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Xác nhận mật khẩu không được để trống";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
-    }
-
-    if (!formData.acceptTerms) {
-      newErrors.acceptTerms = "Bạn phải chấp nhận điều khoản";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-
-    // Clear error for this field
-    if (errors[name as keyof typeof errors]) {
-      setErrors({
-        ...errors,
-        [name]: undefined,
-      });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Registration attempt with:", formData);
-      setIsLoading(false);
-      alert("Đăng ký thành công! Vui lòng đăng nhập.");
-      setFormData({
-        fullName: "",
-        userName: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-        acceptTerms: false,
-      });
-    }, 1500);
-  };
+  const { formData, errors, isLoading, handleChange, handleSubmit } =
+    useRegisterForm();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Card */}
         <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-blue-600 mb-2">🐾</h1>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              Đăng Ký
-            </h2>
-            <p className="text-gray-600">
-              Tạo tài khoản Happy Pet Shop của bạn
-            </p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Đăng Ký</h2>
+            <p className="text-gray-600">Tạo tài khoản Happy Pet Shop của bạn</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Full Name Field */}
             <div>
               <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
                 Tên đầy đủ
@@ -147,13 +40,12 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* userName Field */}
             <div>
               <label htmlFor="userName" className="block text-sm font-semibold text-gray-700 mb-2">
                 Tên Đăng Nhập
               </label>
               <input
-                type="userName"
+                type="email"
                 id="userName"
                 name="userName"
                 value={formData.userName}
@@ -170,7 +62,6 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Phone Field */}
             <div>
               <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
                 Số điện thoại
@@ -193,7 +84,6 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                 Mật khẩu
@@ -216,7 +106,6 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Confirm Password Field */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
                 Xác nhận mật khẩu
@@ -239,11 +128,27 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {errors.acceptTerms && (
-              <p className="text-red-500 text-sm">{errors.acceptTerms}</p>
-            )}
+            <div>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="acceptTerms"
+                  checked={formData.acceptTerms}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">
+                  Tôi đồng ý với{" "}
+                  <a href="#" className="text-blue-600 hover:underline">
+                    điều khoản và điều kiện
+                  </a>
+                </span>
+              </label>
+              {errors.acceptTerms && (
+                <p className="text-red-500 text-sm mt-2">{errors.acceptTerms}</p>
+              )}
+            </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -253,14 +158,12 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center">
             <div className="flex-1 border-t border-gray-300"></div>
             <span className="px-3 text-gray-500 text-sm">hoặc</span>
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
-          {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Đã có tài khoản?{" "}
@@ -270,7 +173,6 @@ export default function RegisterPage() {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );

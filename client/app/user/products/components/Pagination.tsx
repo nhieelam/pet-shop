@@ -62,7 +62,6 @@ export default function Pagination({
     }
   };
 
-  // Show nothing if no items
   if (totalItems === 0) {
     return null;
   }
