@@ -93,7 +93,7 @@ export default function AdminStockInPage() {
 	return (
 		<main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8">
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-				{/* Header */}
+
 				<div className="mb-8">
 					<h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">📥 Trang Nhập Kho</h1>
 					<p className="text-gray-600">Tăng số lượng tồn kho cho sản phẩm</p>
@@ -104,7 +104,6 @@ export default function AdminStockInPage() {
 						<div className="text-center text-gray-600 py-12">Đang tải...</div>
 					) : (
 						<form onSubmit={onSubmit} className="space-y-5">
-							{/* Select product */}
 							<div>
 								<label className="block text-sm font-bold text-gray-700 mb-2">
 									Chọn sản phẩm <span className="text-red-500">*</span>
@@ -128,7 +127,6 @@ export default function AdminStockInPage() {
 								)}
 							</div>
 
-							{/* Quantity */}
 							<div>
 								<label className="block text-sm font-bold text-gray-700 mb-2">
 									Số lượng nhập kho <span className="text-red-500">*</span>
@@ -144,7 +142,6 @@ export default function AdminStockInPage() {
 								/>
 							</div>
 
-							{/* Submit */}
 							<div className="flex justify-end gap-3">
 								<button
 									type="submit"
@@ -157,9 +154,6 @@ export default function AdminStockInPage() {
 					)}
 				</div>
 
-				<p className="text-xs text-gray-500 mt-4">
-					Lưu ý: Dữ liệu tồn kho đang được lưu cục bộ trong trình duyệt (localStorage).
-				</p>
 			</div>
 		</main>
 	);

@@ -11,12 +11,10 @@ export default function OrderSuccessPage() {
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
-    // Get order details from URL params
     const id = searchParams.get("orderId");
     const total = searchParams.get("total");
     
     if (!id) {
-      // If no orderId, redirect to home (invalid access)
       router.push("/");
       return;
     }
@@ -26,11 +24,9 @@ export default function OrderSuccessPage() {
       setOrderTotal(parseFloat(total));
     }
 
-    // Clear checkout data from sessionStorage
     sessionStorage.removeItem("checkoutItems");
     sessionStorage.removeItem("checkoutProduct");
 
-    // Hide confetti after animation
     const timer = setTimeout(() => {
       setShowConfetti(false);
     }, 3000);
@@ -55,7 +51,6 @@ export default function OrderSuccessPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-8 px-4 relative overflow-hidden">
-      {/* Confetti Effect */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
           <div className="confetti-container">
@@ -81,11 +76,8 @@ export default function OrderSuccessPage() {
       )}
 
       <div className="max-w-3xl mx-auto">
-        {/* Success Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slideUp">
-          {/* Header Section with Success Icon */}
           <div className="bg-gradient-to-r from-green-500 to-green-600 px-8 py-12 text-center relative">
-            {/* Animated Success Icon */}
             <div className="mb-6 relative inline-block">
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg animate-scaleIn">
                 <svg
@@ -102,24 +94,19 @@ export default function OrderSuccessPage() {
                   />
                 </svg>
               </div>
-              {/* Pulse Ring Effect */}
               <div className="absolute inset-0 w-24 h-24 bg-white rounded-full animate-ping opacity-20"></div>
             </div>
 
-            {/* Title */}
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 animate-fadeIn">
               Cảm ơn bạn! 🎉
             </h1>
             
-            {/* Subtitle */}
             <p className="text-xl text-green-50 animate-fadeIn animation-delay-200">
               Đơn hàng của bạn đã được đặt thành công
             </p>
           </div>
 
-          {/* Order Details Section */}
           <div className="px-8 py-8">
-            {/* Order Info */}
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-8 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -138,7 +125,6 @@ export default function OrderSuccessPage() {
                 )}
               </div>
               
-              {/* Status Badge */}
               <div className="flex items-center gap-2 pt-4 border-t border-gray-300">
                 <span className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-sm">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -147,7 +133,6 @@ export default function OrderSuccessPage() {
               </div>
             </div>
 
-            {/* Information Message */}
             <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-5 mb-8">
               <div className="flex items-start gap-3">
                 <svg
@@ -191,9 +176,7 @@ export default function OrderSuccessPage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="space-y-4">
-              {/* Primary Button - View Order Detail */}
               <button
                 onClick={() => router.push(`/orders/${orderId}`)}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-xl transition transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg"
@@ -214,9 +197,7 @@ export default function OrderSuccessPage() {
                 Xem chi tiết đơn hàng
               </button>
 
-              {/* Secondary Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Continue Shopping */}
                 <button
                   onClick={() => router.push("/products")}
                   className="bg-white hover:bg-gray-50 text-gray-800 font-bold py-3 px-6 rounded-xl border-2 border-gray-300 hover:border-gray-400 transition transform hover:scale-105 flex items-center justify-center gap-2"
@@ -237,7 +218,6 @@ export default function OrderSuccessPage() {
                   Tiếp tục mua sắm
                 </button>
 
-                {/* Back to Home */}
                 <button
                   onClick={() => router.push("/")}
                   className="bg-white hover:bg-gray-50 text-gray-800 font-bold py-3 px-6 rounded-xl border-2 border-gray-300 hover:border-gray-400 transition transform hover:scale-105 flex items-center justify-center gap-2"
@@ -261,7 +241,6 @@ export default function OrderSuccessPage() {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="bg-gray-50 px-8 py-6 border-t border-gray-200">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
               <p className="flex items-center gap-2">
@@ -288,7 +267,6 @@ export default function OrderSuccessPage() {
           </div>
         </div>
 
-        {/* Additional Help Section */}
         <div className="mt-8 text-center">
           <p className="text-gray-600 mb-4">
             Bạn có câu hỏi về đơn hàng?

@@ -63,7 +63,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Form */}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* userName Field */}
             <div>
@@ -90,7 +90,6 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                 Mật khẩu
@@ -115,7 +114,6 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
