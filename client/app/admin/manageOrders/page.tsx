@@ -403,8 +403,9 @@ export default function AdminProductListPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               >
                 <option value="">Tất cả</option>
-                <option value="active">Đang bán</option>
-                <option value="inactive">Ngừng bán</option>
+                <option value="active">đã duyệt</option>
+                <option value="inactive">hủy đơn</option>
+                <option value="inactive">đã giao</option>
               </select>
             </div>
           </div>
@@ -435,26 +436,26 @@ export default function AdminProductListPage() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Hình ảnh
+                    mã hóa đơn
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Tên dịch vụ
+                    Tên khách hàng
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    thời gian
+                    Số điện thoại
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Giá
+                    thời gian tạo hóa đơn
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    tổng giá
                   </th>
 
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Cập nhật
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Thao tác
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    xem chi tiết
                   </th>
                 </tr>
               </thead>
