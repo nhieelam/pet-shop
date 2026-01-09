@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.service;
 
+import com.funcoders.happy_pet_shop.dto.request.ChangePasswordRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.entity.User;
@@ -26,7 +27,6 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUserName(request.getUsername())) {
             throw new AppException(ErrorType.BAD_REQUEST);
@@ -70,4 +70,19 @@ public class UserService {
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
-}
+
+    @PreAuthorize("isAuthenticated()")
+    public void updatePassword(UUID userId, ChangePasswordRequest request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+
+        // Check mật khẩu cũ
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorType.PASSWORD_MISMATCH);
+        }
+
+        // Encode & save
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }}

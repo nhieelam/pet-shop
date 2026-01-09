@@ -31,4 +31,7 @@ public class Customer {
 
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal points;
+
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    Cart cart;
 }
