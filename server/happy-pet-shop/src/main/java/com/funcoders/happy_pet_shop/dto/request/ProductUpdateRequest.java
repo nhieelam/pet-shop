@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.funcoders.happy_pet_shop.constant.Unit;
 import com.funcoders.happy_pet_shop.validation.CategoryConstraint;
 import jakarta.validation.constraints.*;
@@ -9,12 +10,10 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductUpdateRequest {
 
     @NotBlank(message = "Tên sản phẩm không được để trống")

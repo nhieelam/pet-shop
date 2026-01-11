@@ -1,6 +1,8 @@
 package com.funcoders.happy_pet_shop.controller;
 
+import com.funcoders.happy_pet_shop.dto.request.ChangePasswordRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.UserUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.service.UserService;
@@ -44,7 +46,7 @@ public class UserController {
 
     // Cập nhật user, admin hoặc chính user
     @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateUser(@PathVariable UUID id, @RequestBody UserCreationRequest request) {
+    public ApiResponse<UserResponse> updateUser(@PathVariable UUID id, @RequestBody UserUpdateRequest request) {
         UserResponse updated = userService.updateUser(id, request);
         return new ApiResponse<>(updated, "User updated successfully");
     }
@@ -55,4 +57,11 @@ public class UserController {
         userService.deleteUser(id);
         return new ApiResponse<>(null, "User deleted successfully");
     }
+
+    @PostMapping("/{id}")
+    public ApiResponse<Void> updatePassword(@PathVariable UUID id, ChangePasswordRequest request) {
+        userService.updatePassword(id, request);
+        return new ApiResponse<>(null, "Update password successfully");
+    }
+
 }

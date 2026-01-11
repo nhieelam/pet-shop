@@ -13,6 +13,7 @@ public class InventoryResponse {
     ProductResponse product;
 
     int quantity;
+
     InventoryStatus status;
 
     LocalDateTime createdAt;

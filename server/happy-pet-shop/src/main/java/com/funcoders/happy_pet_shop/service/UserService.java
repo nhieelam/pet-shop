@@ -2,6 +2,7 @@ package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.dto.request.ChangePasswordRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.UserUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
@@ -61,12 +62,11 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public UserResponse updateUser(UUID id, UserCreationRequest request) {
+    public UserResponse updateUser(UUID id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
-        user.setUserName(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userMapper.updateUser(user, request);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
