@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +44,7 @@ public class ProductService {
         return productionMapper.toResponse(productRepository.save(productEntity));
     }
 
-    public ProductResponse getProductById(String id) {
+    public ProductResponse getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
         return productionMapper.toResponse(product);
@@ -66,7 +67,7 @@ public class ProductService {
 
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ProductResponse updateProduct(String id, ProductUpdateRequest request) {
+    public ProductResponse updateProduct(UUID id, ProductUpdateRequest request) {
 //        SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().map(grantedAuthority -> {return grantedAuthority.toString();});
 
         Product productEntity = productRepository.findById(id)
@@ -84,7 +85,7 @@ public class ProductService {
 
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public void deleteProduct(String id) {
+    public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
             throw new AppException(ErrorType.NOT_FOUND);
         }

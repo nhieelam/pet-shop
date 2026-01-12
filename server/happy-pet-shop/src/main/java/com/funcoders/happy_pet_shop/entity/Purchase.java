@@ -26,7 +26,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Purchase {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
@@ -46,11 +45,6 @@ public class Purchase {
     @Column(nullable = false, length = 20)
     PaymentStatus status;
 
-    @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
-
-    LocalDateTime updatedAt;
-
     @OneToMany(
             mappedBy = "purchase",
             fetch = FetchType.LAZY,
@@ -59,24 +53,21 @@ public class Purchase {
     )
     Set<PurchaseDetail> purchaseDetails;
 
+    @Column(nullable = false, updatable = false)
+    LocalDateTime createdAt;
+
     @PrePersist
     protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
+        this.createdAt = LocalDateTime.now();
 
         if (status == null) {
             status = PaymentStatus.PENDING;
         }
 
         if (this.totalAmount == null) {
+            totalAmount = BigDecimal.ZERO;
             recalculateTotalAmount();
         }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void recalculateTotalAmount() {

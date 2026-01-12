@@ -61,6 +61,7 @@ public enum ErrorType {
     // ===== PURCHASE =====
     PURCHASE_NOT_FOUND("Phiếu nhập không tồn tại", 7001, HttpStatus.NOT_FOUND),
     PURCHASE_DETAIL_NOT_FOUND("Chi tiết phiếu nhập không tồn tại", 7002, HttpStatus.NOT_FOUND),
+    PHONE_ALREADY_EXISTS("Số điện thoại đã tồn tại", 7004, HttpStatus.BAD_REQUEST),
     DUPLICATE_PURCHASE_PRODUCT("Sản phẩm đã tồn tại trong phiếu nhập", 7003, HttpStatus.BAD_REQUEST);
 
     private final String message;

@@ -25,7 +25,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
 

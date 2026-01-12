@@ -1,12 +1,13 @@
 package com.funcoders.happy_pet_shop.mapper;
 
-import com.funcoders.happy_pet_shop.dto.response.CartItemResponse;
+import com.funcoders.happy_pet_shop.dto.request.InventoryUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.InventoryResponse;
-import com.funcoders.happy_pet_shop.entity.CartItem;
 import com.funcoders.happy_pet_shop.entity.Inventory;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface InventoryMapper {
     InventoryResponse toResponse(Inventory inventory);
+    void updateInventory(@MappingTarget Inventory inventory, InventoryUpdateRequest request);
 }
