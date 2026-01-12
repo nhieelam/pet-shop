@@ -12,6 +12,7 @@ import ManageServicesPage from './pages/admin/ManageServicesPage/ManageServicesP
 import StockPage from './pages/admin/StockPage/StockPage';
 import UserLayout from './components/layouts/UserLayout';
 import AdminLayout from './components/layouts/AdminLayout';
+import LoginPage from './pages/user/LoginPage/LoginPage';
 import './App.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="services" element={<ServicesPage />} />
           <Route path="detailedProduct/:id" element={<DetailedProductPage />} />
           <Route path="detailedService/:id" element={<DetailedServicePage />} />
+          <Route path="login" element={<LoginPage />} />
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>

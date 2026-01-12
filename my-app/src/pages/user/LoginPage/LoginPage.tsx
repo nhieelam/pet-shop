@@ -1,50 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useLogin } from "./useLogin";
 
 export default function LoginPage() {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ userName?: string; password?: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const validateForm = () => {
-    const newErrors: { userName?: string; password?: string } = {};
-
-    if (!userName) {
-      newErrors.userName = "userName không được để trống";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userName)) {
-      newErrors.userName = "userName không hợp lệ";
-    }
-
-    if (!password) {
-      newErrors.password = "Mật khẩu không được để trống";
-    } else if (password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Login attempt with:", { userName, password });
-      setIsLoading(false);
-      alert("Đăng nhập thành công!");
-      setUserName("");
-      setPassword("");
-    }, 1500);
-  };
+  const {
+    userName,
+    password,
+    errors,
+    isLoading,
+    setUserName,
+    setPassword,
+    handleSubmit,
+    clearError,
+  } = useLogin();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
@@ -64,6 +32,13 @@ export default function LoginPage() {
 
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* General Error Message */}
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <p className="text-sm font-semibold">{errors.general}</p>
+              </div>
+            )}
+
             {/* userName Field */}
             <div>
               <label htmlFor="userName" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -75,7 +50,7 @@ export default function LoginPage() {
                 value={userName}
                 onChange={(e) => {
                   setUserName(e.target.value);
-                  if (errors.userName) setErrors({ ...errors, userName: undefined });
+                  clearError("userName");
                 }}
                 placeholder="nhập userName của bạn"
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
@@ -99,7 +74,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (errors.password) setErrors({ ...errors, password: undefined });
+                  clearError("password");
                 }}
                 placeholder="nhập mật khẩu của bạn"
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
@@ -126,7 +101,6 @@ export default function LoginPage() {
               </a>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -136,7 +110,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center">
             <div className="flex-1 border-t border-gray-300"></div>
             <span className="px-3 text-gray-500 text-sm">hoặc</span>
