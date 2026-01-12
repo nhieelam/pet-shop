@@ -22,7 +22,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Cart {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
@@ -31,14 +30,14 @@ public class Cart {
     @JoinColumn(name = "customer_id", nullable = false, unique = true)
     Customer customer;
 
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
+    Set<CartItem> cartItems;
+
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @Column(nullable = false)
     LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
-    Set<CartItem> cartItems;
 
     @PrePersist
     protected void onCreate() {
