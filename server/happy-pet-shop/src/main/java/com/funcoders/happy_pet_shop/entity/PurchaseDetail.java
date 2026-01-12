@@ -29,7 +29,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PurchaseDetail {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
@@ -38,7 +37,7 @@ public class PurchaseDetail {
     @JoinColumn(name = "purchase_id", nullable = false)
     Purchase purchase;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "product_id", nullable = false)
     Inventory inventory;
 
@@ -51,12 +50,8 @@ public class PurchaseDetail {
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal totalPrice;
 
-    @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
         this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 }

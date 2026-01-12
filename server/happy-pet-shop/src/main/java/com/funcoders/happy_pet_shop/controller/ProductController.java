@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/product")
@@ -28,7 +29,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> getProductById(@PathVariable String id) {
+    public ApiResponse<ProductResponse> getProductById(@PathVariable UUID id) {
         ProductResponse response = productService.getProductById(id);
         return new ApiResponse<>(response, "Get product successfully");
     }
@@ -52,13 +53,13 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@PathVariable String id, @Valid @RequestBody ProductUpdateRequest request) {
+    public ApiResponse<ProductResponse> updateProduct(@PathVariable UUID id, @Valid @RequestBody ProductUpdateRequest request) {
         ProductResponse response = productService.updateProduct(id, request);
         return new ApiResponse<>(response, "Update product successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteProduct(@PathVariable String id) {
+    public ApiResponse<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return new ApiResponse<>(null, "Delete product successfully");
     }

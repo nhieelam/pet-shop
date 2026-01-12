@@ -46,6 +46,7 @@ public class Inventory {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        status = InventoryStatus.AVAILABLE;
     }
 
     @PreUpdate
