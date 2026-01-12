@@ -34,8 +34,8 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         log.info("Application init...");
 
         if (!userRepository.existsByUserName("admin")) {
-//            ROLES
-            Role adminRole = Role.builder()
+
+                Role adminRole = Role.builder()
                     .roleName(UserRole.ADMIN_ROLE)
                     .description("Administrator")
                     .build();

@@ -12,7 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL) // Loại bỏ field null
+@JsonInclude(JsonInclude.Include.NON_NULL) 
 public class ApiResponse<DataType> {
 
     boolean success;
@@ -22,7 +22,6 @@ public class ApiResponse<DataType> {
     int status;
     Instant timestamp;
 
-    // Constructor tiện lợi khi thành công
     public ApiResponse(DataType data, String message) {
         this.success = true;
         this.message = message;
@@ -31,7 +30,6 @@ public class ApiResponse<DataType> {
         timestamp = Instant.now();
     }
 
-    // Constructor tiện lợi khi thất bại
     public ApiResponse(ErrorType errorType) {
         this.success = false;
         this.message = errorType.getMessage();
