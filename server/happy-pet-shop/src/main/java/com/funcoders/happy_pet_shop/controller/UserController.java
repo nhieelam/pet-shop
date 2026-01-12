@@ -23,35 +23,30 @@ public class UserController {
 
     UserService userService;
 
-    // Tạo user mới, chỉ admin mới được tạo
     @PostMapping
     public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserCreationRequest request) {
         UserResponse response = userService.createUser(request);
         return new ApiResponse<>(response, "Create user successfully");
     }
 
-    // Lấy tất cả users, chỉ admin
     @GetMapping
     public ApiResponse<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         return new ApiResponse<>(users, "List of users");
     }
 
-    // Lấy user theo id, admin hoặc chính user
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUserById(@PathVariable UUID id) {
         UserResponse user = userService.getUserById(id);
         return new ApiResponse<>(user, "User details");
     }
 
-    // Cập nhật user, admin hoặc chính user
     @PutMapping("/{id}")
     public ApiResponse<UserResponse> updateUser(@PathVariable UUID id, @RequestBody UserUpdateRequest request) {
         UserResponse updated = userService.updateUser(id, request);
         return new ApiResponse<>(updated, "User updated successfully");
     }
 
-    // Xóa user, chỉ admin
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);

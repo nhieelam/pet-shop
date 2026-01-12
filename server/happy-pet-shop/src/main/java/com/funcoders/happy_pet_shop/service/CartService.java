@@ -28,7 +28,6 @@ public class CartService {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-        // Check cart đã tồn tại chưa
         cartRepository.findByCustomer(customer)
                 .ifPresent(cart -> {
                     throw new AppException(ErrorType.CART_ALREADY_EXISTS);
