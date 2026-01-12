@@ -21,7 +21,6 @@ interface Comment {
 }
 
 export default function DetailedProductPage() {
-  // Extract product ID from URL path (e.g., /product/123 -> 123)
   const getProductIdFromUrl = () => {
     const path = window.location.pathname;
     const segments = path.split("/").filter(Boolean);
@@ -41,9 +40,7 @@ export default function DetailedProductPage() {
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState("");
 
-  // Mock product data - Replace with API call later
   useEffect(() => {
-    // Simulate API call
     setTimeout(() => {
       const mockProduct: Product = {
         id: productId,
