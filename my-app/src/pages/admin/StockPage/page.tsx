@@ -1,6 +1,6 @@
 "use client";
 
-import { useStockManagement } from "./useStockManagement";
+import { useStockManagement } from "./hooks/useStockManagement";
 
 export default function AdminStockInPage() {
   const {
