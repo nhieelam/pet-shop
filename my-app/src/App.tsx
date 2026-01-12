@@ -11,6 +11,7 @@ import ManageProductCategoryPage from './pages/admin/ManageProductCategoryPage/M
 import ManageServicesPage from './pages/admin/ManageServicesPage/ManageServicesPage';
 import StockPage from './pages/admin/StockPage/StockPage';
 import UserLayout from './components/layouts/UserLayout';
+import AdminLayout from './components/layouts/AdminLayout';
 import './App.css';
 
 function App() {
@@ -19,7 +20,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/user/products" replace />} />
         
-        {/* User routes with layout */}
         <Route path="/user" element={<UserLayout />}>
           <Route path="cart" element={<CartPage />} />
           <Route path="profile" element={<ProfilePage />} />
@@ -29,12 +29,13 @@ function App() {
           <Route path="detailedService/:id" element={<DetailedServicePage />} />
         </Route>
 
-        {/* Admin routes */}
-        <Route path="/admin/listProducts" element={<ListProductsPage />} />
-        <Route path="/admin/manageOrders" element={<ManageOrdersPage />} />
-        <Route path="/admin/manageProductCategory" element={<ManageProductCategoryPage />} />
-        <Route path="/admin/manageServices" element={<ManageServicesPage />} />
-        <Route path="/admin/stock" element={<StockPage />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/listProducts" element={<ListProductsPage />} />
+          <Route path="/manageOrders" element={<ManageOrdersPage />} />
+          <Route path="/manageProductCategory" element={<ManageProductCategoryPage />} />
+          <Route path="/manageServices" element={<ManageServicesPage />} />
+          <Route path="/stock" element={<StockPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

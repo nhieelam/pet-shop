@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 
 type NavItem = {
 	label: string;
@@ -17,7 +16,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function AdminSidebar() {
-	const pathname = usePathname();
+	const location = useLocation();
 
 	return (
 		<aside className="w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0">
@@ -25,11 +24,11 @@ export default function AdminSidebar() {
 				<h2 className="text-lg font-bold text-gray-800 mb-4 px-3">📊 Admin Panel</h2>
 				<ul className="space-y-1">
 					{NAV_ITEMS.map((item) => {
-						const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+						const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
 						return (
 							<li key={item.href}>
 								<Link
-									href={item.href}
+									to={item.href}
 									aria-current={isActive ? "page" : undefined}
 									className={`block px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
 										isActive
