@@ -2,7 +2,7 @@
 
 import { useStockManagement } from "./useStockManagement";
 
-export default function AdminStockInPage() {
+export default function StockPage() {
   const {
     products,
     isLoading,

@@ -1,4 +1,4 @@
-import { StockProduct } from "./types";
+import type { StockProduct } from "./types";
 
 export const STORAGE_KEY = "admin_stock_products";
 

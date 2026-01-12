@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { StockProduct } from "../types";
-import { STORAGE_KEY, DEFAULT_PRODUCTS } from "../constants";
+import type { StockProduct } from "./types";
+import { STORAGE_KEY, DEFAULT_PRODUCTS } from "./constants";
 
 interface UseStockManagementReturn {
   products: StockProduct[];
