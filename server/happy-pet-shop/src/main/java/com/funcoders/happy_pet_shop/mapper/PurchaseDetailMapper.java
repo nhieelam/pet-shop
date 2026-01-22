@@ -8,5 +8,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface PurchaseDetailMapper {
     PurchaseDetailResponse toResponse(PurchaseDetail purchaseDetail);
-    PurchaseDetail toPurchaseDetailEntity(PurchaseDetailCreationRequest request);
+    PurchaseDetail toEntity(PurchaseDetailCreationRequest request);
 }

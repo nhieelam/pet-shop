@@ -36,7 +36,7 @@ public class StaffService {
 
         UserCreationRequest userCreationRequest = request.getUserCreationRequest();
 
-        User userEntity = userMapper.toUserEntity(userCreationRequest);
+        User userEntity = userMapper.toEntity(userCreationRequest);
         User managedUser = userRepository.save(userEntity);
 
         Staff staff = Staff.builder()

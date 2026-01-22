@@ -34,7 +34,7 @@ public class ProductService {
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse createProduct(ProductCreationRequest request) {
-        Product productEntity = productionMapper.toProductEntity(request);
+        Product productEntity = productionMapper.toEntity(request);
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorType.INVALID_CATEGORY));

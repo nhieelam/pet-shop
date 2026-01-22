@@ -11,7 +11,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ProductionMapper {
     @Mapping(target = "category", ignore = true)
-    Product toProductEntity(ProductCreationRequest request);
+    Product toEntity(ProductCreationRequest request);
 
     @Mapping(target = "category", ignore = true)
     void updateProduct(@MappingTarget Product productEntity, ProductUpdateRequest request);

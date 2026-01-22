@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -78,5 +80,28 @@ public class PurchaseService {
         });
 
         return purchaseMapper.toResponse(purchaseRepository.save(purchaseEntity));
+    }
+
+    public List<PurchaseResponse> getAllPurchase() {
+        List<Purchase> purchases = purchaseRepository.findAll();
+
+        return purchases
+                .stream()
+                .map(purchaseMapper::toResponse)
+                .toList();
+    }
+
+    public PurchaseResponse getPurchaseById(UUID id) {
+        Purchase purchaseEntity = purchaseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.PURCHASE_NOT_FOUND));
+
+        return purchaseMapper.toResponse(purchaseEntity);
+    }
+
+    public void deletePurchase(UUID id) {
+        Purchase purchaseEntity = purchaseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.PURCHASE_NOT_FOUND));
+
+        purchaseRepository.delete(purchaseEntity);
     }
 }

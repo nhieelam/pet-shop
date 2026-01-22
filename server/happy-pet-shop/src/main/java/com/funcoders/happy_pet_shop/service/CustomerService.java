@@ -33,7 +33,7 @@ public class CustomerService {
     @Transactional
     public CustomerResponse createCustomer(CustomerCreationRequest request) {
 
-        User userEntity = userMapper.toUserEntity(
+        User userEntity = userMapper.toEntity(
                 request.getUserCreationRequest()
         );
 

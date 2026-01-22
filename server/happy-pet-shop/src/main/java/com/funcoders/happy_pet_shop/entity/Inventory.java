@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -31,6 +32,9 @@ public class Inventory {
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 
+    @Column(nullable = false, precision = 15, scale = 2)
+    BigDecimal price;
+
     @Column(nullable = false)
     int quantity;
 
@@ -47,6 +51,8 @@ public class Inventory {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         status = InventoryStatus.AVAILABLE;
+
+        this.price = product.getPrice();
     }
 
     @PreUpdate
