@@ -41,9 +41,16 @@ public class Invoice {
     @Column(nullable = false)
     BigDecimal totalAmount;
 
+    @Column(nullable = false)
+    BigDecimal realAmount;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     PaymentMethod paymentMethod;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promotion_id", nullable = true)
+    Promotion promotion;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,19 +59,26 @@ public class Invoice {
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     Set<InvoiceDetail> invoiceDetails;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+
         if (status == null) {
             status = PaymentStatus.PENDING;
         }
 
-        if (totalAmount == null)
+        if (totalAmount == null) {
             recalculateTotalAmount();
+        }
+
+        if (realAmount == null) {
+            realAmount = totalAmount;
+        }
     }
+
 
     public void recalculateTotalAmount() {
         if (invoiceDetails == null) {

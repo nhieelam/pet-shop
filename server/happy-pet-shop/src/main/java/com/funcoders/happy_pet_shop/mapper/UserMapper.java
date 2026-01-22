@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
     @Mapping(source = "username", target = "userName")
     @Mapping(target = "roles", ignore = true)
-    User toUserEntity(UserCreationRequest request);
+    User toEntity(UserCreationRequest request);
 
     void updateUser(@MappingTarget User userEntity, UserUpdateRequest request);
 

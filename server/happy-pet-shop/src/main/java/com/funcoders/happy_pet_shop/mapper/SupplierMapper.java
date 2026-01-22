@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface SupplierMapper {
-    Supplier toSupplierEntity(SupplierCreationRequest request);
+    Supplier toEntity(SupplierCreationRequest request);
 
     SupplierResponse toResponse(Supplier supplier);
 

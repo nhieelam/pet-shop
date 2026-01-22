@@ -35,7 +35,7 @@ public class SupplierService {
             throw new AppException(ErrorType.EMAIL_ALREADY_EXISTS);
         }
 
-        Supplier supplierEntity = supplierMapper.toSupplierEntity(request);
+        Supplier supplierEntity = supplierMapper.toEntity(request);
 
         return supplierMapper.toResponse(
                 supplierRepository.save(supplierEntity)

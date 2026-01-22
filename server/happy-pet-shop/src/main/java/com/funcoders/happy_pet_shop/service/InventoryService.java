@@ -1,12 +1,15 @@
 package com.funcoders.happy_pet_shop.service;
 
+import com.funcoders.happy_pet_shop.dto.request.InventoryCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.InventoryUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.InventoryResponse;
 import com.funcoders.happy_pet_shop.entity.Inventory;
+import com.funcoders.happy_pet_shop.entity.Product;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.InventoryMapper;
 import com.funcoders.happy_pet_shop.repository.InventoryRepository;
+import com.funcoders.happy_pet_shop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,6 +25,25 @@ public class InventoryService {
 
     InventoryRepository inventoryRepository;
     InventoryMapper inventoryMapper;
+
+    ProductRepository productRepository;
+
+    @Transactional
+    public InventoryResponse createInventory(InventoryCreationRequest request) {
+        Inventory inventoryEntity = inventoryMapper.toEntity(request);
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+
+        inventoryEntity.setProduct(product);
+        inventoryEntity.setPrice(product.getPrice());
+
+        product.setQuantity(product.getQuantity() + inventoryEntity.getQuantity());
+
+        return inventoryMapper
+                .toResponse(inventoryRepository
+                        .save(inventoryEntity));
+    }
 
     @Transactional(readOnly = true)
     public List<InventoryResponse> getAllInventory() {

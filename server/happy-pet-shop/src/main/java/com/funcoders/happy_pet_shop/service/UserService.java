@@ -33,7 +33,7 @@ public class UserService {
             throw new AppException(ErrorType.BAD_REQUEST);
         }
 
-        User userEntity = userMapper.toUserEntity(request);
+        User userEntity = userMapper.toEntity(request);
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userMapper.toUserResponse(userRepository.save(userEntity));
