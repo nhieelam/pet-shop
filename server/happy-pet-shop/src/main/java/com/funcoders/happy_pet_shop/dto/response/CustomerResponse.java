@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.funcoders.happy_pet_shop.entity.Cart;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomerResponse {
     UUID id;
 

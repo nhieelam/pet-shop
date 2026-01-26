@@ -28,28 +28,22 @@ public class PromotionService {
     @Transactional
     public PromotionResponse createPromotion(PromotionCreationRequest request) {
 
-        // 1. Check code trùng
         if (promotionRepository.existsByCode(request.getCode())) {
             throw new AppException(ErrorType.BAD_REQUEST);
         }
 
-        // 2. Validate thời gian
         if (request.getStartDate().isAfter(request.getEndDate())) {
             throw new AppException(ErrorType.BAD_REQUEST);
         }
 
-        // 3. Map DTO -> Entity
         Promotion promotionEntity = promotionMapper.toEntity(request);
 
-        // 4. Set default status nếu chưa có
         if (promotionEntity.getStatus() == null) {
             promotionEntity.setStatus(PromotionStatus.ACTIVE);
         }
 
-        // 5. Save
         Promotion savedPromotion = promotionRepository.save(promotionEntity);
 
-        // 6. Return response
         return promotionMapper.toResponse(savedPromotion);
     }
 

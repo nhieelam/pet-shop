@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.funcoders.happy_pet_shop.constant.DiscountType;
 import com.funcoders.happy_pet_shop.constant.PromotionStatus;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PromotionResponse {
     UUID id;
 

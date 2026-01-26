@@ -1,6 +1,6 @@
 package com.funcoders.happy_pet_shop.service;
 
-import com.funcoders.happy_pet_shop.dto.request.CustomerCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.CustomerResponse;
 import com.funcoders.happy_pet_shop.entity.Cart;
 import com.funcoders.happy_pet_shop.entity.Customer;
@@ -31,11 +31,9 @@ public class CustomerService {
     UserMapper userMapper;
 
     @Transactional
-    public CustomerResponse createCustomer(CustomerCreationRequest request) {
+    public CustomerResponse createCustomer(UserCreationRequest request) {
 
-        User userEntity = userMapper.toEntity(
-                request.getUserCreationRequest()
-        );
+        User userEntity = userMapper.toEntity(request);
 
         Cart cart = new Cart();
 

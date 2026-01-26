@@ -22,6 +22,7 @@ public class ApiResponse<DataType> {
     int status;
     Instant timestamp;
 
+//    SUCCESS
     public ApiResponse(DataType data, String message) {
         this.success = true;
         this.message = message;
@@ -30,6 +31,7 @@ public class ApiResponse<DataType> {
         timestamp = Instant.now();
     }
 
+//    ERROR
     public ApiResponse(ErrorType errorType) {
         this.success = false;
         this.message = errorType.getMessage();
