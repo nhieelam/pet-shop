@@ -59,6 +59,7 @@ public class Purchase {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        recalculateTotalAmount();
 
         if (status == null) {
             status = PaymentStatus.PENDING;
@@ -66,7 +67,6 @@ public class Purchase {
 
         if (this.totalAmount == null) {
             totalAmount = BigDecimal.ZERO;
-            recalculateTotalAmount();
         }
     }
 

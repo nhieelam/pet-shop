@@ -42,4 +42,8 @@ public class InvoiceDetail {
     void prePersist() {
         this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
+
+    public void reCalculateTotalPrice() {
+        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
 }

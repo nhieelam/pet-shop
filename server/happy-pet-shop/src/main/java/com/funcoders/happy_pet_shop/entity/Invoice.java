@@ -12,16 +12,18 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "invoices",
+@Table(
+        name = "invoices",
         indexes = {
                 @Index(name = "idx_invoice_staff", columnList = "staff_id"),
                 @Index(name = "idx_invoice_customer", columnList = "customer_id"),
                 @Index(name = "idx_invoice_created_at", columnList = "created_at")
-        })
+        }
+)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Invoice {
@@ -30,62 +32,66 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
+    // ===== NGƯỜI XỬ LÝ (offline) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id")
     Staff staff;
 
+    // ===== NGƯỜI MUA =====
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     Customer customer;
 
-    @Column(nullable = false)
-    BigDecimal totalAmount;
+    // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====
+    @Column(nullable = false, length = 255)
+    String shippingAddress;
 
-    @Column(nullable = false)
-    BigDecimal realAmount;
+    // ===== GIÁ TIỀN =====
+    @Column(nullable = false, precision = 15, scale = 2)
+    BigDecimal totalAmount = BigDecimal.ZERO;
 
+    @Column(nullable = false, precision = 15, scale = 2)
+    BigDecimal realAmount = BigDecimal.ZERO;
+
+    // ===== THANH TOÁN =====
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     PaymentMethod paymentMethod;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id", nullable = true)
-    Promotion promotion;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    PaymentStatus status;
+    PaymentStatus status = PaymentStatus.PENDING;
 
+    // ===== KHUYẾN MÃI =====
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promotion_id")
+    Promotion promotion;
+
+    // ===== THỜI GIAN =====
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    // ===== CHI TIẾT HÓA ĐƠN =====
+    @OneToMany(
+            mappedBy = "invoice",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     Set<InvoiceDetail> invoiceDetails;
 
+    // ===== LIFECYCLE =====
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        recalculateTotalAmount();
 
-        if (status == null) {
-            status = PaymentStatus.PENDING;
-        }
-
-        if (totalAmount == null) {
-            recalculateTotalAmount();
-        }
-
-        if (realAmount == null) {
-            realAmount = totalAmount;
+        if (realAmount == null || realAmount.compareTo(BigDecimal.ZERO) == 0) {
+            this.realAmount = this.totalAmount;
         }
     }
 
-
+    // ===== BUSINESS LOGIC =====
     public void recalculateTotalAmount() {
-        if (invoiceDetails == null) {
-            this.totalAmount = BigDecimal.ZERO;
-            return;
-        }
-
         this.totalAmount = invoiceDetails.stream()
                 .map(InvoiceDetail::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
