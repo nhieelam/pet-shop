@@ -3,9 +3,7 @@ package com.funcoders.happy_pet_shop.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.funcoders.happy_pet_shop.constant.PaymentMethod;
 import com.funcoders.happy_pet_shop.constant.PaymentStatus;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -15,6 +13,8 @@ import java.util.UUID;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InvoiceResponse {

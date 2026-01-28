@@ -50,9 +50,17 @@ public class PurchaseDetail {
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal totalPrice;
 
+    public void calculateTotalPrice() {
+        if (unitPrice == null) {
+            this.totalPrice = BigDecimal.ZERO;
+            return;
+        }
+        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+
+
     @PrePersist
     protected void onCreate() {
-        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 }
 

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorType {
+    UNCATEGORIZED("lỗi lạ", 999, HttpStatus.INTERNAL_SERVER_ERROR),
 
     // ===== COMMON =====
     BAD_REQUEST("Yêu cầu không hợp lệ", 400, HttpStatus.BAD_REQUEST),
@@ -17,7 +18,7 @@ public enum ErrorType {
 
     // ===== USER / AUTH =====
     USER_NOT_FOUND("Người dùng không tồn tại", 1001, HttpStatus.NOT_FOUND),
-    USERNAME_ALREADY_EXISTS("Username đã tồn tại", 1002, HttpStatus.BAD_REQUEST),
+    USERNAME_ALREADY_EXISTS("User đã tồn tại", 1002, HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_EXISTS("Email đã tồn tại", 1003, HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND("Role không tồn tại", 1004, HttpStatus.NOT_FOUND),
     INVALID_PASSWORD("Mật khẩu không hợp lệ", 1005, HttpStatus.BAD_REQUEST),
@@ -62,7 +63,19 @@ public enum ErrorType {
     PURCHASE_NOT_FOUND("Phiếu nhập không tồn tại", 7001, HttpStatus.NOT_FOUND),
     PURCHASE_DETAIL_NOT_FOUND("Chi tiết phiếu nhập không tồn tại", 7002, HttpStatus.NOT_FOUND),
     PHONE_ALREADY_EXISTS("Số điện thoại đã tồn tại", 7004, HttpStatus.BAD_REQUEST),
-    DUPLICATE_PURCHASE_PRODUCT("Sản phẩm đã tồn tại trong phiếu nhập", 7003, HttpStatus.BAD_REQUEST);
+    DUPLICATE_PURCHASE_PRODUCT("Sản phẩm đã tồn tại trong phiếu nhập", 7003, HttpStatus.BAD_REQUEST),
+
+    // ===== PROMOTION =====
+    PROMOTION_NOT_FOUND("Khuyến mãi không tồn tại", 8001, HttpStatus.NOT_FOUND),
+    PROMOTION_ALREADY_EXISTS("Mã khuyến mãi đã tồn tại", 8002, HttpStatus.BAD_REQUEST),
+    PROMOTION_EXPIRED("Khuyến mãi đã hết hạn", 8003, HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_STARTED("Khuyến mãi chưa bắt đầu", 8004, HttpStatus.BAD_REQUEST),
+    PROMOTION_INACTIVE("Khuyến mãi không còn hoạt động", 8005, HttpStatus.BAD_REQUEST),
+    PROMOTION_USAGE_LIMIT_REACHED("Khuyến mãi đã đạt giới hạn sử dụng", 8006, HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_APPLICABLE("Khuyến mãi không áp dụng cho đơn hàng này", 8007, HttpStatus.BAD_REQUEST),
+    INVALID_PROMOTION_VALUE("Giá trị khuyến mãi không hợp lệ", 8008, HttpStatus.BAD_REQUEST),
+    INVALID_PROMOTION_DATE("Thời gian khuyến mãi không hợp lệ", 8009, HttpStatus.BAD_REQUEST)
+    ;
 
     private final String message;
     private final int errorCode;

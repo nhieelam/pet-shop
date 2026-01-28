@@ -1,24 +1,30 @@
 package com.funcoders.happy_pet_shop.service;
 
+import com.funcoders.happy_pet_shop.constant.UserRole;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.CustomerResponse;
 import com.funcoders.happy_pet_shop.entity.Cart;
 import com.funcoders.happy_pet_shop.entity.Customer;
+import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.CustomerMapper;
 import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
+import com.funcoders.happy_pet_shop.repository.RoleRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -27,13 +33,18 @@ import java.util.UUID;
 public class CustomerService {
     CustomerRepository customerRepository;
     CustomerMapper customerMapper;
-    UserRepository userRepository;
     UserMapper userMapper;
+
+    RoleRepository roleRepository;
 
     @Transactional
     public CustomerResponse createCustomer(UserCreationRequest request) {
+        Role userRole = roleRepository.findById(UserRole.USER_ROLE)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         User userEntity = userMapper.toEntity(request);
+        userEntity.setUserName(userEntity.getPhone());
+        userEntity.setRoles(Set.of(userRole));
 
         Cart cart = new Cart();
 
@@ -51,6 +62,7 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<CustomerResponse> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 

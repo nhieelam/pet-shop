@@ -29,11 +29,9 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
     public UserResponse createUser(UserCreationRequest request) {
-        if (userRepository.existsByUserName(request.getUsername())) {
-            throw new AppException(ErrorType.BAD_REQUEST);
-        }
-
         User userEntity = userMapper.toEntity(request);
+        userEntity.setUserName(userEntity.getPhone());
+
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userMapper.toUserResponse(userRepository.save(userEntity));

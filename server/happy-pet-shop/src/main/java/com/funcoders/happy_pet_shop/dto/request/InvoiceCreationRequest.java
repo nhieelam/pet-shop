@@ -3,15 +3,15 @@ package com.funcoders.happy_pet_shop.dto.request;
 import com.funcoders.happy_pet_shop.constant.PaymentMethod;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceCreationRequest {
@@ -29,5 +29,5 @@ public class InvoiceCreationRequest {
     UUID promotionId;
 
     @NotEmpty(message = "INVALID_INVOICE_DETAILS")
-    Set<InvoiceDetailCreationRequest> invoiceDetails;
+    List<InvoiceDetailCreationRequest> invoiceDetails;
 }
