@@ -2,7 +2,7 @@ package com.funcoders.happy_pet_shop.controller;
 
 import com.funcoders.happy_pet_shop.dto.request.PurchaseCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
-import com.funcoders.happy_pet_shop.mapper.PurchaseResponse;
+import com.funcoders.happy_pet_shop.dto.response.PurchaseResponse;
 import com.funcoders.happy_pet_shop.service.PurchaseService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -24,19 +24,19 @@ public class PurchaseController {
     @PostMapping
     public ApiResponse<PurchaseResponse> createPurchase(@Valid @RequestBody PurchaseCreationRequest request) {
         PurchaseResponse response = purchaseService.createPurchase(request);
-        return new ApiResponse<>(response, "create purchase successfully");
+        return new ApiResponse<PurchaseResponse>(response, "create purchase successfully");
     }
 
     @GetMapping("/{id}")
     public ApiResponse<PurchaseResponse> getPurchaseById(@PathVariable UUID id) {
         PurchaseResponse response = purchaseService.getPurchaseById(id);
-        return new ApiResponse<>(response, "get purchase successfully");
+        return new ApiResponse<PurchaseResponse>(response, "get purchase successfully");
     }
 
     @GetMapping
     public ApiResponse<List<PurchaseResponse>> getAllPurchases() {
         List<PurchaseResponse> responses = purchaseService.getAllPurchase();
-        return new ApiResponse<>(responses, "get all purchases successfully");
+        return new ApiResponse<List<PurchaseResponse>>(responses, "get all purchases successfully");
     }
 
     @DeleteMapping("/{id}")

@@ -11,9 +11,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductUpdateRequest {
 
     @NotBlank(message = "Tên sản phẩm không được để trống")
@@ -37,7 +38,6 @@ public class ProductUpdateRequest {
     Unit unit;
 
     @NotNull(message = "Danh mục không được để trống")
-    @CategoryConstraint
     UUID categoryId;
 
     @Size(max = 100, message = "Brand không quá 100 ký tự")

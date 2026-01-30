@@ -29,6 +29,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/auth/**",
+            "/customers/**"
     };
 
     @Value("${jwt.key}")
@@ -44,11 +45,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //for swagger
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // for swagger
+                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll() //for login and log up
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll() //for showing products to customers
+                        .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt

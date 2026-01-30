@@ -5,13 +5,14 @@ import com.funcoders.happy_pet_shop.constant.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SupplierUpdateRequest {
     @Size(min = 2, max = 100, message = "INVALID_SUPPLIER_NAME_LENGTH")
     String name;

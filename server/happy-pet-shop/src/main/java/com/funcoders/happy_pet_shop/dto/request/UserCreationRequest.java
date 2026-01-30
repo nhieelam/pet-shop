@@ -4,22 +4,17 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
-
-    @NotBlank(message = "INVALID_USERNAME")
-    @Size(min = 3, max = 50, message = "INVALID_USERNAME_LENGTH")
-    private String username;
 
     @Size(max = 50, message = "INVALID_FIRST_NAME_LENGTH")
     private String firstName;
@@ -43,8 +38,10 @@ public class UserCreationRequest {
     private String address;
 
     @NotBlank(message = "INVALID_PASSWORD")
-    @Size(min = 8, max = 64, message = "INVALID_PASSWORD")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[^A-Za-z0-9]).{8,}$", message = "INVALID_PASSWORD")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$",
+            message = "INVALID_PASSWORD"
+    )
     private String password;
 }
 

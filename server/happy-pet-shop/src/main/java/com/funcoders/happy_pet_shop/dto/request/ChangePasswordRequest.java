@@ -2,9 +2,14 @@ package com.funcoders.happy_pet_shop.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChangePasswordRequest {
 
     @NotBlank(message = "INVALID_OLD_PASSWORD")

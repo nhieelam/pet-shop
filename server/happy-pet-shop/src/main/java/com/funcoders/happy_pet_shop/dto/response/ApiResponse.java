@@ -7,12 +7,12 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<DataType> {
 
     boolean success;

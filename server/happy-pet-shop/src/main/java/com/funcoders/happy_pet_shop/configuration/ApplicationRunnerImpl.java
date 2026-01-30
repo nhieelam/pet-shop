@@ -1,6 +1,7 @@
 package com.funcoders.happy_pet_shop.configuration;
 
 import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.entity.Category;
 import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
@@ -35,7 +36,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
 
         if (!userRepository.existsByUserName("admin")) {
 
-                Role adminRole = Role.builder()
+            Role adminRole = Role.builder()
                     .roleName(UserRole.ADMIN_ROLE)
                     .description("Administrator")
                     .build();

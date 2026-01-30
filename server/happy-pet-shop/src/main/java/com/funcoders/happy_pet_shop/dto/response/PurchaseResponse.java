@@ -1,33 +1,33 @@
 package com.funcoders.happy_pet_shop.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.funcoders.happy_pet_shop.constant.UserStatus;
+import com.funcoders.happy_pet_shop.constant.PaymentStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
-public class SupplierResponse {
+public class PurchaseResponse {
     UUID id;
 
-    String name;
+    StaffResponse staff;
 
-    String email;
+    SupplierResponse supplier;
 
-    String phone;
+    BigDecimal totalAmount;
 
-    String address;
+    PaymentStatus status;
 
-    UserStatus status;
+    Set<PurchaseDetailResponse> purchaseDetails;
 
     LocalDateTime createdAt;
-
-    LocalDateTime updatedAt;
 }

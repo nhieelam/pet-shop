@@ -7,20 +7,21 @@ import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.PurchaseDetailMapper;
 import com.funcoders.happy_pet_shop.mapper.PurchaseMapper;
-import com.funcoders.happy_pet_shop.mapper.PurchaseResponse;
+import com.funcoders.happy_pet_shop.dto.response.PurchaseResponse;
 import com.funcoders.happy_pet_shop.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PurchaseService {
@@ -40,43 +41,63 @@ public class PurchaseService {
 
     @Transactional
     public PurchaseResponse createPurchase(PurchaseCreationRequest request) {
-        Set<PurchaseDetailCreationRequest> purchaseDetailCreationRequests = request.getPurchaseDetails();
+        List<PurchaseDetailCreationRequest> purchaseDetailRequests = request.getPurchaseDetails();
 
         Set<PurchaseDetail> purchaseDetails = new HashSet<>();
 
-//        STAFF
+        // find staff
         Staff staff = staffRepository.findById(request.getStaffId())
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-//        SUPPLIER
+        // find supplier
         Supplier supplier = supplierRepository.findById(request.getSupplierId())
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
-//        PURCHASE ENTITY
+        // create purchase entity with staff and supplier
         Purchase purchaseEntity = Purchase.builder()
                 .staff(staff)
                 .supplier(supplier)
                 .purchaseDetails(purchaseDetails)
                 .build();
 
-//        PURCHASE DETAIL REQUESTS
-        purchaseDetailCreationRequests.forEach(purchaseDetailRequest -> {
-            Product product = productRepository.findById(purchaseDetailRequest.getProductId())
-                    .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+        // find products
+        List<Product> products = productRepository.findAllById(purchaseDetailRequests.stream().map(
+                PurchaseDetailCreationRequest::getProductId
+        ).toList());
+        //check products
+        if (products.size() != purchaseDetailRequests.size())
+            throw new AppException(ErrorType.BAD_REQUEST);
 
-            Inventory inventory = Inventory.builder()
+        // create a Map to search purchase detail
+        Map<UUID, PurchaseDetailCreationRequest> purchaseDetailRequestMap = new HashMap<>();
+        purchaseDetailRequests.forEach(
+                purchaseDetailCreationRequest -> {
+                    purchaseDetailRequestMap.put(purchaseDetailCreationRequest.getProductId(), purchaseDetailCreationRequest);
+                }
+        );
+
+        // loop through products to add purchase details into the purchase
+        products.forEach(product -> {
+
+            // create inventory with product above
+            Inventory inventoryEntity = Inventory.builder()
                     .product(product)
-                    .quantity(purchaseDetailRequest.getQuantity())
+                    .quantity(purchaseDetailRequestMap.get(product.getId()).getQuantity())
                     .build();
 
+            // create purchaseDetail with inventory above
             PurchaseDetail purchaseDetailEntity = PurchaseDetail.builder()
-                    .inventory(inventory)
+                    .inventory(inventoryEntity)
                     .purchase(purchaseEntity)
-                    .unitPrice(purchaseDetailRequest.getUnitPrice())
-                    .quantity(purchaseDetailRequest.getQuantity())
+                    .unitPrice(purchaseDetailRequestMap.get(product.getId()).getUnitPrice())
+                    .quantity(purchaseDetailRequestMap.get(product.getId()).getQuantity())
                     .build();
+            purchaseDetailEntity.calculateTotalPrice();
 
-            product.setQuantity(product.getQuantity() + purchaseDetailRequest.getQuantity());
+            // update quantity of product
+            product.setQuantity(product.getQuantity() + purchaseDetailEntity.getQuantity());
+
+            // add purchaseDetail into the set of purchaseDetails
             purchaseDetails.add(purchaseDetailEntity);
         });
 
