@@ -1,5 +1,5 @@
 import { API_CONFIG } from "../config/apiConfig";
-import type { ApiResponse } from "../types/authTypes";
+import type { ApiResponse } from "../types/apiResponse.ts";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

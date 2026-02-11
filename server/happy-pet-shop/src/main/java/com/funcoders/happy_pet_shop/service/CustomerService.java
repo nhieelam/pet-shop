@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,6 +84,16 @@ public class CustomerService {
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         customerRepository.delete(customer);
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerResponse getInfo() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Customer customer = customerRepository.findByUser_Username(username)
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+
+        return customerMapper.toResponse(customer);
     }
 
     @Transactional

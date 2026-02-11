@@ -53,6 +53,12 @@ public class UserController {
         return new ApiResponse<>(null, "User deleted successfully");
     }
 
+    @GetMapping("/info")
+    public ApiResponse<UserResponse> getInfo() {
+        UserResponse response = userService.getInfo();
+        return new ApiResponse<>(response, "User details");
+    }
+
     @PostMapping("/{id}")
     public ApiResponse<Void> updatePassword(@PathVariable UUID id, ChangePasswordRequest request) {
         userService.updatePassword(id, request);

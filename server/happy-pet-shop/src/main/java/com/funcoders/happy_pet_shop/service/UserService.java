@@ -13,8 +13,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,31 +30,35 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
+    @Transactional
     public UserResponse createUser(UserCreationRequest request) {
         User userEntity = userMapper.toEntity(request);
         userEntity.setUserName(userEntity.getPhone());
 
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return userMapper.toUserResponse(userRepository.save(userEntity));
+        return userMapper.toResponse(userRepository.save(userEntity));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
     public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
-        return userMapper.toUserResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(userMapper::toUserResponse)
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Transactional
     public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new AppException(ErrorType.NOT_FOUND);
@@ -60,16 +66,30 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    @Transactional
     public UserResponse updateUser(UUID id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         userMapper.updateUser(user, request);
 
-        return userMapper.toUserResponse(userRepository.save(user));
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getInfo() {
+        // get object name from security context
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // find user
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+
+        return userMapper.toResponse(user);
     }
 
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     public void updatePassword(UUID userId, ChangePasswordRequest request) {
 
         User user = userRepository.findById(userId)

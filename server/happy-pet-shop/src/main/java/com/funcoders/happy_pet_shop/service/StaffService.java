@@ -4,6 +4,7 @@ import com.funcoders.happy_pet_shop.constant.UserRole;
 import com.funcoders.happy_pet_shop.dto.request.StaffCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.StaffResponse;
+import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.Staff;
 import com.funcoders.happy_pet_shop.entity.User;
@@ -18,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,7 +95,6 @@ public class StaffService {
         return staffMapper.toResponse(staffRepository.save(staff));
     }
 
-
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteStaff(UUID staffId) {
@@ -102,6 +103,18 @@ public class StaffService {
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         staffRepository.delete(staff);
+    }
+
+
+    public StaffResponse getInfo() {
+        // get object name from security context
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // find user
+        Staff staff = staffRepository.findByUser_Username(username)
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+
+        return staffMapper.toResponse(staff);
     }
 }
 
