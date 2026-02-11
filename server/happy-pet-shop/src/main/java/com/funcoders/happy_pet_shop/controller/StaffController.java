@@ -22,17 +22,13 @@ public class StaffController {
     StaffService staffService;
 
     @PostMapping
-    public ApiResponse<StaffResponse> createStaff(
-            @RequestBody @Valid StaffCreationRequest request
-    ) {
+    public ApiResponse<StaffResponse> createStaff(@RequestBody @Valid StaffCreationRequest request) {
         StaffResponse response = staffService.createStaff(request);
         return new ApiResponse<>(response, "create staff successfully");
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<StaffResponse> getStaffById(
-            @PathVariable UUID id
-    ) {
+    public ApiResponse<StaffResponse> getStaffById(@PathVariable UUID id) {
         StaffResponse response = staffService.getStaffById(id);
         return new ApiResponse<>(response, "get staff successfully");
     }
@@ -44,10 +40,7 @@ public class StaffController {
     }
 
     @PutMapping("/{id}/shift")
-    public ApiResponse<StaffResponse> updateStaffShift(
-            @PathVariable UUID id,
-            @RequestParam int shift
-    ) {
+    public ApiResponse<StaffResponse> updateStaffShift(@PathVariable UUID id, @RequestParam int shift) {
         StaffResponse response = staffService.updateStaffShift(id, shift);
         return new ApiResponse<>(response, "update staff shift successfully");
     }
@@ -58,6 +51,13 @@ public class StaffController {
     ) {
         staffService.deleteStaff(id);
         return new ApiResponse<>(null, "delete staff successfully");
+    }
+
+    @GetMapping("/info")
+    public ApiResponse<StaffResponse> getInfo() {
+        StaffResponse response = staffService.getInfo();
+
+        return new ApiResponse<StaffResponse>(response, "get staff successfully");
     }
 }
 

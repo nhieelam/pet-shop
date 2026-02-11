@@ -51,6 +51,12 @@ public class CustomerController {
         return new ApiResponse<>(null, "Delete customer successfully");
     }
 
+    @GetMapping("/info")
+    public ApiResponse<CustomerResponse> getInfo() {
+        CustomerResponse response = customerService.getInfo();
+        return new ApiResponse<>(response, "Get customer successfully");
+    }
+
     @PostMapping("/{id}/points")
     public ApiResponse<CustomerResponse> addPoints(
             @PathVariable UUID id,

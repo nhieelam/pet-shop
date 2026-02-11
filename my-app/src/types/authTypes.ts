@@ -14,12 +14,10 @@ export interface LoginError {
   errorCode?: number;
 }
 
+export interface IntrospectRequest {
+    token: string;
+}
 
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  status?: number;
-  errorCode?: number;
-  timestamp?: string;
+export interface IntrospectResponse {
+    valid: boolean;
 }

@@ -1,6 +1,4 @@
 import {
-    storeAuthToken,
-    storeUserName,
     getAuthToken,
     removeAuthToken,
     removeUserName,

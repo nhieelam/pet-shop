@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Address, AddressFormData } from "../type";
 
 interface Props {
