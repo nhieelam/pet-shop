@@ -33,7 +33,7 @@ public class UserService {
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUserName(userEntity.getPhone());
+        userEntity.setUsername(userEntity.getPhone());
 
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -82,7 +82,7 @@ public class UserService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // find user
-        User user = userRepository.findByUserName(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
         return userMapper.toResponse(user);

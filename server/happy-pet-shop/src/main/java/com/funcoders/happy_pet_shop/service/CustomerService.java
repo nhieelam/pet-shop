@@ -44,7 +44,7 @@ public class CustomerService {
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUserName(userEntity.getPhone());
+        userEntity.setUsername(userEntity.getPhone());
         userEntity.setRoles(Set.of(userRole));
 
         Cart cart = new Cart();

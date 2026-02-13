@@ -38,23 +38,40 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
 
-  // Load user từ localStorage khi reload trang
+// Load user từ localStorage khi reload trang
   useEffect(() => {
     const introspect = async () => {
-      const tokenString = getAuthToken();
+      try {
+        const tokenString = getAuthToken();
 
-      if (!tokenString) {
+        if (!tokenString) {
+          setIsAuthenticated(false);
+          return;
+        }
+
+        const request: IntrospectRequest = {
+          token: tokenString,
+        };
+
+        const res = await verifyToken(request);
+
+        if (!res.valid) {
+          setIsAuthenticated(false);
+          return;
+        }
+
+        setIsAuthenticated(true);
+
+        if (location.pathname === "/login") {
+          const customer: CustomerResponse = await getInfo();
+
+          setUser(customer);
+        }
+
+      } catch (error) {
+        console.error("Token verify failed:", error);
         setIsAuthenticated(false);
-        return;
       }
-
-      const request: IntrospectRequest = {
-        token: tokenString,
-      };
-
-      const res = await verifyToken(request);
-
-      setIsAuthenticated(res.valid);
     };
 
     introspect();
