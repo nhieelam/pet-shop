@@ -54,7 +54,7 @@ public class AuthService {
     protected long EXPIRATION_TIME;
 
     public AuthResponse authenticate(AuthRequest request) {
-        User user = userRepository.findByUserName(request.getUserName())
+        User user = userRepository.findByUsername(request.getUserName())
                 .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
@@ -113,7 +113,7 @@ public class AuthService {
 
         invalidatedTokenRepository.save(invalidatedToken);
 
-        User userEntity = userRepository.findByUserName(claimsSet.getSubject())
+        User userEntity = userRepository.findByUsername(claimsSet.getSubject())
                 .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
 
         String newToken = generateToken(userEntity);
@@ -127,7 +127,7 @@ public class AuthService {
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
-                .subject(user.getUserName())
+                .subject(user.getUsername())
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
                 .issuer("domainname")

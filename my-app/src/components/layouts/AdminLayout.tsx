@@ -1,15 +1,20 @@
-"use client";
-
 import { Outlet } from "react-router-dom";
 import AdminSideBar from "./AdminSideBar";
 
-export default function AdminLayout() {
+const AdminLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <AdminSideBar />
-      <main className="flex-grow">
-        <Outlet />
-      </main>
-    </div>
+      <div className="relative">
+        {/* Sidebar cố định */}
+        <AdminSideBar />
+
+        {/* Content */}
+        <div className="ml-64 min-h-screen bg-slate-100">
+          <main className="p-6">
+            <Outlet />
+          </main>
+        </div>
+      </div>
   );
-}
+};
+
+export default AdminLayout;

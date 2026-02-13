@@ -1,49 +1,85 @@
-"use client";
-
 import { Link, useLocation } from "react-router-dom";
 
 type NavItem = {
-	label: string;
-	href: string;
+  label: string;
+  href: string;
 };
 
 const NAV_ITEMS: NavItem[] = [
-	{ label: "Danh sách sản phẩm", href: "/admin/listProducts" },
-	{ label: "Nhập kho", href: "/admin/stock" },
-	{ label: "Quản lí hóa đơn", href: "/admin/manageOrders" },
-	{ label: "Quản lí danh mục", href: "/admin/manageProductCategory" },
-	{ label: "Quản lí dịch vụ", href: "/admin/manageServices" },
+  { label: "Trang chủ", href: "/admin/dashBoard" },
+  { label: "Danh sách sản phẩm", href: "/admin/listProducts" },
+  { label: "Nhập kho", href: "/admin/stock" },
+  { label: "Quản lí hóa đơn", href: "/admin/manageOrders" },
+  { label: "Quản lí danh mục", href: "/admin/manageProductCategory" },
+  { label: "Quản lí dịch vụ", href: "/admin/manageServices" },
 ];
 
-export default function AdminSidebar() {
-	const location = useLocation();
+const AdminSidebar: React.FC = () => {
+  const location = useLocation();
 
-	return (
-		<aside className="w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0">
-			<nav className="p-4">
-				<h2 className="text-lg font-bold text-gray-800 mb-4 px-3">📊 Admin Panel</h2>
-				<ul className="space-y-1">
-					{NAV_ITEMS.map((item) => {
-						const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
-						return (
-							<li key={item.href}>
-								<Link
-									to={item.href}
-									aria-current={isActive ? "page" : undefined}
-									className={`block px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-										isActive
-											? "bg-blue-600 text-white shadow"
-											: "text-gray-700 hover:bg-gray-100"
-									}`}
-								>
-									{item.label}
-								</Link>
-							</li>
-						);
-					})}
-				</ul>
-			</nav>
-		</aside>
-	);
-}
+  return (
+      <aside className="fixed top-0 left-0 w-64 h-screen bg-gradient-to-b from-indigo-900 via-indigo-800 to-purple-900 text-white flex flex-col z-50">
 
+        {/* Logo */}
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+              📊
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">AdminPro</h1>
+              <p className="text-xs text-indigo-300">Dashboard v2.0</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu */}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <p className="text-xs text-indigo-400 uppercase tracking-wider mb-4 px-2">
+            Menu chính
+          </p>
+
+          <ul className="space-y-1">
+            {NAV_ITEMS.map((item) => {
+              const isActive = location.pathname.startsWith(item.href);
+
+              return (
+                  <li key={item.href}>
+                    <Link
+                        to={item.href}
+                        className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            isActive
+                                ? "bg-white/15 border-l-4 border-indigo-400 text-white"
+                                : "text-indigo-200 hover:bg-white/10 hover:translate-x-1"
+                        }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* User Profile */}
+        <div className="p-4 border-t border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-full flex items-center justify-center font-bold">
+              A
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Admin User</p>
+              <p className="text-xs text-indigo-300">
+                admin@example.com
+              </p>
+            </div>
+            <button className="text-indigo-300 hover:text-white transition">
+              ⎋
+            </button>
+          </div>
+        </div>
+      </aside>
+  );
+};
+
+export default AdminSidebar;

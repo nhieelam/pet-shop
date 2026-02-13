@@ -30,7 +30,7 @@ public class User {
     UUID id;
 
     @Column(name = "username", nullable = false, unique = true, length = 50)
-    String userName;
+    String username;
 
     @Column(name = "first_name", length = 50)
     String firstName;

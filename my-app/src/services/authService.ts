@@ -13,7 +13,7 @@ import {removeAuthToken} from "../utils/storageUtils.ts";
 export const login = async (cridentials: AuthRequest): Promise<AuthResponse> => {
     try {
         const res = await axios.post<ApiResponse<AuthResponse>>(
-            API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+            API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.AUTH.LOGIN,
             cridentials
         );
 

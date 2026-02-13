@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../../../services/authService";
-import { storeAuthToken, storeUserName } from "../../../controllers/authController";
+import { useAuth } from "../../../context/authContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface LoginErrors {
   userName?: string;
@@ -22,19 +21,20 @@ interface UseLoginReturn {
 
 export function useLogin(): UseLoginReturn {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+  const location = useLocation();
+  const { login } = useAuth();
+
+  const [userName, setUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const validateForm = (): boolean => {
     const newErrors: LoginErrors = {};
 
-    // if (!userName) {
-    //   newErrors.userName = "userName không được để trống";
-    // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userName)) {
-    //   newErrors.userName = "userName không hợp lệ";
-    // }
+    if (!userName.trim()) {
+      newErrors.userName = "Tên đăng nhập không được để trống";
+    }
 
     if (!password) {
       newErrors.password = "Mật khẩu không được để trống";
@@ -46,45 +46,47 @@ export function useLogin(): UseLoginReturn {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
-    setErrors({}); // Clear previous errors
+    setErrors({});
 
     try {
-      const authResponse = await login({ userName, password });
+      await login({ userName, password });
 
-      // Store token and username in localStorage
-      storeAuthToken(authResponse.token);
-      storeUserName(userName);
-
-      // Clear form
       setUserName("");
       setPassword("");
 
-      // Show success message
       alert("Đăng nhập thành công!");
 
-      // Redirect to products page
-      navigate("/user/products");
-    } catch (error: any) {
+      // 🔥 Kiểm tra nếu đang ở đường dẫn admin
+      if (location.pathname.includes("/admin")) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user/products");
+      }
+
+    } catch (error: unknown) {
       console.error("Login error:", error);
-      setErrors({
-        general: error.message || "Đăng nhập thất bại. Vui lòng thử lại.",
-      });
+
+      if (error instanceof Error) {
+        setErrors({ general: error.message });
+      } else {
+        setErrors({
+          general: "Đăng nhập thất bại. Vui lòng thử lại.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const clearError = (field: keyof LoginErrors) => {
+  const clearError = (field: keyof LoginErrors): void => {
     if (errors[field]) {
-      setErrors({ ...errors, [field]: undefined });
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 

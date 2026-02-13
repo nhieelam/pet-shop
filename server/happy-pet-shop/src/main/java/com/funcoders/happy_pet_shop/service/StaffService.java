@@ -49,7 +49,7 @@ public class StaffService {
         UserCreationRequest userCreationRequest = request.getUserCreationRequest();
 
         User userEntity = userMapper.toEntity(userCreationRequest);
-        userEntity.setUserName(userEntity.getPhone());
+        userEntity.setUsername(userEntity.getPhone());
         userEntity.setRoles(Set.of(staffRole));
 
         User managedUser = userRepository.save(userEntity);
