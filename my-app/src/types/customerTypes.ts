@@ -1,4 +1,4 @@
-import type {UserResponse} from "./userTypes.ts";
+import type {UserResponse} from "./user.ts";
 import type {CartResponse} from "./cartTypes.ts";
 
 export interface CustomerResponse {

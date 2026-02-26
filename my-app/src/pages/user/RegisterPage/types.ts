@@ -16,11 +16,4 @@ export interface RegisterFormErrors {
   acceptTerms?: string;
 }
 
-export const initialFormData: RegisterFormData = {
-  fullName: "",
-  userName: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  acceptTerms: false,
-};
+

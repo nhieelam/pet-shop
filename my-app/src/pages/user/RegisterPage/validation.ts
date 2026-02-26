@@ -11,12 +11,6 @@ export const validateForm = (
     errors.fullName = "Tên phải có ít nhất 3 ký tự";
   }
 
-  if (!formData.userName) {
-    errors.userName = "userName không được để trống";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.userName)) {
-    errors.userName = "userName không hợp lệ";
-  }
-
   if (!formData.phone) {
     errors.phone = "Số điện thoại không được để trống";
   } else if (!/^0\d{9,10}$/.test(formData.phone)) {

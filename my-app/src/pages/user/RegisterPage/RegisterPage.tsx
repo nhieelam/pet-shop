@@ -17,47 +17,26 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Tên đầy đủ
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Nhập tên của bạn"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.fullName
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
-              />
-              {errors.fullName && (
-                <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
-              )}
-            </div>
 
             <div>
-              <label htmlFor="userName" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
                 Tên Đăng Nhập
               </label>
               <input
-                type="email"
-                id="userName"
-                name="userName"
-                value={formData.userName}
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                placeholder="Nhập userName của bạn"
+                placeholder="Nhập tên đăng nhập của bạn"
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.userName
+                  errors.username
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-blue-400"
                 }`}
               />
-              {errors.userName && (
-                <p className="text-red-500 text-sm mt-2">{errors.userName}</p>
+              {errors.username && (
+                <p className="text-red-500 text-sm mt-2">{errors.username}</p>
               )}
             </div>
 

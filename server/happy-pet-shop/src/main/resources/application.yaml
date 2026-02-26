@@ -2,14 +2,14 @@ spring:
     application:
         name: happy-pet-shop
 
-    # datasource:
-    #     url: "jdbc:postgresql://localhost:5432/happy-pet-shop"
-    #     username: root
-    #     password: root
     datasource:
-       url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
-       username: postgres
-       password: lamthaiyennhi20051011
+         url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
+         username: postgres
+         password: postgres
+#    datasource:
+#       url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
+#       username: postgres
+#       password: lamthaiyennhi20051011
 
     jpa:
         hibernate:

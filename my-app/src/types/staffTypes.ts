@@ -1,4 +1,4 @@
-import type {UserCreationRequest, UserResponse} from "./userTypes.ts";
+import type {UserCreationRequest, UserResponse} from "./user.ts";
 
 export interface StaffCreationRequest {
     shift: number;

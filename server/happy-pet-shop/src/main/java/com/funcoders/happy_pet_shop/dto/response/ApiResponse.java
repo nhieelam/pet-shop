@@ -21,23 +21,4 @@ public class ApiResponse<DataType> {
     int errorCode;
     int status;
     Instant timestamp;
-
-    //    SUCCESS
-    public ApiResponse(DataType data, String message) {
-        this.success = true;
-        this.message = message;
-        this.data = data;
-        this.status = 1000;
-        timestamp = Instant.now();
-    }
-
-    //    ERROR
-    public ApiResponse(ErrorType errorType) {
-        this.success = false;
-        this.message = errorType.getMessage();
-        this.data = null;
-        this.errorCode = errorType.getErrorCode();
-        timestamp = Instant.now();
-        this.data = null;
-    }
 }
