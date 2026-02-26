@@ -3,7 +3,7 @@ import com.funcoders.happy_pet_shop.entity.Pet;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
-
+import java.util.UUID;
 
 
 @Entity
@@ -16,8 +16,8 @@ import java.util.List;
 public class Breed {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String name;

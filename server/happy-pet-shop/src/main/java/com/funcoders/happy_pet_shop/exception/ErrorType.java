@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 public enum ErrorType {
     UNCATEGORIZED("lỗi lạ", 999, HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // ===== COMMON =====
     BAD_REQUEST("Yêu cầu không hợp lệ", 400, HttpStatus.BAD_REQUEST),
     NOT_FOUND("Không tìm thấy", 404, HttpStatus.NOT_FOUND),
     UNAUTHORIZED("Chưa xác thực", 401, HttpStatus.UNAUTHORIZED),

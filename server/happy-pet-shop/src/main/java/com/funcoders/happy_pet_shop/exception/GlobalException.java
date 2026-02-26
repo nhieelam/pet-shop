@@ -11,29 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class GlobalException {
-    @ExceptionHandler(AppException.class)
-    ResponseEntity<ApiResponse> appExceptionHandler(AppException appException) {
-        ErrorType errorType = appException.getErrorType();
 
-        ApiResponse apiResponse = new ApiResponse(errorType);
-
-        return ResponseEntity.status(errorType.getHttpStatus()).body(apiResponse);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<ApiResponse> dataIntegrityViolationHandler(
-            DataIntegrityViolationException exception
-    ) {
-        log.error("Data integrity violation", exception);
-
-        ErrorType errorType = ErrorType.USERNAME_ALREADY_EXISTS;
-
-        ApiResponse apiResponse = new ApiResponse(errorType);
-
-        return ResponseEntity
-                .status(errorType.getHttpStatus())
-                .body(apiResponse);
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handleMethodArgumentNotValid(

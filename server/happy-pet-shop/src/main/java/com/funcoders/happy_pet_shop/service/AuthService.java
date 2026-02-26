@@ -1,16 +1,9 @@
 package com.funcoders.happy_pet_shop.service;
 
-import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
-import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
-import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
-import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
-import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
-import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
-import com.funcoders.happy_pet_shop.entity.InvalidatedToken;
+
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
-import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -42,136 +35,11 @@ import static java.rmi.server.LogStream.log;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthService {
     UserRepository userRepository;
-    InvalidatedTokenRepository invalidatedTokenRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     @Value("${jwt.key}")
     @NonFinal
     protected String SIGNER_KEY;
 
-    @Value("${jwt.expiration-time}")
-    @NonFinal
-    protected long EXPIRATION_TIME;
 
-    public AuthResponse authenticate(AuthRequest request) {
-        User user = userRepository.findByUsername(request.getUserName())
-                .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
-
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            throw new AppException(ErrorType.UNAUTHORIZED);
-
-        String token = generateToken(user);
-
-        AuthResponse respond = AuthResponse.builder()
-                .token(token)
-                .authenticated(true)
-                .build();
-        return respond;
-    }
-
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        String token = request.getToken();
-
-        boolean verified = true;
-        try{
-            verifyToken(token);
-        } catch(AppException e) {
-            verified = false;
-        }
-
-        return IntrospectResponse.builder()
-                .valid(verified)
-                .build();
-    }
-
-    public void logout(LogoutRequest request) throws ParseException, JOSEException {
-        try {
-            String token = request.getToken();
-
-            SignedJWT signedJWT = verifyToken(token);
-            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-
-            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                    .id(jwtClaimsSet.getJWTID())
-                    .expiryTime(jwtClaimsSet.getExpirationTime())
-                    .build();
-
-            invalidatedTokenRepository.save(invalidatedToken);
-        } catch (Exception e) {
-            log(e.getMessage());
-        }
-    }
-
-    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
-        SignedJWT signedJWT = verifyToken(request.getToken());
-        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
-
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(claimsSet.getJWTID())
-                .expiryTime(claimsSet.getExpirationTime())
-                .build();
-
-        invalidatedTokenRepository.save(invalidatedToken);
-
-        User userEntity = userRepository.findByUsername(claimsSet.getSubject())
-                .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
-
-        String newToken = generateToken(userEntity);
-
-        return AuthResponse.builder()
-                .authenticated(true)
-                .token(newToken)
-                .build();
-    }
-
-    private String generateToken(User user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
-                .claim("scope", buildScope(user))
-                .jwtID(UUID.randomUUID().toString())
-                .issuer("domainname")
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(EXPIRATION_TIME, ChronoUnit.SECONDS).toEpochMilli()
-                ))
-                .build();
-        Payload payload = new Payload(claimSet.toJSONObject());
-
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            AuthService.log.error("Cannot create token", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String buildScope(User user) {
-        StringJoiner stringJoiner = new StringJoiner(" ");
-
-        user.getRoles().forEach(role -> {
-            stringJoiner.add("ROLE_" + role.getRoleName());
-        });
-
-        return stringJoiner.toString();
-    }
-
-    private SignedJWT verifyToken(String token) throws ParseException, JOSEException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        boolean verified = signedJWT.verify(verifier);
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        if (!(verified && expirationTime.after(new Date())))
-            throw new AppException(ErrorType.UNAUTHORIZED);
-
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new AppException(ErrorType.UNAUTHORIZED);
-
-        return signedJWT;
-    }
 }

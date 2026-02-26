@@ -1,106 +1,54 @@
 package com.funcoders.happy_pet_shop.service;
 
-import com.funcoders.happy_pet_shop.dto.request.ChangePasswordRequest;
-import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
-import com.funcoders.happy_pet_shop.dto.request.UserUpdateRequest;
+import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.constant.UserStatus;
+import com.funcoders.happy_pet_shop.dto.request.UserRegisterRequest;
 import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
-import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
     UserRepository userRepository;
-    UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserResponse createUser(UserCreationRequest request) {
-        User userEntity = userMapper.toEntity(request);
-        userEntity.setUsername(userEntity.getPhone());
-
-        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        return userMapper.toResponse(userRepository.save(userEntity));
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Transactional(readOnly = true)
-    public UserResponse getUserById(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
-        return userMapper.toResponse(user);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Transactional
-    public void deleteUser(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new AppException(ErrorType.NOT_FOUND);
-        }
-        userRepository.deleteById(id);
-    }
-
-    @Transactional
-    public UserResponse updateUser(UUID id, UserUpdateRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
-
-        userMapper.updateUser(user, request);
-
-        return userMapper.toResponse(userRepository.save(user));
-    }
-
-    @Transactional(readOnly = true)
-    public UserResponse getInfo() {
-        // get object name from security context
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // find user
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-
-        return userMapper.toResponse(user);
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @Transactional
-    public void updatePassword(UUID userId, ChangePasswordRequest request) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-
-        // Check mật khẩu cũ
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new AppException(ErrorType.PASSWORD_MISMATCH);
+    public UserResponse register(UserRegisterRequest req) {
+        String username = req.getUsername().trim();
+        if (userRepository.existsByUsername(username)) {
+            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
         }
 
-        // Encode & save
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-    }}
+        User user = User.builder()
+                .username(username)
+                .passwordHash(passwordEncoder.encode(req.getPassword()))
+                .phone(req.getPhone())
+                .address(req.getAddress())
+                .role(UserRole.CUSTOMER)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        User saved = userRepository.save(user);
+
+        return UserResponse.builder()
+                .id(saved.getId())
+                .username(saved.getUsername())
+                .phone(saved.getPhone())
+                .address(saved.getAddress())
+                .role(saved.getRole())
+                .status(saved.getStatus())
+                .createdAt(saved.getCreatedAt() == null ? null : saved.getCreatedAt().toInstant())
+                .build();
+    }
+}
+

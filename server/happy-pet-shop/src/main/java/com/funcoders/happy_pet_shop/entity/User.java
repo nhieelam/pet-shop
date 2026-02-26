@@ -1,8 +1,11 @@
 package com.funcoders.happy_pet_shop.entity;
+import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +17,8 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(unique = true, nullable = false, length = 50)
     private String username;
