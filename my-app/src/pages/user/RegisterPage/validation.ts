@@ -1,21 +1,22 @@
-import type { RegisterFormData, RegisterFormErrors } from "./types";
+import type { UserRegisterRequest, RegisterFormErrors } from "@/types/user";
 
 export const validateForm = (
-  formData: RegisterFormData
+  formData: UserRegisterRequest 
 ): RegisterFormErrors => {
   const errors: RegisterFormErrors = {};
 
-  if (!formData.fullName.trim()) {
-    errors.fullName = "Tên không được để trống";
-  } else if (formData.fullName.length < 3) {
-    errors.fullName = "Tên phải có ít nhất 3 ký tự";
-  }
+  if (!formData.username.trim()) {
+    errors.username = "Tên đăng nhập không được để trống";
+  } else if (formData.username.length < 3) {
+    errors.username = "Tên đăng nhập phải có ít nhất 3 ký tự";
+  } 
 
-  if (!formData.phone) {
-    errors.phone = "Số điện thoại không được để trống";
-  } else if (!/^0\d{9,10}$/.test(formData.phone)) {
-    errors.phone = "Số điện thoại phải bắt đầu bằng 0 và có 10-11 chữ số";
-  }
+
+if (!formData.phone) {
+  errors.phone = "Số điện thoại không được để trống";
+} else if (!/^(0\d{9}|\+84\d{9})$/.test(formData.phone)) {
+  errors.phone = "SĐT không hợp lệ";
+}
 
   if (!formData.password) {
     errors.password = "Mật khẩu không được để trống";

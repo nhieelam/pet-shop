@@ -25,7 +25,7 @@ const initialFormData: UserRegisterRequest = {
 
 export function useRegisterForm(): UseRegisterFormReturn {
   const [formData, setFormData] = useState<UserRegisterRequest>(initialFormData);
-  const [errors, setErrors] = useState<RegisterFormErrors>({});
+  const [errors, setErrors] = useState<RegisterFormErrors>({username : "Tên đăng nhập không được để trống"});
   const [apiError, setApiError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 

@@ -23,7 +23,7 @@ export type ApiResponse<T> = {
 
 
 export interface RegisterFormErrors {
-  username: string;
+  username ?: string;
   phone?: string;
   password?: string;
   confirmPassword?: string;

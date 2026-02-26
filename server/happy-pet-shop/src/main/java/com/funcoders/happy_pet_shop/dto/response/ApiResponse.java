@@ -21,4 +21,5 @@ public class ApiResponse<DataType> {
     int errorCode;
     int status;
     Instant timestamp;
+
 }
