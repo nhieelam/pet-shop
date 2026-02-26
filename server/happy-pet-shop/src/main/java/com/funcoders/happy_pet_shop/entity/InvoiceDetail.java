@@ -2,10 +2,8 @@ package com.funcoders.happy_pet_shop.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
-import java.util.UUID;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "invoice_details")
@@ -14,36 +12,33 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
 
     @Column(nullable = false)
-    BigDecimal unitPrice;
+    private Integer quantity;
 
     @Column(nullable = false)
-    int quantity;
+    private BigDecimal unitPrice;
 
     @Column(nullable = false)
-    BigDecimal totalPrice;
+    private BigDecimal totalPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id", nullable = false)
-    Inventory inventory;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", nullable = false, updatable = false)
-    Invoice invoice;
-
-    @PrePersist
-    void prePersist() {
-        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
-    }
-
-    public void reCalculateTotalPrice() {
-        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
-    }
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

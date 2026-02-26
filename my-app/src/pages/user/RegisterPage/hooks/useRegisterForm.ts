@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { RegisterFormData, RegisterFormErrors, initialFormData } from "../types";
+import type { RegisterFormData, RegisterFormErrors } from "../types";
+import { initialFormData } from "../types";
 import { validateForm } from "../validation";
 
 interface UseRegisterFormReturn {

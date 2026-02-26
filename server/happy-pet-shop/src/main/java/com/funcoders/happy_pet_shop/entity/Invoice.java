@@ -1,100 +1,44 @@
 package com.funcoders.happy_pet_shop.entity;
 
-import com.funcoders.happy_pet_shop.constant.PaymentMethod;
-import com.funcoders.happy_pet_shop.constant.PaymentStatus;
+import com.funcoders.happy_pet_shop.constant.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.time.OffsetDateTime;
+import java.util.List;
+
 
 @Entity
-@Table(
-        name = "invoices",
-        indexes = {
-                @Index(name = "idx_invoice_staff", columnList = "staff_id"),
-                @Index(name = "idx_invoice_customer", columnList = "customer_id"),
-                @Index(name = "idx_invoice_created_at", columnList = "created_at")
-        }
-)
+@Table(name = "invoices")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Invoice {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // ===== NGƯỜI XỬ LÝ (offline) =====
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id")
-    Staff staff;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // ===== NGƯỜI MUA =====
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    Customer customer;
+    private String district;
+    private String city;
+    private String address;
+    private String phone;
 
-    // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====
-    @Column(nullable = false, length = 255)
-    String shippingAddress;
-
-    // ===== GIÁ TIỀN =====
-    @Column(nullable = false, precision = 15, scale = 2)
-    BigDecimal totalAmount = BigDecimal.ZERO;
-
-    @Column(nullable = false, precision = 15, scale = 2)
-    BigDecimal realAmount = BigDecimal.ZERO;
-
-    // ===== THANH TOÁN =====
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    PaymentMethod paymentMethod;
+    @Column(nullable = false)
+    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    PaymentStatus status = PaymentStatus.PENDING;
+    private InvoiceStatus status;
 
-    // ===== KHUYẾN MÃI =====
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id")
-    Promotion promotion;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
-    // ===== THỜI GIAN =====
-    @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
-
-    // ===== CHI TIẾT HÓA ĐƠN =====
-    @OneToMany(
-            mappedBy = "invoice",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    Set<InvoiceDetail> invoiceDetails;
-
-    // ===== LIFECYCLE =====
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.status = PaymentStatus.PENDING;
-        recalculateTotalAmount();
-
-        if (realAmount == null || realAmount.compareTo(BigDecimal.ZERO) == 0) {
-            this.realAmount = this.totalAmount;
-        }
-    }
-
-    // ===== BUSINESS LOGIC =====
-    public void recalculateTotalAmount() {
-        this.totalAmount = invoiceDetails.stream()
-                .map(InvoiceDetail::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
+    private List<InvoiceDetail> invoiceDetails;
 }

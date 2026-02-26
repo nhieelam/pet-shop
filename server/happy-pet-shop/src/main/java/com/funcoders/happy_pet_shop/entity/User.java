@@ -1,85 +1,42 @@
 package com.funcoders.happy_pet_shop.entity;
-
-import com.funcoders.happy_pet_shop.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
-@Table(
-        name = "users",
-        indexes = {
-                @Index(name = "idx_users_username", columnList = "username"),
-                @Index(name = "idx_users_email", columnList = "email")
-        }
-)
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "username", nullable = false, unique = true, length = 50)
-    String username;
+    @Column(unique = true, nullable = false, length = 50)
+    private String username;
 
-    @Column(name = "first_name", length = 50)
-    String firstName;
+    @Column(nullable = false)
+    private String passwordHash;
 
-    @Column(name = "last_name", length = 50)
-    String lastName;
-
-    @Column(unique = true, length = 100)
-    String email;
-
-    @Column(length = 10, nullable = false)
-    String phone;
-
-    @Column(length = 255)
-    String address;
+    private String address;
+    private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    UserStatus status;
-
-    @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
-
     @Column(nullable = false)
-    LocalDateTime updatedAt;
+    private UserRole role;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    String password;
+    private UserStatus status;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    Set<Role> roles;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        if (status == null) {
-            status = UserStatus.ACTIVATED;
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    @OneToMany(mappedBy = "user")
+    private List<Invoice> invoices;
 }
-

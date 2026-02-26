@@ -1,32 +1,37 @@
 package com.funcoders.happy_pet_shop.entity;
 
 import jakarta.persistence.*;
-
-import java.util.UUID;
+import lombok.*;
+import java.time.OffsetDateTime;
 
 @Entity
-@Table(
-        name = "cart_items",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_cart_product",
-                        columnNames = {"cart_id", "product_id"}
-                )
-        }
-)
+@Table(name = "cart_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CartItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id", nullable = false)
-    Cart cart;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id", nullable = false)
-    Inventory inventory;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    int quantity;
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

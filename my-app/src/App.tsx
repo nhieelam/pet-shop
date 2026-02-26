@@ -16,30 +16,29 @@ import UserLayout from "./components/layouts/UserLayout";
 import AdminLayout from "./components/layouts/AdminLayout";
 import LoginPage from "./pages/user/LoginPage/LoginPage";
 
-import { AuthProvider } from "./context/authContext";
 
 import "./App.css";
+import RegisterPage from "./pages/user/RegisterPage/RegisterPage";
 
 const App: React.FC = () => {
   return (
       <BrowserRouter>
-        <AuthProvider>
           <Routes>
             <Route
                 path="/"
                 element={<Navigate to="/user/products" replace />}
             />
 
-            {/* login */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin/login" element={<LoginPage />} />
 
-            {/* USER ROUTES */}
             <Route path="/user" element={<UserLayout />}>
               <Route path="cart" element={<CartPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="services" element={<ServicesPage />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
               <Route
                   path="detailedProduct/:id"
                   element={<DetailedProductPage />}
@@ -50,7 +49,6 @@ const App: React.FC = () => {
               />
             </Route>
 
-            {/* ADMIN ROUTES */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="dashBoard" element={<AdminDashBoard />} />
               <Route path="listProducts" element={<ListProductsPage />} />
@@ -66,7 +64,6 @@ const App: React.FC = () => {
               <Route path="stock" element={<StockPage />} />
             </Route>
           </Routes>
-        </AuthProvider>
       </BrowserRouter>
   );
 };

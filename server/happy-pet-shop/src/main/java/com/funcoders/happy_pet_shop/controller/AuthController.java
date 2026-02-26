@@ -4,10 +4,13 @@ import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
 import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
 import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
 import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
+import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
 import com.funcoders.happy_pet_shop.service.AuthService;
+import com.funcoders.happy_pet_shop.service.CustomerService;
+import com.funcoders.happy_pet_shop.service.UserService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -26,6 +29,22 @@ import java.text.ParseException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
     AuthService authService;
+    CustomerService customerService;
+    UserService UserService;
+
+    @PostMapping("/register")
+    public ApiResponse<AuthResponse> register(@Valid @RequestBody UserCreationRequest request) {
+        customerService.createCustomer(request);
+
+        AuthResponse response = authService.authenticate(
+                AuthRequest.builder()
+                        .userName(request.getUsername()) 
+                        .password(request.getPassword())
+                        .build()
+        );
+
+        return new ApiResponse<>(response, "Register successfully");
+    }
 
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody AuthRequest request) {

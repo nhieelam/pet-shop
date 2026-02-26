@@ -6,35 +6,32 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "promotion_details")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
+public class PromotionDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    @JoinColumn(name = "promotion_id", nullable = false)
+    private Promotion promotion;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    private String imageUrl;
-
-    @Column(nullable = false)
-    private BigDecimal basePrice;
-
-    @Enumerated(EnumType.STRING)
-    private ItemStatus status;
+    private BigDecimal discountPercentage;
 
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

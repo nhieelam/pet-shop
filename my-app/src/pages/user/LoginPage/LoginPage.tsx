@@ -16,7 +16,6 @@ export default function LoginPage() {
     clearError,
   } = useLogin();
 
-  // 🔒 Chặn scroll khi loading
   useEffect(() => {
     if (isLoading) {
       document.body.style.overflow = "hidden";
@@ -29,7 +28,6 @@ export default function LoginPage() {
       <div
           className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12 relative">
 
-        {/* 🔥 Overlay Loader */}
         {isLoading && (
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
               <Loader/>
@@ -42,7 +40,6 @@ export default function LoginPage() {
             }`}
         >
           <div className="bg-white rounded-lg shadow-lg p-8">
-            {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-blue-600 mb-2">🐾</h1>
               <h2 className="text-3xl font-bold text-gray-800 mb-2">

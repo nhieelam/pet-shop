@@ -14,6 +14,7 @@ import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,29 +36,39 @@ public class CustomerService {
     CustomerRepository customerRepository;
     CustomerMapper customerMapper;
     UserMapper userMapper;
-
+    UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
 
     @Transactional
     public CustomerResponse createCustomer(UserCreationRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
+        }
+
         Role userRole = roleRepository.findById(UserRole.USER_ROLE)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUsername(userEntity.getPhone());
+        userEntity.setUsername(request.getUsername());             
+        userEntity.setPhone(request.getPhone());                 
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         userEntity.setRoles(Set.of(userRole));
 
-        Cart cart = new Cart();
+        User savedUser = userRepository.save(userEntity);
 
         Customer customer = Customer.builder()
-                .user(userEntity)
+                .user(savedUser)
                 .points(BigDecimal.ZERO)
-                .cart(cart)
                 .build();
 
-        cart.setCustomer(customer);
-
         Customer savedCustomer = customerRepository.save(customer);
+
+        Cart cart = new Cart();
+        cart.setCustomer(savedCustomer);
+        cartRepository.save(cart);
+
+        savedCustomer.setCart(cart);
 
         return customerMapper.toResponse(savedCustomer);
     }

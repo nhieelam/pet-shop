@@ -1,4 +1,4 @@
-export interface RegisterFormData {
+export type RegisterFormData = {
   fullName: string;
   userName: string;
   phone: string;

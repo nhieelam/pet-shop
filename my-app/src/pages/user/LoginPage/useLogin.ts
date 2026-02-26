@@ -1,94 +1,92 @@
-import { useState } from "react";
-import { useAuth } from "../../../context/authContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_CONFIG } from "../../../config/apiConfig";
+import { apiClient } from "../../../utils/apiClient";
+import { storeAuthToken, storeUserName } from "../../../utils/storageUtils";
+import { isNetworkError, ERROR_MESSAGES } from "../../../utils/errorHandler";
+import type { AuthResponse } from "../../../types/authTypes";
 
-interface LoginErrors {
+export interface LoginErrors {
+  general?: string;
   userName?: string;
   password?: string;
-  general?: string;
 }
 
-interface UseLoginReturn {
-  userName: string;
-  password: string;
-  errors: LoginErrors;
-  isLoading: boolean;
-  setUserName: (value: string) => void;
-  setPassword: (value: string) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  clearError: (field: keyof LoginErrors) => void;
-}
-
-export function useLogin(): UseLoginReturn {
+export function useLogin() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-
-  const [userName, setUserName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const validateForm = (): boolean => {
-    const newErrors: LoginErrors = {};
+  const clearError = useCallback((field: keyof LoginErrors) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
 
+  const validate = useCallback((): boolean => {
+    const next: LoginErrors = {};
     if (!userName.trim()) {
-      newErrors.userName = "Tên đăng nhập không được để trống";
+      next.userName = "Vui lòng nhập tên đăng nhập.";
     }
-
     if (!password) {
-      newErrors.password = "Mật khẩu không được để trống";
-    } else if (password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      next.password = "Vui lòng nhập mật khẩu.";
     }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }, [userName, password]);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
+      if (!validate()) return;
 
-    if (!validateForm()) return;
+      setIsLoading(true);
+      setErrors((prev) => ({ ...prev, general: undefined }));
 
-    setIsLoading(true);
-    setErrors({});
+      try {
+        const res = await apiClient.post<AuthResponse>(
+          API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+          { userName: userName.trim(), password }
+        );
 
-    try {
-      await login({ userName, password });
+        if (res.success && res.data?.token) {
+          storeAuthToken(res.data.token);
+          storeUserName(userName.trim());
+          navigate("/user/products", { replace: true });
+          return;
+        }
 
-      setUserName("");
-      setPassword("");
-
-      alert("Đăng nhập thành công!");
-
-      // 🔥 Kiểm tra nếu đang ở đường dẫn admin
-      if (location.pathname.includes("/admin")) {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/user/products");
+        const message =
+          res.message || ERROR_MESSAGES.LOGIN_FAILED;
+        setErrors((prev) => ({ ...prev, general: message }));
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setErrors((prev) => ({
+            ...prev,
+            general: ERROR_MESSAGES.NETWORK_ERROR,
+          }));
+        } else if (error && typeof error === "object" && "message" in error) {
+          setErrors((prev) => ({
+            ...prev,
+            general: (error as { message: string }).message,
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            general: ERROR_MESSAGES.UNKNOWN_ERROR,
+          }));
+        }
+      } finally {
+        setIsLoading(false);
       }
-
-    } catch (error: unknown) {
-      console.error("Login error:", error);
-
-      if (error instanceof Error) {
-        setErrors({ general: error.message });
-      } else {
-        setErrors({
-          general: "Đăng nhập thất bại. Vui lòng thử lại.",
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearError = (field: keyof LoginErrors): void => {
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
+    },
+    [userName, password, validate, navigate]
+  );
 
   return {
     userName,

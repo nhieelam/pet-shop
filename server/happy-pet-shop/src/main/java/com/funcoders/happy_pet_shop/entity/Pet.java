@@ -1,29 +1,46 @@
 package com.funcoders.happy_pet_shop.entity;
+import com.funcoders.happy_pet_shop.constant.ItemStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
+enum.;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "pets")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
+public class Pet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "breed_id")
+    private Breed breed;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(nullable = false)
-    private String name;
+    private String petName;
+
+    private LocalDate birthday;
+    private String furColor;
 
     @Column(columnDefinition = "TEXT")
     private String description;

@@ -1,4 +1,4 @@
-import { RegisterFormData, RegisterFormErrors } from "./types";
+import type { RegisterFormData, RegisterFormErrors } from "./types";
 
 export const validateForm = (
   formData: RegisterFormData

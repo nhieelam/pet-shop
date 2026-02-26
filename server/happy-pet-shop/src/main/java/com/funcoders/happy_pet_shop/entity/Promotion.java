@@ -1,89 +1,34 @@
 package com.funcoders.happy_pet_shop.entity;
 
-import com.funcoders.happy_pet_shop.constant.DiscountType;
-import com.funcoders.happy_pet_shop.constant.PromotionStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
-@Table(
-        name = "promotions",
-        indexes = {
-                @Index(name = "idx_promotion_code", columnList = "code"),
-                @Index(name = "idx_promotion_status", columnList = "status"),
-                @Index(name = "idx_promotion_date", columnList = "start_date, end_date")
-        }
-)
+@Table(name = "promotions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Promotion {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    String code;
+    private String description;
 
-    @Column(length = 255)
-    String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    DiscountType discountType;
-
-    @Column(nullable = false, precision = 15, scale = 2)
-    BigDecimal discountValue;
-
-    @Column(precision = 15, scale = 2)
-    BigDecimal maxDiscountValue;
-
-    @Column(nullable = false)
-    LocalDate startDate;
-
-    @Column(nullable = false)
-    LocalDate endDate;
+    private OffsetDateTime startDate;
+    private OffsetDateTime endDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    PromotionStatus status;
+    private PromotionStatus status;
 
-    @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
-    LocalDateTime updatedAt;
-
-
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-
-        if (status == null) {
-            status = PromotionStatus.ACTIVE;
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public boolean isValidNow() {
-        LocalDate today = LocalDate.now();
-        return status == PromotionStatus.ACTIVE
-                && !today.isBefore(startDate)
-                && !today.isAfter(endDate);
-    }
+    @OneToMany(mappedBy = "promotion")
+    private List<PromotionDetail> details;
 }

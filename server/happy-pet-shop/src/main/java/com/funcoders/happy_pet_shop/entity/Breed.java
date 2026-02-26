@@ -1,17 +1,19 @@
 package com.funcoders.happy_pet_shop.entity;
-
+import com.funcoders.happy_pet_shop.entity.Pet;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+
+
 @Entity
-@Table(name = "categories")
+@Table(name = "breeds")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
+public class Breed {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +22,6 @@ public class Category {
     @Column(unique = true, nullable = false)
     private String name;
 
-    private String description;
-
-    @OneToMany(mappedBy = "category")
-    private List<Product> products;
-
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "breed")
     private List<Pet> pets;
 }
