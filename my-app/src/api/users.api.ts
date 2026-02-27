@@ -10,3 +10,8 @@ export async function registerUser(dto: UserRegisterRequest) {
 
   return res.data;
 }
+
+export async function getMe() {
+  const res = await http.get(API_CONFIG.ENDPOINTS.USER.INFO);
+  return res.data;
+}

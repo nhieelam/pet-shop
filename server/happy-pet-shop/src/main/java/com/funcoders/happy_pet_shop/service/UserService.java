@@ -11,6 +11,8 @@ import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,23 @@ public class UserService {
                 .role(saved.getRole())
                 .status(saved.getStatus())
                 .createdAt(saved.getCreatedAt() == null ? null : saved.getCreatedAt().toInstant())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getMe(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .createdAt(user.getCreatedAt() == null ? null : user.getCreatedAt().toInstant())
                 .build();
     }
 }

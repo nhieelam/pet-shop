@@ -3,7 +3,10 @@ export const API_CONFIG = {
     ENDPOINTS: {
         USER : {
             REGISTER: "/users/register",
-
+            INFO: "/users/me",
+        },
+        AUTH: {
+            LOGIN: "/auth/login", 
         },
 
     },

@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import type { UserRegisterRequest, RegisterFormErrors } from "@/types/user";
 import { validateForm } from "../validation";
 import { registerUser } from "@/api/users.api";
-import { getApiMessage } from "@/utils/getApiMessage";
 
 interface UseRegisterFormReturn {
   formData: UserRegisterRequest;
@@ -25,8 +24,7 @@ const initialFormData: UserRegisterRequest = {
 
 export function useRegisterForm(): UseRegisterFormReturn {
   const [formData, setFormData] = useState<UserRegisterRequest>(initialFormData);
-  const [errors, setErrors] = useState<RegisterFormErrors>({username : "Tên đăng nhập không được để trống"});
-  const [apiError, setApiError] = useState<string | undefined>(undefined);
+  const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = useCallback(
@@ -38,26 +36,19 @@ export function useRegisterForm(): UseRegisterFormReturn {
         [name]: type === "checkbox" ? checked : value,
       }));
 
-      if (errors[name as keyof RegisterFormErrors]) {
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
-      }
-
-      if (apiError) setApiError(undefined);
     },
-    [errors, apiError]
+    [errors]
   );
 
   const resetForm = useCallback(() => {
     setFormData(initialFormData);
     setErrors({});
-    setApiError(undefined);
+
   }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-
-      setApiError(undefined);
 
       const validationErrors = validateForm(formData);
       setErrors(validationErrors);
@@ -73,7 +64,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
         resetForm();
       } catch (error) {
         console.error("Registration error:", error);
-        setApiError(getApiMessage(error));
+
       } finally {
         setIsLoading(false);
       }
@@ -85,7 +76,6 @@ export function useRegisterForm(): UseRegisterFormReturn {
     formData,
     errors,
     isLoading,
-    apiError,
     handleChange,
     handleSubmit,
     resetForm,

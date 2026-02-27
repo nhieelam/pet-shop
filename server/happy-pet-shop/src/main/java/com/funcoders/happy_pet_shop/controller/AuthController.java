@@ -1,28 +1,48 @@
 package com.funcoders.happy_pet_shop.controller;
 
+import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
+import com.funcoders.happy_pet_shop.dto.request.LoginRequest;
+import com.funcoders.happy_pet_shop.dto.response.LoginResponse;
 import com.funcoders.happy_pet_shop.service.AuthService;
-import com.funcoders.happy_pet_shop.service.CustomerService;
-import com.funcoders.happy_pet_shop.service.UserService;
-import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
+import java.time.Instant;
 
 @RestController
-@RequestMapping("/auth")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/auth")
 public class AuthController {
-    AuthService authService;
-    CustomerService customerService;
-    UserService UserService;
+    private AuthService authService;
 
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest req) {
+        LoginResponse data = authService.login(req);
 
+        ApiResponse<LoginResponse> res = ApiResponse.<LoginResponse>builder()
+                .success(true)
+                .message("Login success")
+                .data(data)
+                .status(200)
+                .errorCode(0)
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout() {
+
+        return ApiResponse.<Void>builder()
+                .success(true)
+                .message("Logged out successfully")
+                .status(HttpStatus.OK.value())
+                .errorCode(0)
+                .timestamp(Instant.now())
+                .build();
+    }
 }

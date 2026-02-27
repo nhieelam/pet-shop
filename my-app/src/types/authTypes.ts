@@ -1,23 +1,19 @@
-export interface AuthRequest {
-  userName: string;
+export type LoginRequest = {
+  username: string;
   password: string;
-}
+};
 
-export interface AuthResponse {
-  authenticated: boolean;
+export type UserResponse = {
+  id: string; // UUID
+  username: string;
+  phone?: string;
+  address?: string;
+  role?: string;
+  status?: string;
+  createdAt?: string | null;
+};
+
+export type LoginResponse = {
   token: string;
-}
-
-export interface LoginError {
-  message: string;
-  status?: number;
-  errorCode?: number;
-}
-
-export interface IntrospectRequest {
-    token: string;
-}
-
-export interface IntrospectResponse {
-    valid: boolean;
-}
+  user: UserResponse;
+};

@@ -1,31 +1,27 @@
 spring:
-    application:
-        name: happy-pet-shop
+  application:
+    name: happy-pet-shop
 
-    datasource:
-         url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
-         username: postgres
-         password: postgres
-#    datasource:
-#       url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
-#       username: postgres
-#       password: lamthaiyennhi20051011
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
+    username: postgres
+    password: postgres
 
-    jpa:
-        hibernate:
-            ddl-auto: update
-        show-sql: true
-        properties:
-            hibernate:
-                format_sql: true
-                dialect: org.hibernate.dialect.PostgreSQLDialect
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-    port: 8080
-    servlet:
-        context-path: /happy-pet-shop
+  port: 8080
+  servlet:
+    context-path: /happy-pet-shop
 
-jwt:
-    key: "ZXZlbnR0aHJlYWRvbGRub25lZmVuY2VmYWlybHl0b3dlcmFiaWxpdHlmaW5kYmFsbHM="
-    expiration-time: 3600 #seconds
-    refreshExpiration-time: 604800 #seconds
+app:
+  jwt:
+    secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_32_CHARS"
+    expiration-seconds: 86400
