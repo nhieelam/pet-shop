@@ -1,4 +1,4 @@
-package com.funcoders.happy_pet_shop.config;
+package com.funcoders.happy_pet_shop.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
