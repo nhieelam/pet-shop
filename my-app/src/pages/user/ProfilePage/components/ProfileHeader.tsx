@@ -1,37 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { getMe } from "@/api/users.api";
+import { useEffect, useState } from "react";
 
 interface UserProfile {
   id: string;
-  name: string;
-  email: string;
+  username: string;
   phone: string;
-  avatar: string;
-  joinDate: string;
+  avatar ?: string;
+  createdAt : string;
 }
 
-const mockUser: UserProfile = {
-  id: "user_001",
-  name: "Nguyễn Văn An",
-  email: "nguyenvanan@email.com",
-  phone: "0123 456 789",
-  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-  joinDate: "2023-06-15",
-};
-
 export default function ProfileHeader() {
-  const [user, setUser] = useState<UserProfile>(mockUser);
+  const [user, setUser] = useState<UserProfile>({
+  id: "",
+  username: "",
+  phone: "",
+  avatar: "",
+  createdAt : "",
+});
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editName, setEditName] = useState(user.name);
-  const [editPhone, setEditPhone] = useState(user.phone);
-  const [editAvatar, setEditAvatar] = useState(user.avatar);
+  const [editName, setEditName] = useState(user.username || "");
+  const [editPhone, setEditPhone] = useState(user.phone || "");
+  const [editAvatar, setEditAvatar] = useState(user.avatar || "");
 
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await getMe();
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user", err);
+      }
+    }
+
+    fetchUser();
+  }, []);
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setUser({
       ...user,
-      name: editName,
+      username: editName,
       phone: editPhone,
       avatar: editAvatar,
     });
@@ -52,21 +61,17 @@ export default function ProfileHeader() {
           <div className="flex flex-col items-center md:items-start">
             <img
               src={user.avatar}
-              alt={user.name}
+              alt={user.username}
               className="w-32 h-32 rounded-lg border-4 border-white shadow-lg object-cover"
             />
             <p className="text-sm text-gray-500 mt-2">
-              Thành viên từ {new Date(user.joinDate).toLocaleDateString("vi-VN")}
+              Thành viên từ {new Date(user.createdAt).toLocaleDateString("vi-VN")}
             </p>
           </div>
 
           <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">{user.name}</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">{user.username}</h2>
             <div className="space-y-2 text-gray-600">
-              <p className="flex items-center gap-2">
-                <span>📧</span>
-                {user.email}
-              </p>
               <p className="flex items-center gap-2">
                 <span>📱</span>
                 {user.phone}
