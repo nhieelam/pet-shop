@@ -6,9 +6,9 @@ const StatusBadge = ({ status }: { status: string }) => {
   }[status] || "bg-gray-100 text-gray-800";
 
   const labels: Record<string, string> = {
-    Paid: "✓ Đã thanh toán",
+    Paid: "Đã thanh toán",
     Pending: "⏳ Chờ thanh toán",
-    Cancelled: "✕ Bị hủy",
+    Cancelled: "Bị hủy",
   };
 
   return (

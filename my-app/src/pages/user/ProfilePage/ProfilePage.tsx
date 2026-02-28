@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import ProfileHeader from "./components/ProfileHeader";
-import AddressList from "./components/AddressList";
 import InvoiceHistory from "./components/InvoiceHistory";
 import OverviewTab from "./components/overview";
 
@@ -62,9 +61,6 @@ export default function ProfilePage() {
           {activeTab === "overview" && (
             <OverviewTab />
           )}
-
-          {activeTab === "addresses" && <AddressList />}
-
           {activeTab === "invoices" && <InvoiceHistory />}
         </div>
       </div>

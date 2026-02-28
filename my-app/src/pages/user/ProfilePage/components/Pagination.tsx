@@ -16,6 +16,7 @@ const PaginationControls = ({ current, total, onChange }: PaginationProps) => {
       >
         ← Trước
       </button>
+
       {Array.from({ length: total }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
@@ -27,6 +28,7 @@ const PaginationControls = ({ current, total, onChange }: PaginationProps) => {
           {page}
         </button>
       ))}
+
       <button
         onClick={() => onChange(Math.min(total, current + 1))}
         disabled={current === total}
@@ -34,6 +36,7 @@ const PaginationControls = ({ current, total, onChange }: PaginationProps) => {
       >
         Sau →
       </button>
+      
     </div>
   );
 };

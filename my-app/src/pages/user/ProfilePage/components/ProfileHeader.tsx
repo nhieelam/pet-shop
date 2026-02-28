@@ -1,56 +1,20 @@
 "use client";
-
-import { getMe } from "@/api/users.api";
-import { useEffect, useState } from "react";
-
-interface UserProfile {
-  id: string;
-  username: string;
-  phone: string;
-  avatar ?: string;
-  createdAt : string;
-}
+import { useProfileHeader } from "../hooks/useProfileHeader";
 
 export default function ProfileHeader() {
-  const [user, setUser] = useState<UserProfile>({
-  id: "",
-  username: "",
-  phone: "",
-  avatar: "",
-  createdAt : "",
-});
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editName, setEditName] = useState(user.username || "");
-  const [editPhone, setEditPhone] = useState(user.phone || "");
-  const [editAvatar, setEditAvatar] = useState(user.avatar || "");
+  const { 
+    user, 
+    isEditOpen, 
+    editName, 
+    editPhone, 
+    editAvatar, 
+    handleEditSubmit, 
+    setIsEditOpen, 
+    setEditAvatar, 
+    setEditName, 
+    setEditPhone 
+  } = useProfileHeader();
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await getMe();
-        setUser(res.data);
-      } catch (err) {
-        console.error("Failed to fetch user", err);
-      }
-    }
-
-    fetchUser();
-  }, []);
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setUser({
-      ...user,
-      username: editName,
-      phone: editPhone,
-      avatar: editAvatar,
-    });
-    setIsEditOpen(false);
-    alert("Cập nhật hồ sơ thành công!");
-  };
-
-  const handleLogout = () => {
-    alert("Bạn đã đăng xuất!");
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -87,7 +51,7 @@ export default function ProfileHeader() {
               ✏️ Chỉnh sửa hồ sơ
             </button>
             <button
-              onClick={handleLogout}
+              // onClick={handleLogout}
               className="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
               🚪 Đăng xuất
