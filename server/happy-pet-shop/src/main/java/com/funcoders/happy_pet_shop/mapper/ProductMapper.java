@@ -9,12 +9,13 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface ProductionMapper {
+public interface ProductMapper {
     @Mapping(target = "category", ignore = true)
     Product toEntity(ProductCreationRequest request);
 
     @Mapping(target = "category", ignore = true)
     void updateProduct(@MappingTarget Product productEntity, ProductUpdateRequest request);
 
+    @Mapping(target = "categoryName", source = "category.name")
     ProductResponse toResponse(Product productEntity);
 }

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const API_CONFIG = {
     BASE_URL: "http://localhost:8080/happy-pet-shop",
     ENDPOINTS: {
@@ -39,3 +41,10 @@ export const STORAGE_KEYS = {
     AUTH_TOKEN: "authToken",
     USER_NAME: "userName",
 } as const;
+
+export const apiClient = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});

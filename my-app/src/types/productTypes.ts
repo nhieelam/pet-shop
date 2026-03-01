@@ -1,10 +1,20 @@
 export interface ProductResponse {
-    id: string;
-    productName: string;
-    description: string;
-    price: number;
-    amount: number;
-    createdAt: Date;
+  id: string;                // UUID -> string
+  name: string;
+  description: string;
+  price: number;             // BigDecimal -> number
+
+  categoryName: string;
+
+  brand: string;
+  origin: string;
+  unit: string;
+
+  quantity: number;
+  imageUrl: string;
+
+  createdAt: string;
+  updatedAt: string | null;
 }
 
 export interface ProductCreationRequest {

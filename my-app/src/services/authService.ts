@@ -1,6 +1,4 @@
-import { API_CONFIG } from "../config/apiConfig";
 import type {AuthRequest, AuthResponse, IntrospectRequest, IntrospectResponse} from "../types/authTypes";
-import axios from "axios";
 import {
   createLoginError,
   isNetworkError,
@@ -9,58 +7,66 @@ import {
 } from "../utils/errorHandler";
 import type {ApiResponse} from "../types/apiResponse.ts";
 import {removeAuthToken} from "../utils/storageUtils.ts";
+import axios from "axios";
+import {API_CONFIG, apiClient} from "../config/apiConfig.ts";
 
-export const login = async (cridentials: AuthRequest): Promise<AuthResponse> => {
-    try {
-        const res = await axios.post<ApiResponse<AuthResponse>>(
-            API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-            cridentials
-        );
+export const login = async (
+    credentials: AuthRequest
+): Promise<AuthResponse> => {
+  try {
+    const res = await apiClient.post<ApiResponse<AuthResponse>>(
+        API_CONFIG.ENDPOINTS.AUTH.LOGIN,
+        credentials
+    );
 
-        // Backend trả về nhưng logic fail
-        if (!res.data.success || !res.data.data) {
-            throw createLoginError(
-                res.data.message || ERROR_MESSAGES.LOGIN_FAILED,
-                res.data.status,
-                res.data.errorCode
-            );
-        }
-
-        return res.data.data;
-    } catch (error: unknown) {
-        // Lỗi network (mất mạng, timeout, server down)
-        if (isNetworkError(error)) {
-            throw createLoginError(ERROR_MESSAGES.NETWORK_ERROR);
-        }
-
-        // Lỗi đã được chuẩn hoá trước đó (do mình throw)
-        if (isLoginError(error)) {
-            throw error;
-        }
-
-        // Lỗi backend axios (4xx, 5xx nhưng chưa map)
-        if (axios.isAxiosError(error)) {
-            throw createLoginError(
-                error.response?.data?.message || ERROR_MESSAGES.LOGIN_FAILED,
-                error.response?.status,
-                error.response?.data?.errorCode
-            );
-        }
-
-        // Lỗi không xác định
-        throw createLoginError(ERROR_MESSAGES.UNKNOWN_ERROR);
+    // Backend trả về nhưng logic fail
+    if (!res.data.success || !res.data.data) {
+      throw createLoginError(
+          res.data.message || ERROR_MESSAGES.LOGIN_FAILED,
+          res.data.status,
+          res.data.errorCode
+      );
     }
+
+    return res.data.data;
+  } catch (error: unknown) {
+
+    // Network error
+    if (isNetworkError(error)) {
+      throw createLoginError(ERROR_MESSAGES.NETWORK_ERROR);
+    }
+
+    // Lỗi đã chuẩn hoá trước đó
+    if (isLoginError(error)) {
+      throw error;
+    }
+
+    // Axios error (4xx, 5xx)
+    if (axios.isAxiosError(error)) {
+      throw createLoginError(
+          error.response?.data?.message || ERROR_MESSAGES.LOGIN_FAILED,
+          error.response?.status,
+          error.response?.data?.errorCode
+      );
+    }
+
+    throw createLoginError(ERROR_MESSAGES.UNKNOWN_ERROR);
+  }
 };
 
 export const verifyToken = async (request: IntrospectRequest): Promise<IntrospectResponse> => {
-    const res = await axios.post<ApiResponse<IntrospectResponse>>(API_CONFIG.ENDPOINTS.AUTH.INTROSPECT, request);
 
-    return res.data.data;
-}
+  const res = await apiClient.post<ApiResponse<IntrospectResponse>>(
+      API_CONFIG.ENDPOINTS.AUTH.INTROSPECT,
+      request
+  );
+
+  return res.data.data;
+};
 
 export const logout = () => {
-    removeAuthToken();
-}
+  removeAuthToken();
+};
 
 // export async function login(credentials: AuthRequest): Promise<AuthResponse> {
 //   try {

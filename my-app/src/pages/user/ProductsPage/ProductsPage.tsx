@@ -6,13 +6,41 @@ import PriceFilter from "./components/PriceFilter";
 import SearchBar from "./components/SearchBar";
 import Pagination from "./components/Pagination";
 
-import { useProductManager } from "./hooks/useProductManager";
-import { mockProducts, CATEGORIES, ITEMS_PER_PAGE } from "./constants";
+import {useProductManager} from "./hooks/useProductManager";
+import { CATEGORIES, ITEMS_PER_PAGE } from "./constants";
+import {useEffect, useState} from "react";
+import type {ProductResponse} from "../../../types/productTypes.ts";
+import Loader from "../../../components/ui/loader.tsx";
+import axios from "axios";
+import {getAllProducts} from "../../../services/productService.ts";
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        setProducts(data);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || "Lỗi từ server");
+        } else {
+          setError("Lỗi không xác định");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const {
     selectedCategories,
-    searchQuery,
+    // searchQuery,
     minPrice,
     maxPrice,
     sortBy,
@@ -29,7 +57,7 @@ export default function ProductsPage() {
     handlePageChange,
     resetFilters,
   } = useProductManager({
-    products: mockProducts,
+    products: products,
     itemsPerPage: ITEMS_PER_PAGE,
   });
 
@@ -98,9 +126,9 @@ export default function ProductsPage() {
                     name={product.name}
                     description={product.description}
                     price={product.price}
-                    image={product.image}
-                    availableAmount={product.availableAmount}
-                    category={product.category}
+                    image={product.imageUrl}
+                    availableAmount={product.quantity}
+                    category={product.categoryName}
                   />
                 ))}
               </div>
@@ -137,7 +165,12 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+      {loading && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <Loader/>
+          </div>
+      )}
+
     </div>
   );
 }
-

@@ -29,7 +29,7 @@ export default function LoginPage() {
       <div
           className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12 relative">
 
-        {/* 🔥 Overlay Loader */}
+        {/* loader */}
         {isLoading && (
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
               <Loader/>
