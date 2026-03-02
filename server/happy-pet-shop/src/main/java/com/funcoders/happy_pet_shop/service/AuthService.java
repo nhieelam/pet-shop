@@ -77,11 +77,11 @@ public class AuthService {
 
         String token = generateToken(user);
 
-        AuthResponse respond = AuthResponse.builder()
+        return AuthResponse.builder()
                 .token(token)
                 .authenticated(true)
+                .user(userMapper.toResponse(user))
                 .build();
-        return respond;
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
