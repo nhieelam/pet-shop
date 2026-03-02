@@ -9,6 +9,9 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -38,15 +41,10 @@ public class Promotion {
     @Column(length = 255)
     String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    DiscountType discountType;
-
-    @Column(nullable = false, precision = 15, scale = 2)
-    BigDecimal discountValue;
-
-    @Column(precision = 15, scale = 2)
-    BigDecimal maxDiscountValue;
+    @OneToMany(mappedBy = "promotion",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    Set<PromotionDetail> promotionDetails;
 
     @Column(nullable = false)
     LocalDate startDate;

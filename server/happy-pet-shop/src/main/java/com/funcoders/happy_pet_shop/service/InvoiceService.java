@@ -34,46 +34,108 @@ public class InvoiceService {
 
     PromotionRepository promotionRepository;
 
+    PetRepository petRepository;
+
+    ProductRepository productRepository;
+
     @Transactional
     public InvoiceResponse createInvoice(InvoiceCreationRequest request) {
-        // find customer
+
+        // ===== 1. Find customer =====
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-        // find staff
+        // ===== 2. Find staff =====
         Staff staff = staffRepository.findById(request.getStaffId())
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-        Set<InvoiceDetail> invoiceDetailEntities = new HashSet<>();
-
-        // create invoice with customer and staff
-        Invoice invoiceEntity = Invoice.builder()
-                .paymentMethod(request.getPaymentMethod())
+        // ===== 3. Create invoice =====
+        Invoice invoice = Invoice.builder()
                 .customer(customer)
                 .staff(staff)
-                .invoiceDetails(invoiceDetailEntities)
+                .paymentMethod(request.getPaymentMethod())
                 .shippingAddress(request.getShippingAddress())
+                .invoiceDetails(new HashSet<>())
+                .totalAmount(BigDecimal.ZERO)
+                .realAmount(BigDecimal.ZERO)
                 .build();
 
-        // find and check inventories
-        List<InvoiceDetailCreationRequest> invoiceDetailRequests = request.getInvoiceDetails();
+        BigDecimal totalAmount = BigDecimal.ZERO;
 
-        // create a Map of inventories with information
-        Map<UUID, InvoiceDetailCreationRequest> invoiceDetailRequestMap = new HashMap<>();
-        invoiceDetailRequests.forEach(invoiceDetailRequest -> {
-            invoiceDetailRequestMap.put(invoiceDetailRequest.getInventoryId(), invoiceDetailRequest);
-        });
+        // ===== 4. Process invoice details =====
+        for (InvoiceDetailCreationRequest detailRequest : request.getInvoiceDetails()) {
 
+            if (detailRequest.getProductId() == null && detailRequest.getPetId() == null) {
+                throw new AppException(ErrorType.INVALID_INVOICE_DETAIL);
+            }
 
-        invoiceEntity.recalculateTotalAmount();
+            if (detailRequest.getProductId() != null && detailRequest.getPetId() != null) {
+                throw new AppException(ErrorType.INVALID_INVOICE_DETAIL);
+            }
 
-        // apply promotion if exists
+            InvoiceDetail detail = new InvoiceDetail();
+            detail.setInvoice(invoice);
+
+            // ===== PRODUCT =====
+            if (detailRequest.getProductId() != null) {
+
+                Product product = productRepository.findById(detailRequest.getProductId())
+                        .orElseThrow(() -> new AppException(ErrorType.PRODUCT_NOT_FOUND));
+
+                if (!product.isAvailable()) {
+                    throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
+                }
+
+                if (product.getQuantity() < detailRequest.getQuantity()) {
+                    throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
+                }
+
+                // Trừ stock
+                product.setQuantity(product.getQuantity() - detailRequest.getQuantity());
+
+                detail.setProduct(product);
+                detail.setQuantity(detailRequest.getQuantity());
+                detail.setUnitPrice(product.getPrice());
+
+                BigDecimal lineTotal = product.getPrice()
+                        .multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
+
+                totalAmount = totalAmount.add(lineTotal);
+            }
+
+            // ===== PET =====
+            if (detailRequest.getPetId() != null) {
+
+                Pet pet = petRepository.findById(detailRequest.getPetId())
+                        .orElseThrow(() -> new AppException(ErrorType.PET_NOT_FOUND));
+
+                if (Boolean.FALSE.equals(pet.getAvailable())) {
+                    throw new AppException(ErrorType.PET_ALREADY_SOLD);
+                }
+
+                // Pet luôn quantity = 1
+                detail.setPet(pet);
+                detail.setQuantity(1);
+                detail.setUnitPrice(pet.getPrice());
+
+                totalAmount = totalAmount.add(pet.getPrice());
+
+                // Đánh dấu đã bán
+                pet.markAsSold();
+            }
+
+            invoice.getInvoiceDetails().add(detail);
+        }
+
+        invoice.setTotalAmount(totalAmount);
+        invoice.setRealAmount(totalAmount);
+
+        // ===== 5. Apply promotion =====
         if (request.getPromotionId() != null) {
 
             Promotion promotion = promotionRepository.findById(request.getPromotionId())
                     .orElseThrow(() -> new AppException(ErrorType.PROMOTION_NOT_FOUND));
 
-            // check promotion active
             LocalDate now = LocalDate.now();
 
             if (!promotion.getStatus().equals(PromotionStatus.ACTIVE)) {
@@ -92,28 +154,106 @@ public class InvoiceService {
             BigDecimal discountAmount = BigDecimal.ZERO;
 
             switch (promotion.getDiscountType()) {
-                case PERCENT -> {
-                    discountAmount = invoiceEntity.getTotalAmount()
-                            .multiply(promotion.getDiscountValue())
-                            .divide(BigDecimal.valueOf(100));
-                }
-                case FIXED -> {
-                    discountAmount = promotion.getDiscountValue();
-                }
+                case PERCENT -> discountAmount = totalAmount
+                        .multiply(promotion.getDiscountValue())
+                        .divide(BigDecimal.valueOf(100));
+
+                case FIXED -> discountAmount = promotion.getDiscountValue();
             }
 
-            // prevent negative amount
-            BigDecimal realAmount = invoiceEntity.getTotalAmount().subtract(discountAmount);
+            BigDecimal realAmount = totalAmount.subtract(discountAmount);
+
             if (realAmount.compareTo(BigDecimal.ZERO) < 0) {
                 realAmount = BigDecimal.ZERO;
             }
 
-            invoiceEntity.setRealAmount(realAmount);
-            invoiceEntity.setPromotion(promotion);
+            invoice.setRealAmount(realAmount);
+            invoice.setPromotion(promotion);
         }
 
-        return invoiceMapper.toResponse(invoiceRepository.save(invoiceEntity));
+        return invoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
+
+//    @Transactional
+//    public InvoiceResponse createInvoice(InvoiceCreationRequest request) {
+//        // find customer
+//        Customer customer = customerRepository.findById(request.getCustomerId())
+//                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+//
+//        // find staff
+//        Staff staff = staffRepository.findById(request.getStaffId())
+//                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+//
+//        Set<InvoiceDetail> invoiceDetailEntities = new HashSet<>();
+//
+//        // create invoice with customer and staff
+//        Invoice invoiceEntity = Invoice.builder()
+//                .paymentMethod(request.getPaymentMethod())
+//                .customer(customer)
+//                .staff(staff)
+//                .invoiceDetails(invoiceDetailEntities)
+//                .shippingAddress(request.getShippingAddress())
+//                .build();
+//
+//        // find and check inventories
+//        List<InvoiceDetailCreationRequest> invoiceDetailRequests = request.getInvoiceDetails();
+//
+//        // create a Map of inventories with information
+//        Map<UUID, InvoiceDetailCreationRequest> invoiceDetailRequestMap = new HashMap<>();
+//        invoiceDetailRequests.forEach(invoiceDetailRequest -> {
+//            invoiceDetailRequestMap.put(invoiceDetailRequest.getInventoryId(), invoiceDetailRequest);
+//        });
+//
+//
+//        invoiceEntity.recalculateTotalAmount();
+//
+//        // apply promotion if exists
+//        if (request.getPromotionId() != null) {
+//
+//            Promotion promotion = promotionRepository.findById(request.getPromotionId())
+//                    .orElseThrow(() -> new AppException(ErrorType.PROMOTION_NOT_FOUND));
+//
+//            // check promotion active
+//            LocalDate now = LocalDate.now();
+//
+//            if (!promotion.getStatus().equals(PromotionStatus.ACTIVE)) {
+//                throw new AppException(ErrorType.PROMOTION_INACTIVE);
+//            }
+//
+//            if (now.isBefore(promotion.getStartDate())) {
+//                throw new AppException(ErrorType.PROMOTION_NOT_STARTED);
+//            }
+//
+//            if (now.isAfter(promotion.getEndDate())) {
+//                promotion.setStatus(PromotionStatus.EXPIRED);
+//                throw new AppException(ErrorType.PROMOTION_EXPIRED);
+//            }
+//
+//            BigDecimal discountAmount = BigDecimal.ZERO;
+//
+//            switch (promotion.getDiscountType()) {
+//                case PERCENT -> {
+//                    discountAmount = invoiceEntity.getTotalAmount()
+//                            .multiply(promotion.getDiscountValue())
+//                            .divide(BigDecimal.valueOf(100));
+//                }
+//                case FIXED -> {
+//                    discountAmount = promotion.getDiscountValue();
+//                }
+//            }
+//
+//            // prevent negative amount
+//            BigDecimal realAmount = invoiceEntity.getTotalAmount().subtract(discountAmount);
+//            if (realAmount.compareTo(BigDecimal.ZERO) < 0) {
+//                realAmount = BigDecimal.ZERO;
+//            }
+//
+//            invoiceEntity.setRealAmount(realAmount);
+//            invoiceEntity.setPromotion(promotion);
+//        }
+//
+//        return invoiceMapper.toResponse(invoiceRepository.save(invoiceEntity));
+//    }
 
     @Transactional(readOnly = true)
     public List<InvoiceResponse> getAllInvoices() {

@@ -1,6 +1,7 @@
 package com.funcoders.happy_pet_shop.dto.request;
 
 import com.funcoders.happy_pet_shop.constant.PaymentMethod;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -29,5 +30,5 @@ public class InvoiceCreationRequest {
     UUID promotionId;
 
     @NotEmpty(message = "INVALID_INVOICE_DETAILS")
-    List<InvoiceDetailCreationRequest> invoiceDetails;
+    List<@Valid InvoiceDetailCreationRequest> invoiceDetails;
 }

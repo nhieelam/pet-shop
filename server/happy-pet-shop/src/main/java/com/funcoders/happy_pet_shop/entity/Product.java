@@ -54,6 +54,8 @@ public class Product {
     @Column(name = "image_url")
     String imageUrl;
 
+    @Column(name = "available", nullable = false)
+    boolean available;
 
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;

@@ -14,8 +14,9 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDetailCreationRequest {
 
-    @NotNull(message = "INVALID_INVENTORY")
-    UUID inventoryId;
+    UUID productId;
+
+    UUID petId;
 
     @Min(value = 1, message = "INVALID_QUANTITY")
     int quantity;
