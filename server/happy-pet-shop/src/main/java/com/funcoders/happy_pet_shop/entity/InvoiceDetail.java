@@ -31,10 +31,6 @@ public class InvoiceDetail {
     BigDecimal totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id", nullable = false)
-    Inventory inventory;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable = false, updatable = false)
     Invoice invoice;
 

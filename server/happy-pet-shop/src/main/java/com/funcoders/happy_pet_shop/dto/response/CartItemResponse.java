@@ -17,7 +17,5 @@ import java.util.UUID;
 public class CartItemResponse {
     UUID id;
 
-    InventoryResponse inventory;
-
     int quantity;
 }

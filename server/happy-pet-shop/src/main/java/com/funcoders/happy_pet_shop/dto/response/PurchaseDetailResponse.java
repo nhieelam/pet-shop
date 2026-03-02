@@ -16,8 +16,6 @@ import java.util.UUID;
 public class PurchaseDetailResponse {
     UUID id;
 
-    InventoryResponse inventory;
-
     BigDecimal unitPrice;
 
     int quantity;

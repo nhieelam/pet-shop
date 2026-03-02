@@ -54,8 +54,6 @@ public class Product {
     @Column(name = "image_url")
     String imageUrl;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    Set<Inventory> inventories;
 
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;

@@ -37,10 +37,6 @@ public class PurchaseDetail {
     @JoinColumn(name = "purchase_id", nullable = false)
     Purchase purchase;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "product_id", nullable = false)
-    Inventory inventory;
-
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal unitPrice;
 

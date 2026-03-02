@@ -35,7 +35,6 @@ public class PurchaseService {
 
     SupplierRepository supplierRepository;
 
-    InventoryRepository inventoryRepository;
 
     ProductRepository productRepository;
 
@@ -79,15 +78,8 @@ public class PurchaseService {
         // loop through products to add purchase details into the purchase
         products.forEach(product -> {
 
-            // create inventory with product above
-            Inventory inventoryEntity = Inventory.builder()
-                    .product(product)
-                    .quantity(purchaseDetailRequestMap.get(product.getId()).getQuantity())
-                    .build();
-
             // create purchaseDetail with inventory above
             PurchaseDetail purchaseDetailEntity = PurchaseDetail.builder()
-                    .inventory(inventoryEntity)
                     .purchase(purchaseEntity)
                     .unitPrice(purchaseDetailRequestMap.get(product.getId()).getUnitPrice())
                     .quantity(purchaseDetailRequestMap.get(product.getId()).getQuantity())

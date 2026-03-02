@@ -32,8 +32,6 @@ public class InvoiceService {
 
     StaffRepository staffRepository;
 
-    InventoryRepository inventoryRepository;
-
     PromotionRepository promotionRepository;
 
     @Transactional
@@ -59,16 +57,6 @@ public class InvoiceService {
 
         // find and check inventories
         List<InvoiceDetailCreationRequest> invoiceDetailRequests = request.getInvoiceDetails();
-        List<Inventory> inventories = inventoryRepository
-                .findAllById(invoiceDetailRequests.stream()
-                        .map(InvoiceDetailCreationRequest::getInventoryId)
-                        .toList());
-
-        System.out.println(inventories.size());
-        System.out.println(invoiceDetailRequests.size());
-
-        if (inventories.size() != invoiceDetailRequests.size())
-            throw new AppException(ErrorType.INSUFFICIENT_INVENTORY);
 
         // create a Map of inventories with information
         Map<UUID, InvoiceDetailCreationRequest> invoiceDetailRequestMap = new HashMap<>();
@@ -76,29 +64,6 @@ public class InvoiceService {
             invoiceDetailRequestMap.put(invoiceDetailRequest.getInventoryId(), invoiceDetailRequest);
         });
 
-        // loop inventories
-        inventories.forEach(inventory -> {
-            InvoiceDetailCreationRequest invoiceDetailRequest = invoiceDetailRequestMap.get(inventory.getId());
-
-            if (invoiceDetailRequest.getQuantity() > inventory.getQuantity())
-                throw new AppException(ErrorType.INSUFFICIENT_INVENTORY);
-
-            InvoiceDetail invoiceDetail = InvoiceDetail.builder()
-                    .unitPrice(inventory.getPrice())
-                    .quantity(invoiceDetailRequest.getQuantity())
-                    .inventory(inventory)
-                    .invoice(invoiceEntity)
-                    .build();
-            invoiceDetail.reCalculateTotalPrice();
-
-            invoiceDetailEntities.add(invoiceDetail);
-
-            int quantity = invoiceDetail.getQuantity();
-            inventory.setQuantity(inventory.getQuantity() - quantity);
-            inventory.getProduct().setQuantity(
-                    inventory.getProduct().getQuantity() - invoiceDetailRequest.getQuantity()
-            );
-        });
 
         invoiceEntity.recalculateTotalAmount();
 
