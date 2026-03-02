@@ -16,7 +16,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest req) {

@@ -1,8 +1,9 @@
 "use client";
 import { useInvoiceHistory } from "../hooks/useInvoiceHistory";
 import type { Invoice, SortOption } from "../hooks/useInvoiceHistory"; 
-import Pagination from "./Pagination"; 
+import PaginationControls from "@/components/ui/pagination"
 import StatusBadge from "./StatusBadge"; 
+import { usePagination } from "@/components/hooks/usePagination";
 
 const mockInvoices: Invoice[] = [
   {
@@ -90,16 +91,9 @@ const mockInvoices: Invoice[] = [
 
 
 export default function InvoiceHistory() {
-  const { 
-    currentInvoices, 
-    currentPage, 
-    totalPages, 
-    sortBy, 
-    setSortBy, 
-    goToPage, 
-    startIndex, 
-    totalCount 
-  } = useInvoiceHistory(mockInvoices);
+
+  const {totalPages,currentInvoices, sortBy, setSortBy} = useInvoiceHistory(mockInvoices, 5);
+  const {currentPage, goToPage, startIndex, totalCount} = usePagination(totalPages);
 
   const fmtMoney = (n: number) => `₫${n.toLocaleString("vi-VN")}`;
   const fmtDate = (d: string) => new Date(d).toLocaleDateString("vi-VN");
@@ -177,7 +171,7 @@ export default function InvoiceHistory() {
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4">
-          <Pagination current={currentPage} total={totalPages} onChange={goToPage} />
+          <PaginationControls current={currentPage} total={totalPages} onChange={goToPage} />
           <p className="text-sm text-gray-600">
              Hiển thị {startIndex + 1}–{startIndex + currentInvoices.length} trong {totalCount} hóa đơn
           </p>

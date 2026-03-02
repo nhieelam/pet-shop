@@ -54,7 +54,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/happy-pet-shop/auth/**",     // <-- adjust if your auth paths differ
+                                "/auth/**",     // context-path is stripped; path is /auth/login
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",

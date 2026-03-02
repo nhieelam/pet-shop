@@ -1,71 +1,55 @@
-import { useEffect, useState } from "react";
-import { getMe } from "@/api/users.api";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useProfile } from "./useProfile";
 
-const { user, setUser, isEditOpen,setIsEditOpen} = useProfile();
 interface UserProfile {
   id: string;
   username: string;
   phone: string;
-  avatar ?: string;
-  createdAt : string;
+  avatar?: string;
+  createdAt: string;
 }
 
 interface UseProfileHeaderReturn {
-    user: UserProfile;
-    isEditOpen: boolean;
-    editName: string;
-    editPhone: string;
-    editAvatar: string;
-    handleEditSubmit: (e: React.FormEvent) => void;
-    setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setEditAvatar: React.Dispatch<React.SetStateAction<string>>;
-    setEditName: React.Dispatch<React.SetStateAction<string>>;
-    setEditPhone: React.Dispatch<React.SetStateAction<string>>;
+  user: UserProfile;
+  isEditOpen: boolean;
+  editName: string;
+  editPhone: string;
+  editAvatar: string;
+  handleEditSubmit: (e: React.FormEvent) => void;
+  setIsEditOpen: Dispatch<SetStateAction<boolean>>;
+  setEditAvatar: Dispatch<SetStateAction<string>>;
+  setEditName: Dispatch<SetStateAction<string>>;
+  setEditPhone: Dispatch<SetStateAction<string>>;
 }
 
-export function useProfileHeader() : UseProfileHeaderReturn {
-    const [editName, setEditName] = useState(user.username || "");
-    const [editPhone, setEditPhone] = useState(user.phone || "");
-    const [editAvatar, setEditAvatar] = useState(user.avatar || "");
+export function useProfileHeader(): UseProfileHeaderReturn {
 
-    useEffect(() => {
-    async function fetchUser() {
-        try {
-        const res = await getMe();
-        setUser(res.data);
-        } catch (err) {
-        console.error("Failed to fetch user", err);
-        }
-    }
+  const { user, setUser, isEditOpen, setIsEditOpen } = useProfile();
 
-    fetchUser();
-    }, []);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
 
-    const handleEditSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setUser({
-            ...user,
-            username: editName,
-            phone: editPhone,
-            avatar: editAvatar,
-        });
-        setIsEditOpen(false);
-        alert("Cập nhật hồ sơ thành công!");
-    };
-  
+
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await getMe();
-        setUser(res.data);
-      } catch (err) {
-        console.error("Failed to fetch user", err);
-      }
-    }
+    setEditName(user.username ?? "");
+    setEditPhone(user.phone ?? "");
+    setEditAvatar(user.avatar ?? "");
+  }, [user.username, user.phone, user.avatar]);
 
-    fetchUser();
-  }, []);
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setUser((prev) => ({
+      ...prev,
+      username: editName,
+      phone: editPhone,
+      avatar: editAvatar,
+    }));
+
+    setIsEditOpen(false);
+    alert("Cập nhật hồ sơ thành công!");
+  };
 
   return {
     user,
@@ -78,5 +62,5 @@ export function useProfileHeader() : UseProfileHeaderReturn {
     setEditAvatar,
     setEditName,
     setEditPhone,
-  }
+  };
 }
