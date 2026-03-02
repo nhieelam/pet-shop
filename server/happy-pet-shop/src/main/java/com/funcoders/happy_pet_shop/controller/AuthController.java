@@ -2,11 +2,13 @@ package com.funcoders.happy_pet_shop.controller;
 
 import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
 import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
-import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
 import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
+import com.funcoders.happy_pet_shop.dto.request.UserRegisterRequest;
+import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
+import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
@@ -50,6 +52,12 @@ public class AuthController {
     public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) throws ParseException, JOSEException {
         AuthResponse response = authService.refreshToken(request);
 
-        return new ApiResponse(response, "Refresh token successfully");
+        return new ApiResponse<AuthResponse>(response, "Refresh token successfully");
+    }
+
+    @PostMapping("/register")
+    public ApiResponse<UserResponse> register(@Valid @RequestBody UserRegisterRequest req) {
+        UserResponse response = authService.register(req);
+        return new ApiResponse<UserResponse>(response, "Registered successfully");
     }
 }
