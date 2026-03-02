@@ -197,25 +197,34 @@ public class AuthService {
             throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
         }
 
+        Role defaultRole = roleRepository.findById(UserRole.USER_ROLE)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+        Role role = req.getRole() != null && !req.getRole().isBlank()
+                ? roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))
+                : defaultRole;
+
         User user = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(req.getPassword()))
                 .phone(req.getPhone())
-                .address(req.getAddress() != null ? req.getAddress() : null)
-                .roles(req.getRole() != null ? Set.of(roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))) : Set.of(userRole))
+                .roles(Set.of(role))
                 .status(UserStatus.ACTIVATED)
                 .build();
 
-        Cart cart = new Cart();
-        Customer customer = Customer.builder()
-                .user(user)
-                .points(BigDecimal.ZERO)
-                .cart(cart)
-                .build();
-        cart.setCustomer(customer);
-
-        Customer savedCustomer = customerRepository.save(customer);
-        User savedUser = savedCustomer.getUser();
+        User savedUser;
+        if (UserRole.USER_ROLE.equals(role.getRoleName())) {
+            Cart cart = new Cart();
+            Customer customer = Customer.builder()
+                    .user(user)
+                    .points(BigDecimal.ZERO)
+                    .cart(cart)
+                    .build();
+            cart.setCustomer(customer);
+            Customer savedCustomer = customerRepository.save(customer);
+            savedUser = savedCustomer.getUser();
+        } else {
+            savedUser = userRepository.save(user);
+        }
 
         return userMapper.toResponse(savedUser);
     }
