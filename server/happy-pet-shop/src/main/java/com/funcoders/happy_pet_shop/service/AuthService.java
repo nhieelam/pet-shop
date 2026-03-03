@@ -18,7 +18,6 @@ import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
-import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
@@ -39,6 +38,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
@@ -58,7 +58,6 @@ public class AuthService {
     CustomerRepository customerRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-    UserMapper userMapper;
 
     @Value("${jwt.key}")
     @NonFinal
@@ -80,7 +79,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(token)
                 .authenticated(true)
-                .user(userMapper.toResponse(user))
+                .user(toUserResponse(user))
                 .build();
     }
 
@@ -226,6 +225,21 @@ public class AuthService {
             savedUser = userRepository.save(user);
         }
 
-        return userMapper.toResponse(savedUser);
+        return toUserResponse(savedUser);
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .status(user.getStatus())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 }
