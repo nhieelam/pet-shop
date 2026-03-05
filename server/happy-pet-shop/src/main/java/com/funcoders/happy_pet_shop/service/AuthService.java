@@ -190,33 +190,33 @@ public class AuthService {
         return signedJWT;
     }
 
-    @Transactional
-    public UserResponse register(UserRegisterRequest req) {
-        String username = req.getUsername().trim();
-        if (userRepository.existsByUsername(username)) {
-            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
-        }
-
-        User user = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(req.getPassword()))
-                .phone(req.getPhone())
-                .address(req.getAddress() != null ? req.getAddress() : null)
-                .roles(req.getRole() != null ? Set.of(roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))) : Set.of(userRole))
-                .status(UserStatus.ACTIVATED)
-                .build();
-
-        Cart cart = new Cart();
-        Customer customer = Customer.builder()
-                .user(user)
-                .points(BigDecimal.ZERO)
-                .cart(cart)
-                .build();
-        cart.setCustomer(customer);
-
-        Customer savedCustomer = customerRepository.save(customer);
-        User savedUser = savedCustomer.getUser();
-
-        return userMapper.toResponse(savedUser);
-    }
+//    @Transactional
+//    public UserResponse register(UserRegisterRequest req) {
+//        String username = req.getUsername().trim();
+//        if (userRepository.existsByUsername(username)) {
+//            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
+//        }
+//
+//        User user = User.builder()
+//                .username(username)
+//                .password(passwordEncoder.encode(req.getPassword()))
+//                .phone(req.getPhone())
+//                .address(req.getAddress() != null ? req.getAddress() : null)
+//                .roles(req.getRole() != null ? Set.of(roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))) : Set.of(userRole))
+//                .status(UserStatus.ACTIVATED)
+//                .build();
+//
+//        Cart cart = new Cart();
+//        Customer customer = Customer.builder()
+//                .user(user)
+//                .points(BigDecimal.ZERO)
+//                .cart(cart)
+//                .build();
+//        cart.setCustomer(customer);
+//
+//        Customer savedCustomer = customerRepository.save(customer);
+//        User savedUser = savedCustomer.getUser();
+//
+//        return userMapper.toResponse(savedUser);
+//    }
 }

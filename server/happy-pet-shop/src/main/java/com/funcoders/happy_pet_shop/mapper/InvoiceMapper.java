@@ -26,11 +26,7 @@ public interface InvoiceMapper {
                     "invoice.getStaff().getUser().getLastName() + \" \" + invoice.getStaff().getUser().getFirstName() : null)"
     )
 
-    // ===== Promotion (object) =====
-    @Mapping(target = "promotion", source = "promotion")
-
     // ===== Invoice Details =====
     @Mapping(target = "invoiceDetails", source = "invoiceDetails")
-
     InvoiceResponse toResponse(Invoice invoice);
 }

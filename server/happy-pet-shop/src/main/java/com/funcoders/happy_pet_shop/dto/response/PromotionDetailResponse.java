@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -13,14 +12,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InvoiceDetailResponse {
+public class PromotionDetailResponse {
+
     UUID id;
 
     UUID productId;
-    UUID petId;
 
-    BigDecimal unitPrice;
-    Integer quantity;
-    BigDecimal totalPrice;
-    BigDecimal discountAmount;
+    String productName;
 }
