@@ -1,6 +1,6 @@
 package com.funcoders.happy_pet_shop.service;
 
-import com.funcoders.happy_pet_shop.constant.PromotionStatus;
+import com.funcoders.happy_pet_shop.constant.DiscountType;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +32,7 @@ public class InvoiceService {
     StaffRepository staffRepository;
 
     PromotionRepository promotionRepository;
+    PromotionDetailRepository promotionDetailRepository;
 
     PetRepository petRepository;
 
@@ -61,8 +61,45 @@ public class InvoiceService {
                 .build();
 
         BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal realAmount = BigDecimal.ZERO;
 
-        // ===== 4. Process invoice details =====
+        // ===== 4. Load products =====
+        Set<UUID> productIds = request.getInvoiceDetails()
+                .stream()
+                .map(InvoiceDetailCreationRequest::getProductId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        Map<UUID, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        // ===== 5. Load promotions =====
+        Map<UUID, PromotionDetail> bestPromotionByProduct = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            List<PromotionDetail> promotionDetails =
+                    promotionDetailRepository.findActivePromotionDetails(productIds, LocalDate.now());
+
+            bestPromotionByProduct = promotionDetails.stream()
+                    .collect(Collectors.toMap(
+                            pd -> pd.getProduct().getId(),
+                            pd -> pd,
+                            (pd1, pd2) -> {
+                                BigDecimal d1 = calculateDiscountAmount(
+                                        pd1,
+                                        pd1.getProduct().getPrice()
+                                );
+                                BigDecimal d2 = calculateDiscountAmount(
+                                        pd2,
+                                        pd2.getProduct().getPrice()
+                                );
+                                return d1.compareTo(d2) >= 0 ? pd1 : pd2;
+                            }
+                    ));
+        }
+
+        // ===== 6. Process invoice details =====
         for (InvoiceDetailCreationRequest detailRequest : request.getInvoiceDetails()) {
 
             if (detailRequest.getProductId() == null && detailRequest.getPetId() == null) {
@@ -79,8 +116,11 @@ public class InvoiceService {
             // ===== PRODUCT =====
             if (detailRequest.getProductId() != null) {
 
-                Product product = productRepository.findById(detailRequest.getProductId())
-                        .orElseThrow(() -> new AppException(ErrorType.PRODUCT_NOT_FOUND));
+                Product product = productMap.get(detailRequest.getProductId());
+
+                if (product == null) {
+                    throw new AppException(ErrorType.PRODUCT_NOT_FOUND);
+                }
 
                 if (!product.isAvailable()) {
                     throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
@@ -90,7 +130,6 @@ public class InvoiceService {
                     throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
                 }
 
-                // Trừ stock
                 product.setQuantity(product.getQuantity() - detailRequest.getQuantity());
 
                 detail.setProduct(product);
@@ -101,6 +140,25 @@ public class InvoiceService {
                         .multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
 
                 totalAmount = totalAmount.add(lineTotal);
+
+                // ===== APPLY PROMOTION =====
+                PromotionDetail promotionDetail =
+                        bestPromotionByProduct.get(product.getId());
+
+                BigDecimal discount = BigDecimal.ZERO;
+
+                if (promotionDetail != null) {
+
+                    discount = calculateDiscountAmount(
+                            promotionDetail,
+                            product.getPrice()
+                    ).multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
+
+                    detail.setPromotionDetail(promotionDetail);
+                    detail.setDiscountAmount(discount);
+                }
+
+                realAmount = realAmount.add(lineTotal.subtract(discount));
             }
 
             // ===== PET =====
@@ -113,14 +171,13 @@ public class InvoiceService {
                     throw new AppException(ErrorType.PET_ALREADY_SOLD);
                 }
 
-                // Pet luôn quantity = 1
                 detail.setPet(pet);
                 detail.setQuantity(1);
                 detail.setUnitPrice(pet.getPrice());
 
                 totalAmount = totalAmount.add(pet.getPrice());
+                realAmount = realAmount.add(pet.getPrice());
 
-                // Đánh dấu đã bán
                 pet.markAsSold();
             }
 
@@ -128,132 +185,16 @@ public class InvoiceService {
         }
 
         invoice.setTotalAmount(totalAmount);
-        invoice.setRealAmount(totalAmount);
+        invoice.setRealAmount(realAmount);
+        System.out.println("hi");
 
-        // ===== 5. Apply promotion =====
-        if (request.getPromotionId() != null) {
+        Invoice saved = invoiceRepository.save(invoice);
+        System.out.println("hi");
 
-            Promotion promotion = promotionRepository.findById(request.getPromotionId())
-                    .orElseThrow(() -> new AppException(ErrorType.PROMOTION_NOT_FOUND));
-
-            LocalDate now = LocalDate.now();
-
-            if (!promotion.getStatus().equals(PromotionStatus.ACTIVE)) {
-                throw new AppException(ErrorType.PROMOTION_INACTIVE);
-            }
-
-            if (now.isBefore(promotion.getStartDate())) {
-                throw new AppException(ErrorType.PROMOTION_NOT_STARTED);
-            }
-
-            if (now.isAfter(promotion.getEndDate())) {
-                promotion.setStatus(PromotionStatus.EXPIRED);
-                throw new AppException(ErrorType.PROMOTION_EXPIRED);
-            }
-
-            BigDecimal discountAmount = BigDecimal.ZERO;
-
-            switch (promotion.getDiscountType()) {
-                case PERCENT -> discountAmount = totalAmount
-                        .multiply(promotion.getDiscountValue())
-                        .divide(BigDecimal.valueOf(100));
-
-                case FIXED -> discountAmount = promotion.getDiscountValue();
-            }
-
-            BigDecimal realAmount = totalAmount.subtract(discountAmount);
-
-            if (realAmount.compareTo(BigDecimal.ZERO) < 0) {
-                realAmount = BigDecimal.ZERO;
-            }
-
-            invoice.setRealAmount(realAmount);
-            invoice.setPromotion(promotion);
-        }
-
-        return invoiceMapper.toResponse(invoiceRepository.save(invoice));
+        InvoiceResponse response = invoiceMapper.toResponse(saved);
+        System.out.println("hi");
+        return response;
     }
-
-//    @Transactional
-//    public InvoiceResponse createInvoice(InvoiceCreationRequest request) {
-//        // find customer
-//        Customer customer = customerRepository.findById(request.getCustomerId())
-//                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-//
-//        // find staff
-//        Staff staff = staffRepository.findById(request.getStaffId())
-//                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-//
-//        Set<InvoiceDetail> invoiceDetailEntities = new HashSet<>();
-//
-//        // create invoice with customer and staff
-//        Invoice invoiceEntity = Invoice.builder()
-//                .paymentMethod(request.getPaymentMethod())
-//                .customer(customer)
-//                .staff(staff)
-//                .invoiceDetails(invoiceDetailEntities)
-//                .shippingAddress(request.getShippingAddress())
-//                .build();
-//
-//        // find and check inventories
-//        List<InvoiceDetailCreationRequest> invoiceDetailRequests = request.getInvoiceDetails();
-//
-//        // create a Map of inventories with information
-//        Map<UUID, InvoiceDetailCreationRequest> invoiceDetailRequestMap = new HashMap<>();
-//        invoiceDetailRequests.forEach(invoiceDetailRequest -> {
-//            invoiceDetailRequestMap.put(invoiceDetailRequest.getInventoryId(), invoiceDetailRequest);
-//        });
-//
-//
-//        invoiceEntity.recalculateTotalAmount();
-//
-//        // apply promotion if exists
-//        if (request.getPromotionId() != null) {
-//
-//            Promotion promotion = promotionRepository.findById(request.getPromotionId())
-//                    .orElseThrow(() -> new AppException(ErrorType.PROMOTION_NOT_FOUND));
-//
-//            // check promotion active
-//            LocalDate now = LocalDate.now();
-//
-//            if (!promotion.getStatus().equals(PromotionStatus.ACTIVE)) {
-//                throw new AppException(ErrorType.PROMOTION_INACTIVE);
-//            }
-//
-//            if (now.isBefore(promotion.getStartDate())) {
-//                throw new AppException(ErrorType.PROMOTION_NOT_STARTED);
-//            }
-//
-//            if (now.isAfter(promotion.getEndDate())) {
-//                promotion.setStatus(PromotionStatus.EXPIRED);
-//                throw new AppException(ErrorType.PROMOTION_EXPIRED);
-//            }
-//
-//            BigDecimal discountAmount = BigDecimal.ZERO;
-//
-//            switch (promotion.getDiscountType()) {
-//                case PERCENT -> {
-//                    discountAmount = invoiceEntity.getTotalAmount()
-//                            .multiply(promotion.getDiscountValue())
-//                            .divide(BigDecimal.valueOf(100));
-//                }
-//                case FIXED -> {
-//                    discountAmount = promotion.getDiscountValue();
-//                }
-//            }
-//
-//            // prevent negative amount
-//            BigDecimal realAmount = invoiceEntity.getTotalAmount().subtract(discountAmount);
-//            if (realAmount.compareTo(BigDecimal.ZERO) < 0) {
-//                realAmount = BigDecimal.ZERO;
-//            }
-//
-//            invoiceEntity.setRealAmount(realAmount);
-//            invoiceEntity.setPromotion(promotion);
-//        }
-//
-//        return invoiceMapper.toResponse(invoiceRepository.save(invoiceEntity));
-//    }
 
     @Transactional(readOnly = true)
     public List<InvoiceResponse> getAllInvoices() {
@@ -274,5 +215,22 @@ public class InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND));
 
         invoiceRepository.delete(invoice);
+    }
+
+    private BigDecimal calculateDiscountAmount(PromotionDetail promotionDetail, BigDecimal productPrice) {
+        if (promotionDetail.getPromotion().getDiscountType() == DiscountType.PERCENT) {
+            BigDecimal percentDiscount = productPrice
+                    .multiply(promotionDetail.getPromotion().getDiscountValue())
+                    .divide(BigDecimal.valueOf(100));
+
+            if (promotionDetail.getPromotion().getMaxDiscountValue() != null) {
+                return percentDiscount.min(promotionDetail.getPromotion().getMaxDiscountValue());
+            }
+
+            return percentDiscount;
+        }
+
+        // FIXED
+        return promotionDetail.getPromotion().getDiscountValue();
     }
 }

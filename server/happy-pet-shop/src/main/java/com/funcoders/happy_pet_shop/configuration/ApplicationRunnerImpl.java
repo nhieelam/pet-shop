@@ -1,8 +1,10 @@
 package com.funcoders.happy_pet_shop.configuration;
 
 import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.entity.Category;
 import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
+import com.funcoders.happy_pet_shop.repository.CategoryRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
@@ -27,6 +29,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
 
     UserRepository userRepository;
     RoleRepository roleRepository;
+    CategoryRepository categoryRepository;
     PasswordEncoder passwordEncoder;
 
     @Override
@@ -69,6 +72,29 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
             userRepository.save(admin);
             log.info("Admin user created: username=admin, password=Asdf1234!");
         }
+
+        // Seed pet shop categories if not present
+        seedCategoriesIfEmpty();
+
         log.info("Application init successfully");
+        log.info("localhost:8080/happy-pet-shop/swagger-ui/index.html");
+    }
+
+    private void seedCategoriesIfEmpty() {
+        if (categoryRepository.count() > 0) {
+            return;
+        }
+        var categories = java.util.List.of(
+                Category.builder().name("Food & Treats").description("Dry food, wet food, treats and supplements for pets").build(),
+                Category.builder().name("Toys").description("Toys and play items for dogs, cats and small animals").build(),
+                Category.builder().name("Accessories").description("Collars, leashes, harnesses, bowls and travel gear").build(),
+                Category.builder().name("Grooming").description("Shampoos, brushes, nail clippers and grooming kits").build(),
+                Category.builder().name("Health & Wellness").description("Vitamins, flea & tick control, and health care products").build(),
+                Category.builder().name("Beds & Furniture").description("Pet beds, crates, carriers and furniture").build(),
+                Category.builder().name("Litter & Hygiene").description("Litter, litter boxes, waste bags and cleaning supplies").build(),
+                Category.builder().name("Aquarium & Fish").description("Fish food, tanks, filters and aquarium supplies").build()
+        );
+        categoryRepository.saveAll(categories);
+        log.info("Seeded {} pet shop categories", categories.size());
     }
 }

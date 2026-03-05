@@ -46,6 +46,16 @@ public class Promotion {
             orphanRemoval = true)
     Set<PromotionDetail> promotionDetails;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    DiscountType discountType;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    BigDecimal discountValue;
+
+    @Column(precision = 15, scale = 2)
+    BigDecimal maxDiscountValue;
+
     @Column(nullable = false)
     LocalDate startDate;
 

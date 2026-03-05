@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -53,6 +54,9 @@ public class Product {
 
     @Column(name = "image_url")
     String imageUrl;
+
+    @Column(name = "expiry_date")
+    LocalDate expiryDate;
 
     @Column(name = "available", nullable = false)
     boolean available;

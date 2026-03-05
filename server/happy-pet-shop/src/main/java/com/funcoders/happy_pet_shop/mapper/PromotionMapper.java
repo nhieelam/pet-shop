@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = PromotionDetailMapper.class)
 public interface PromotionMapper {
 
     @Mapping(target = "promotionDetails", ignore = true)
@@ -16,5 +16,6 @@ public interface PromotionMapper {
 
     void updatePromotion(@MappingTarget Promotion promotion, PromotionUpdateRequest request);
 
+    @Mapping(target = "promotionDetails", source = "promotionDetails")
     PromotionResponse toResponse(Promotion promotion);
 }

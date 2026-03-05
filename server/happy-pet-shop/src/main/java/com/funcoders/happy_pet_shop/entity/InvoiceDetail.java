@@ -1,6 +1,5 @@
 package com.funcoders.happy_pet_shop.entity;
 
-import com.funcoders.happy_pet_shop.constant.ItemType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,9 +14,9 @@ import java.util.UUID;
         constraints =
                 """
                             (
-                                (item_type = 'PRODUCT' AND product_id IS NOT NULL AND pet_id IS NULL)
+                                (product_id IS NOT NULL AND pet_id IS NULL)
                                 OR
-                                (item_type = 'PET' AND pet_id IS NOT NULL AND product_id IS NULL)
+                                (pet_id IS NOT NULL AND product_id IS NULL)
                             )
                         """
 )
@@ -31,32 +30,35 @@ public class InvoiceDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable = false, updatable = false)
-    private Invoice invoice;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ItemType itemType;
+    Invoice invoice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
-    private Product product;
+    Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", unique = true)
-    private Pet pet;
+    Pet pet;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promotion_detail_id")
+    PromotionDetail promotionDetail;
+
+    @Column(precision = 19, scale = 2)
+    BigDecimal discountAmount;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal unitPrice;
+    BigDecimal unitPrice;
 
     @Column(nullable = false)
-    private int quantity;
+    int quantity;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal totalPrice;
+    BigDecimal totalPrice;
 
     @PrePersist
     @PreUpdate
