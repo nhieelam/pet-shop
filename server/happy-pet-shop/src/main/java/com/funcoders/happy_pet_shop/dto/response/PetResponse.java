@@ -1,9 +1,11 @@
 package com.funcoders.happy_pet_shop.dto.response;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,7 +25,7 @@ public class PetResponse {
 
     String breed;
 
-    Integer ageInMonths;
+    LocalDate birth;
 
     String gender;
 

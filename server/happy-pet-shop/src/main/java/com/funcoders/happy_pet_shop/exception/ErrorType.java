@@ -51,6 +51,7 @@ public enum ErrorType {
     INVALID_PET_BREED("Giống thú cưng không hợp lệ", 3507, HttpStatus.BAD_REQUEST),
     INVALID_PET_GENDER("Giới tính thú cưng không hợp lệ", 3508, HttpStatus.BAD_REQUEST),
     INVALID_PET_VACCINATED_STATUS("Trạng thái tiêm chủng không hợp lệ", 3509, HttpStatus.BAD_REQUEST),
+    INVALID_PET_BIRTH("Trạng thái tiêm chủng không hợp lệ", 3510, HttpStatus.BAD_REQUEST),
 
     // ===== INVENTORY =====
     INVENTORY_NOT_FOUND("Kho hàng không tồn tại", 4001, HttpStatus.NOT_FOUND),

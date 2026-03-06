@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -25,9 +26,8 @@ public class PetCreationRequest {
     @Size(max = 100, message = "INVALID_PET_BREED_LENGTH")
     String breed;
 
-    @NotNull(message = "INVALID_PET_AGE")
-    @Min(value = 0, message = "INVALID_PET_AGE")
-    Integer ageInMonths;
+    @NotNull(message = "INVALID_PET_BIRTH")
+    LocalDate birth;
 
     @NotBlank(message = "INVALID_PET_GENDER")
     @Size(max = 10, message = "INVALID_PET_GENDER_LENGTH")

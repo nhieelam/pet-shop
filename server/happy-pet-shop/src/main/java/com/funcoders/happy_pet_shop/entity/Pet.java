@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class Pet {
     String breed;
 
     @Column(nullable = false)
-    Integer ageInMonths;
+    LocalDate birth;
 
     @Column(nullable = false, length = 10)
     String gender;
