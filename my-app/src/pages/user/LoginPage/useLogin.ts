@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useAuth } from "../../../context/authContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import {useAuth} from "../../../context/authContext.tsx";
+import {useState} from "react";
 
 interface LoginErrors {
   userName?: string;
@@ -22,7 +22,7 @@ interface UseLoginReturn {
 export function useLogin(): UseLoginReturn {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const {login} = useAuth();
 
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
