@@ -22,8 +22,6 @@ public class UserRegisterRequest {
     @Pattern(regexp = "^(0|\\+84)[0-9]{9}$", message = "PHONE_FORMAT_INVALID")
     private String phone;
 
-    @Size(max = 255, message = "ADDRESS_TOO_LONG")
-    private String address;
-
+    @NotBlank(message = "ROLE_REQUIRED")
     private String role;
 }

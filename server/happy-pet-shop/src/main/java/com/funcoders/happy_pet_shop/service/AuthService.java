@@ -18,7 +18,6 @@ import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
-import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
@@ -39,6 +38,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
@@ -58,7 +58,6 @@ public class AuthService {
     CustomerRepository customerRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-    UserMapper userMapper;
 
     @Value("${jwt.key}")
     @NonFinal
@@ -77,11 +76,11 @@ public class AuthService {
 
         String token = generateToken(user);
 
-        AuthResponse respond = AuthResponse.builder()
+        return AuthResponse.builder()
                 .token(token)
                 .authenticated(true)
+                .user(toUserResponse(user))
                 .build();
-        return respond;
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
