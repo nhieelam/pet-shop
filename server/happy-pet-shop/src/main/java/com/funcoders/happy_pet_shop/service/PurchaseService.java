@@ -13,7 +13,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,39 +58,52 @@ public class PurchaseService {
                 .purchaseDetails(purchaseDetails)
                 .build();
 
-        // find products
-        List<Product> products = productRepository.findAllById(purchaseDetailRequests.stream().map(
-                PurchaseDetailCreationRequest::getProductId
-        ).toList());
-        //check products
-        if (products.size() != purchaseDetailRequests.size())
-            throw new AppException(ErrorType.BAD_REQUEST);
-
-        // create a Map to search purchase detail
-        Map<UUID, PurchaseDetailCreationRequest> purchaseDetailRequestMap = new HashMap<>();
-        purchaseDetailRequests.forEach(
-                purchaseDetailCreationRequest -> {
-                    purchaseDetailRequestMap.put(purchaseDetailCreationRequest.getProductId(), purchaseDetailCreationRequest);
+        // Aggregate by productId (same product may appear multiple times): sum quantity, use first unitPrice
+        Map<UUID, PurchaseDetailCreationRequest> aggregatedByProduct = new HashMap<>();
+        for (PurchaseDetailCreationRequest detail : purchaseDetailRequests) {
+            UUID productId = detail.getProductId();
+            if (aggregatedByProduct.containsKey(productId)) {
+                PurchaseDetailCreationRequest existing = aggregatedByProduct.get(productId);
+                if (existing.getUnitPrice().compareTo(detail.getUnitPrice()) != 0) {
+                    throw new AppException(ErrorType.BAD_REQUEST);
                 }
-        );
+                aggregatedByProduct.put(productId, PurchaseDetailCreationRequest.builder()
+                        .productId(productId)
+                        .unitPrice(existing.getUnitPrice())
+                        .quantity(existing.getQuantity() + detail.getQuantity())
+                        .build());
+            } else {
+                aggregatedByProduct.put(productId, detail);
+            }
+        }
 
-        // loop through products to add purchase details into the purchase
-        products.forEach(product -> {
+        List<UUID> productIds = aggregatedByProduct.keySet().stream().toList();
+        List<Product> products = productRepository.findAllById(productIds);
 
-            // create purchaseDetail with inventory above
+        if (products.size() != productIds.size()) {
+            throw new AppException(ErrorType.PRODUCT_NOT_FOUND);
+        }
+
+        Map<UUID, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        for (PurchaseDetailCreationRequest detailRequest : aggregatedByProduct.values()) {
+            Product product = productMap.get(detailRequest.getProductId());
+            if (product == null) {
+                throw new AppException(ErrorType.PRODUCT_NOT_FOUND);
+            }
+
             PurchaseDetail purchaseDetailEntity = PurchaseDetail.builder()
                     .purchase(purchaseEntity)
-                    .unitPrice(purchaseDetailRequestMap.get(product.getId()).getUnitPrice())
-                    .quantity(purchaseDetailRequestMap.get(product.getId()).getQuantity())
+                    .product(product)
+                    .unitPrice(detailRequest.getUnitPrice())
+                    .quantity(detailRequest.getQuantity())
                     .build();
             purchaseDetailEntity.calculateTotalPrice();
 
-            // update quantity of product
             product.setQuantity(product.getQuantity() + purchaseDetailEntity.getQuantity());
-
-            // add purchaseDetail into the set of purchaseDetails
             purchaseDetails.add(purchaseDetailEntity);
-        });
+        }
 
         purchaseEntity.recalculateTotalAmount();
 
@@ -99,7 +111,7 @@ public class PurchaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<PurchaseResponse> getAllPurchase() {
+    public List<PurchaseResponse> getAllPurchases() {
         List<Purchase> purchases = purchaseRepository.findAll();
 
         return purchases

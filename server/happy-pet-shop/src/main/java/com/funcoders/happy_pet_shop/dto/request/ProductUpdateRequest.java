@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -45,6 +46,8 @@ public class ProductUpdateRequest {
 
     @Size(max = 100, message = "Xuất xứ không quá 100 ký tự")
     String origin;
+
+    LocalDate expiryDate;
 
     String imageUrl;
 }

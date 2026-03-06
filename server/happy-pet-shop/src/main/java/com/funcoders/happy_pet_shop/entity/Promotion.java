@@ -9,6 +9,9 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +40,11 @@ public class Promotion {
 
     @Column(length = 255)
     String description;
+
+    @OneToMany(mappedBy = "promotion",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    Set<PromotionDetail> promotionDetails;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

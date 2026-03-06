@@ -1,7 +1,6 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "@/api/auth.api";
-import { STORAGE_KEYS } from "@/config/apiConfig";
+import { useNavigate, useLocation } from "react-router-dom";
+import {useAuth} from "../../../context/authContext.tsx";
+import {useState} from "react";
 
 export interface LoginErrors {
   general?: string;
@@ -11,8 +10,11 @@ export interface LoginErrors {
 
 export function useLogin() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+  const location = useLocation();
+  const {login} = useAuth();
+
+  const [userName, setUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 

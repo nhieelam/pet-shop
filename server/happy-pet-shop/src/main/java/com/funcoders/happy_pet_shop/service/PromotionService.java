@@ -2,19 +2,25 @@ package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.constant.PromotionStatus;
 import com.funcoders.happy_pet_shop.dto.request.PromotionCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.PromotionDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.PromotionResponse;
 import com.funcoders.happy_pet_shop.entity.Promotion;
+import com.funcoders.happy_pet_shop.entity.PromotionDetail;
+import com.funcoders.happy_pet_shop.entity.Product;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.PromotionMapper;
 import com.funcoders.happy_pet_shop.repository.PromotionRepository;
+import com.funcoders.happy_pet_shop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -24,6 +30,7 @@ public class PromotionService {
 
     PromotionRepository promotionRepository;
     PromotionMapper promotionMapper;
+    ProductRepository productRepository;
 
     @Transactional
     public PromotionResponse createPromotion(PromotionCreationRequest request) {
@@ -41,6 +48,20 @@ public class PromotionService {
         if (promotionEntity.getStatus() == null) {
             promotionEntity.setStatus(PromotionStatus.ACTIVE);
         }
+
+        Set<PromotionDetail> details = new HashSet<>();
+        if (request.getPromotionDetails() != null && !request.getPromotionDetails().isEmpty()) {
+            for (PromotionDetailCreationRequest detailRequest : request.getPromotionDetails()) {
+                Product product = productRepository.findById(detailRequest.getProductId())
+                        .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+                PromotionDetail detail = PromotionDetail.builder()
+                        .promotion(promotionEntity)
+                        .product(product)
+                        .build();
+                details.add(detail);
+            }
+        }
+        promotionEntity.setPromotionDetails(details);
 
         Promotion savedPromotion = promotionRepository.save(promotionEntity);
 

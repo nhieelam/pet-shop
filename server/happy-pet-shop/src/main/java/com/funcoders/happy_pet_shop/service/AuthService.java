@@ -189,57 +189,33 @@ public class AuthService {
         return signedJWT;
     }
 
-    @Transactional
-    public UserResponse register(UserRegisterRequest req) {
-        String username = req.getUsername().trim();
-        if (userRepository.existsByUsername(username)) {
-            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
-        }
-
-        Role defaultRole = roleRepository.findById(UserRole.USER_ROLE)
-                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
-        Role role = req.getRole() != null && !req.getRole().isBlank()
-                ? roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))
-                : defaultRole;
-
-        User user = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(req.getPassword()))
-                .phone(req.getPhone())
-                .roles(Set.of(role))
-                .status(UserStatus.ACTIVATED)
-                .build();
-
-        User savedUser;
-        if (UserRole.USER_ROLE.equals(role.getRoleName())) {
-            Cart cart = new Cart();
-            Customer customer = Customer.builder()
-                    .user(user)
-                    .points(BigDecimal.ZERO)
-                    .cart(cart)
-                    .build();
-            cart.setCustomer(customer);
-            Customer savedCustomer = customerRepository.save(customer);
-            savedUser = savedCustomer.getUser();
-        } else {
-            savedUser = userRepository.save(user);
-        }
-
-        return toUserResponse(savedUser);
-    }
-
-    private UserResponse toUserResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .address(user.getAddress())
-                .status(user.getStatus())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
+//    @Transactional
+//    public UserResponse register(UserRegisterRequest req) {
+//        String username = req.getUsername().trim();
+//        if (userRepository.existsByUsername(username)) {
+//            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
+//        }
+//
+//        User user = User.builder()
+//                .username(username)
+//                .password(passwordEncoder.encode(req.getPassword()))
+//                .phone(req.getPhone())
+//                .address(req.getAddress() != null ? req.getAddress() : null)
+//                .roles(req.getRole() != null ? Set.of(roleRepository.findById(req.getRole()).orElseThrow(() -> new AppException(ErrorType.NOT_FOUND))) : Set.of(userRole))
+//                .status(UserStatus.ACTIVATED)
+//                .build();
+//
+//        Cart cart = new Cart();
+//        Customer customer = Customer.builder()
+//                .user(user)
+//                .points(BigDecimal.ZERO)
+//                .cart(cart)
+//                .build();
+//        cart.setCustomer(customer);
+//
+//        Customer savedCustomer = customerRepository.save(customer);
+//        User savedUser = savedCustomer.getUser();
+//
+//        return userMapper.toResponse(savedUser);
+//    }
 }

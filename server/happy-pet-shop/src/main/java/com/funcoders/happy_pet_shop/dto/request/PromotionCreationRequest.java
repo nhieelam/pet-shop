@@ -1,6 +1,7 @@
 package com.funcoders.happy_pet_shop.dto.request;
 
 import com.funcoders.happy_pet_shop.constant.DiscountType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -40,4 +42,7 @@ public class PromotionCreationRequest {
 
     @NotNull
     LocalDate endDate;
+
+    @Valid
+    List<PromotionDetailCreationRequest> promotionDetails;
 }

@@ -16,7 +16,11 @@ import java.util.UUID;
 public class InvoiceDetailResponse {
     UUID id;
 
+    UUID productId;
+    UUID petId;
+
     BigDecimal unitPrice;
-    int quantity;
+    Integer quantity;
     BigDecimal totalPrice;
+    BigDecimal discountAmount;
 }

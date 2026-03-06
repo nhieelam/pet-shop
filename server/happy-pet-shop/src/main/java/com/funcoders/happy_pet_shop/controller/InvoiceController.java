@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +23,12 @@ public class InvoiceController {
     InvoiceService invoiceService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<InvoiceResponse> createInvoice(
             @Valid @RequestBody InvoiceCreationRequest request
     ) {
         InvoiceResponse response = invoiceService.createInvoice(request);
-        return new ApiResponse<>(response, "create invoice successfully");
+        return new ApiResponse<>(response, "Create invoice successfully");
     }
 
     @GetMapping("/{id}")
@@ -34,13 +36,13 @@ public class InvoiceController {
             @PathVariable UUID id
     ) {
         InvoiceResponse response = invoiceService.getInvoiceById(id);
-        return new ApiResponse<>(response, "get invoice successfully");
+        return new ApiResponse<>(response, "Get invoice successfully");
     }
 
     @GetMapping
     public ApiResponse<List<InvoiceResponse>> getAllInvoices() {
         List<InvoiceResponse> responses = invoiceService.getAllInvoices();
-        return new ApiResponse<>(responses, "get all invoices successfully");
+        return new ApiResponse<>(responses, "Get all invoices successfully");
     }
 
     @DeleteMapping("/{id}")
@@ -48,6 +50,6 @@ public class InvoiceController {
             @PathVariable UUID id
     ) {
         invoiceService.deleteInvoiceById(id);
-        return new ApiResponse<>(null, "delete invoice successfully");
+        return new ApiResponse<>(null, "Delete invoice successfully");
     }
 }

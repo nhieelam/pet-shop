@@ -37,10 +37,9 @@ public class PurchaseDetail {
     @JoinColumn(name = "purchase_id", nullable = false)
     Purchase purchase;
 
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_id",nullable = false)
-    Product  product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    Product product;
 
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal unitPrice;
