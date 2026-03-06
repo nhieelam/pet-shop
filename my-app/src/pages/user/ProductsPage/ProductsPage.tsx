@@ -12,7 +12,7 @@ import {useEffect, useState} from "react";
 import type {ProductResponse} from "../../../types/productTypes.ts";
 import Loader from "../../../components/ui/loader.tsx";
 import axios from "axios";
-import {getAllProducts} from "../../../services/productService.ts";
+import {getAllProducts} from "../../../api/products.api.ts";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([]);
@@ -23,13 +23,9 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
-        setProducts(data);
+        setProducts(data.data);
       } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Lỗi từ server");
-        } else {
-          setError("Lỗi không xác định");
-        }
+
       } finally {
         setLoading(false);
       }

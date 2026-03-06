@@ -6,6 +6,7 @@ export const API_CONFIG = {
             LOGOUT: "/auth/logout",
             REFRESH: "/auth/refresh",
             INTROSPECT: "/auth/introspect",
+            REGISTER: "/auth/register",
         },
 
         USER: {
@@ -16,6 +17,7 @@ export const API_CONFIG = {
             UPDATE: (id: string) => `/users/${id}`,
             UPDATE_PASSWORD: (id: string) => `/users/${id}`,
             DELETE: (id: string) => `/users/${id}`,
+            
         },
 
         PRODUCT: {
