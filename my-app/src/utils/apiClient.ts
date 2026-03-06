@@ -38,8 +38,24 @@ class ApiClient {
     return { ...data, status: response.status };
   }
 
-  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: "GET", headers });
+  private buildUrl(endpoint: string, params?: Record<string, string | number>): string {
+    if (!params || Object.keys(params).length === 0) return endpoint;
+    const search = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).map(([k, v]) => [k, String(v)])
+      )
+    );
+    return `${endpoint}?${search.toString()}`;
+  }
+
+  async get<T>(
+    endpoint: string,
+    options?: { headers?: Record<string, string>; params?: Record<string, string | number> }
+  ): Promise<ApiResponse<T>> {
+    const headers = options?.headers;
+    const params = options?.params;
+    const url = params ? this.buildUrl(endpoint, params) : endpoint;
+    return this.request<T>(url, { method: "GET", headers });
   }
 
   async post<T>(

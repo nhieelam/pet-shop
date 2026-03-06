@@ -22,3 +22,16 @@ export interface UserResponse {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface UserUpdateRequest {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+}
+
+export interface ChangePasswordRequest {
+    oldPassword: string;
+    newPassword: string;
+}

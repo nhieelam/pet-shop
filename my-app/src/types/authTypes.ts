@@ -21,3 +21,11 @@ export interface IntrospectRequest {
 export interface IntrospectResponse {
     valid: boolean;
 }
+
+export interface LogoutRequest {
+    token: string;
+}
+
+export interface RefreshRequest {
+    token: string;
+}

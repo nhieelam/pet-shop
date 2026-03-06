@@ -19,7 +19,7 @@ import {getInfo} from "../services/customerService.ts"
 ========================= */
 interface AuthContextType {
   user: CustomerResponse | null;
-  setUser: (user: CustomerResponse) => void;
+  setUser: (user: CustomerResponse | null) => void;
   loading: boolean;
   error: string | null;
   login: (credentials: AuthRequest) => Promise<void>;
@@ -29,6 +29,17 @@ interface AuthContextType {
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// HOOK
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+
+  return context;
+};
 
 // Create provider for context
 export const AuthProvider = ({children}: { children: ReactNode }) => {
@@ -124,7 +135,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             error,
             login,
             logout,
-            isAuthenticated
+            isAuthenticated,
           }}
       >
         {children}
@@ -132,15 +143,3 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   );
 };
 
-/* =========================
-   HOOK
-========================= */
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
-  return context;
-};
