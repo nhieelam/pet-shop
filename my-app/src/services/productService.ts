@@ -4,50 +4,54 @@ import type {
     ProductCreationRequest,
     ProductUpdateRequest,
 } from "../types/productTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createProduct = async (
     credentials: ProductCreationRequest
 ): Promise<ProductResponse> => {
-    const res = await apiClient.post<ProductResponse>(
+    const res = await apiClient.post<ApiResponse<ProductResponse>>(
         API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
         credentials
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create product failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create product failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllProducts = async (): Promise<ProductResponse[]> => {
-    const res = await apiClient.get<ProductResponse[]>(
+    const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
         API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getProductById = async (productId: string): Promise<ProductResponse> => {
-    const res = await apiClient.get<ProductResponse>(
+    const res = await apiClient.get<ApiResponse<ProductResponse>>(
         API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get product failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get product failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const updateProduct = async (
     productId: string,
     body: ProductUpdateRequest
 ): Promise<ProductResponse> => {
-    const res = await apiClient.put<ProductResponse>(
+    const res = await apiClient.put<ApiResponse<ProductResponse>>(
         API_CONFIG.ENDPOINTS.PRODUCT.UPDATE(productId),
         body
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Update product failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update product failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const deleteProduct = async (productId: string): Promise<void> => {
@@ -58,9 +62,9 @@ export const getAllProductsPaginated = async (
     page: number,
     size: number
 ): Promise<ProductResponse[]> => {
-    const res = await apiClient.get<ProductResponse[]>(
+    const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
         API_CONFIG.ENDPOINTS.PRODUCT.PAGINATE,
         { params: { page, size } }
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };

@@ -5,86 +5,81 @@ import type {
     UserUpdateRequest,
     ChangePasswordRequest,
 } from "../types/userTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
-import { getAuthToken } from "../utils/storageUtils";
-
-const authHeaders = () => ({
-    Authorization: `Bearer ${getAuthToken()}`,
-});
 
 export const createUser = async (
     request: UserCreationRequest
 ): Promise<UserResponse> => {
-    const res = await apiClient.post<UserResponse>(
+    const res = await apiClient.post<ApiResponse<UserResponse>>(
         API_CONFIG.ENDPOINTS.USER.CREATE,
-        request,
-        authHeaders()
+        request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create user failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create user failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllUsers = async (): Promise<UserResponse[]> => {
-    const res = await apiClient.get<UserResponse[]>(
-        API_CONFIG.ENDPOINTS.USER.GET_ALL,
-        { headers: authHeaders() }
+    const res = await apiClient.get<ApiResponse<UserResponse[]>>(
+        API_CONFIG.ENDPOINTS.USER.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getUserById = async (id: string): Promise<UserResponse> => {
-    const res = await apiClient.get<UserResponse>(
-        API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id),
-        { headers: authHeaders() }
+    const res = await apiClient.get<ApiResponse<UserResponse>>(
+        API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get user failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get user failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getInfo = async (): Promise<UserResponse> => {
-    const res = await apiClient.get<UserResponse>(
-        API_CONFIG.ENDPOINTS.USER.GET_INFO,
-        { headers: authHeaders() }
+    const res = await apiClient.get<ApiResponse<UserResponse>>(
+        API_CONFIG.ENDPOINTS.USER.GET_INFO
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get info failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get info failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const updateUser = async (
     id: string,
     request: UserUpdateRequest
 ): Promise<UserResponse> => {
-    const res = await apiClient.put<UserResponse>(
+    const res = await apiClient.put<ApiResponse<UserResponse>>(
         API_CONFIG.ENDPOINTS.USER.UPDATE(id),
-        request,
-        authHeaders()
+        request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Update user failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update user failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const updatePassword = async (
     id: string,
     request: ChangePasswordRequest
 ): Promise<void> => {
-    const res = await apiClient.post(
+    const res = await apiClient.post<ApiResponse<unknown>>(
         API_CONFIG.ENDPOINTS.USER.UPDATE_PASSWORD(id),
-        request,
-        authHeaders()
+        request
     );
-    if (!res.success) {
-        throw new Error(res.message ?? "Update password failed");
+    const apiRes = res.data;
+    if (!apiRes.success) {
+        throw new Error(apiRes.message ?? "Update password failed");
     }
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-    await apiClient.delete(API_CONFIG.ENDPOINTS.USER.DELETE(id), authHeaders());
+    await apiClient.delete(API_CONFIG.ENDPOINTS.USER.DELETE(id));
 };

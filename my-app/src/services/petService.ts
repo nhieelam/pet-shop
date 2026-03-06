@@ -4,71 +4,76 @@ import type {
     PetCreationRequest,
     PetUpdateRequest,
 } from "../types/petTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createPet = async (
     request: PetCreationRequest
 ): Promise<PetResponse> => {
-    const res = await apiClient.post<PetResponse>(
+    const res = await apiClient.post<ApiResponse<PetResponse>>(
         API_CONFIG.ENDPOINTS.PET.CREATE,
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create pet failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create pet failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllPets = async (): Promise<PetResponse[]> => {
-    const res = await apiClient.get<PetResponse[]>(
+    const res = await apiClient.get<ApiResponse<PetResponse[]>>(
         API_CONFIG.ENDPOINTS.PET.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getPetById = async (id: string): Promise<PetResponse> => {
-    const res = await apiClient.get<PetResponse>(
+    const res = await apiClient.get<ApiResponse<PetResponse>>(
         API_CONFIG.ENDPOINTS.PET.GET_BY_ID(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get pet failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get pet failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllPetsPaginated = async (
     page: number,
     size: number
 ): Promise<PetResponse[]> => {
-    const res = await apiClient.get<PetResponse[]>(
+    const res = await apiClient.get<ApiResponse<PetResponse[]>>(
         API_CONFIG.ENDPOINTS.PET.PAGINATE,
         { params: { page, size } }
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const updatePet = async (
     id: string,
     request: PetUpdateRequest
 ): Promise<PetResponse> => {
-    const res = await apiClient.put<PetResponse>(
+    const res = await apiClient.put<ApiResponse<PetResponse>>(
         API_CONFIG.ENDPOINTS.PET.UPDATE(id),
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Update pet failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update pet failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const markAsSold = async (id: string): Promise<PetResponse> => {
-    const res = await apiClient.patch<PetResponse>(
+    const res = await apiClient.patch<ApiResponse<PetResponse>>(
         API_CONFIG.ENDPOINTS.PET.MARK_SOLD(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Mark as sold failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Mark as sold failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const deletePet = async (id: string): Promise<void> => {

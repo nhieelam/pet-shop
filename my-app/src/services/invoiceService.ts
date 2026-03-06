@@ -3,36 +3,39 @@ import type {
     InvoiceResponse,
     InvoiceCreationRequest,
 } from "../types/invoiceTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createInvoice = async (
     request: InvoiceCreationRequest
 ): Promise<InvoiceResponse> => {
-    const res = await apiClient.post<InvoiceResponse>(
+    const res = await apiClient.post<ApiResponse<InvoiceResponse>>(
         API_CONFIG.ENDPOINTS.INVOICE.CREATE,
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create invoice failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create invoice failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllInvoices = async (): Promise<InvoiceResponse[]> => {
-    const res = await apiClient.get<InvoiceResponse[]>(
+    const res = await apiClient.get<ApiResponse<InvoiceResponse[]>>(
         API_CONFIG.ENDPOINTS.INVOICE.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
-    const res = await apiClient.get<InvoiceResponse>(
+    const res = await apiClient.get<ApiResponse<InvoiceResponse>>(
         API_CONFIG.ENDPOINTS.INVOICE.GET_BY_ID(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get invoice failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get invoice failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const deleteInvoice = async (id: string): Promise<void> => {

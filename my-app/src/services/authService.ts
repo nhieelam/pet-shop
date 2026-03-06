@@ -7,6 +7,7 @@ import type {
     LogoutRequest,
     RefreshRequest,
 } from "../types/authTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import {
     createLoginError,
     isNetworkError,
@@ -18,20 +19,21 @@ import { removeAuthToken } from "../utils/storageUtils";
 
 export const login = async (credentials: AuthRequest): Promise<AuthResponse> => {
     try {
-        const res = await apiClient.post<AuthResponse>(
+        const res = await apiClient.post<ApiResponse<AuthResponse>>(
             API_CONFIG.ENDPOINTS.AUTH.LOGIN,
             credentials
         );
+        const apiRes = res.data;
 
-        if (!res.success || !res.data) {
+        if (!apiRes.success || !apiRes.data) {
             throw createLoginError(
-                res.message || ERROR_MESSAGES.LOGIN_FAILED,
-                res.status,
-                res.errorCode
+                apiRes.message || ERROR_MESSAGES.LOGIN_FAILED,
+                apiRes.status ?? res.status,
+                apiRes.errorCode
             );
         }
 
-        return res.data;
+        return apiRes.data;
     } catch (error: unknown) {
         if (isNetworkError(error)) {
             throw createLoginError(ERROR_MESSAGES.NETWORK_ERROR);
@@ -46,25 +48,27 @@ export const login = async (credentials: AuthRequest): Promise<AuthResponse> => 
 };
 
 export const verifyToken = async (request: IntrospectRequest): Promise<IntrospectResponse> => {
-    const res = await apiClient.post<IntrospectResponse>(
+    const res = await apiClient.post<ApiResponse<IntrospectResponse>>(
         API_CONFIG.ENDPOINTS.AUTH.INTROSPECT,
         request
     );
-    if (!res.success || !res.data) {
-        throw new Error(res.message ?? "Introspect failed");
+    const apiRes = res.data;
+    if (!apiRes.success || !apiRes.data) {
+        throw new Error(apiRes.message ?? "Introspect failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const refresh = async (request: RefreshRequest): Promise<AuthResponse> => {
-    const res = await apiClient.post<AuthResponse>(
+    const res = await apiClient.post<ApiResponse<AuthResponse>>(
         API_CONFIG.ENDPOINTS.AUTH.REFRESH,
         request
     );
-    if (!res.success || !res.data) {
-        throw new Error(res.message || "Refresh failed");
+    const apiRes = res.data;
+    if (!apiRes.success || !apiRes.data) {
+        throw new Error(apiRes.message || "Refresh failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const logout = async (request?: LogoutRequest) => {

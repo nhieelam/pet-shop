@@ -4,52 +4,56 @@ import type {
     SupplierCreationRequest,
     SupplierUpdateRequest,
 } from "../types/supplierTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createSupplier = async (
     request: SupplierCreationRequest
 ): Promise<SupplierResponse> => {
-    const res = await apiClient.post<SupplierResponse>(
+    const res = await apiClient.post<ApiResponse<SupplierResponse>>(
         API_CONFIG.ENDPOINTS.SUPPLIER.CREATE,
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create supplier failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create supplier failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllSuppliers = async (): Promise<SupplierResponse[]> => {
-    const res = await apiClient.get<SupplierResponse[]>(
+    const res = await apiClient.get<ApiResponse<SupplierResponse[]>>(
         API_CONFIG.ENDPOINTS.SUPPLIER.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getSupplierById = async (
     id: string
 ): Promise<SupplierResponse> => {
-    const res = await apiClient.get<SupplierResponse>(
+    const res = await apiClient.get<ApiResponse<SupplierResponse>>(
         API_CONFIG.ENDPOINTS.SUPPLIER.GET_BY_ID(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get supplier failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get supplier failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const updateSupplier = async (
     id: string,
     request: SupplierUpdateRequest
 ): Promise<SupplierResponse> => {
-    const res = await apiClient.put<SupplierResponse>(
+    const res = await apiClient.put<ApiResponse<SupplierResponse>>(
         API_CONFIG.ENDPOINTS.SUPPLIER.UPDATE(id),
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Update supplier failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update supplier failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const deleteSupplier = async (id: string): Promise<void> => {

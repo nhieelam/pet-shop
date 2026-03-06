@@ -58,7 +58,7 @@ public class PurchaseService {
                 .purchaseDetails(purchaseDetails)
                 .build();
 
-        // Aggregate by productId (same product may appear multiple times): sum quantity, use first unitPrice
+        //create a hash map of purchase details
         Map<UUID, PurchaseDetailCreationRequest> aggregatedByProduct = new HashMap<>();
         for (PurchaseDetailCreationRequest detail : purchaseDetailRequests) {
             UUID productId = detail.getProductId();

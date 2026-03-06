@@ -3,38 +3,41 @@ import type {
     PromotionResponse,
     PromotionCreationRequest,
 } from "../types/promotionTypes";
+import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createPromotion = async (
     request: PromotionCreationRequest
 ): Promise<PromotionResponse> => {
-    const res = await apiClient.post<PromotionResponse>(
+    const res = await apiClient.post<ApiResponse<PromotionResponse>>(
         API_CONFIG.ENDPOINTS.PROMOTION.CREATE,
         request
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Create promotion failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create promotion failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const getAllPromotions = async (): Promise<PromotionResponse[]> => {
-    const res = await apiClient.get<PromotionResponse[]>(
+    const res = await apiClient.get<ApiResponse<PromotionResponse[]>>(
         API_CONFIG.ENDPOINTS.PROMOTION.GET_ALL
     );
-    return res.data ?? [];
+    return res.data?.data ?? [];
 };
 
 export const getPromotionById = async (
     id: string
 ): Promise<PromotionResponse> => {
-    const res = await apiClient.get<PromotionResponse>(
+    const res = await apiClient.get<ApiResponse<PromotionResponse>>(
         API_CONFIG.ENDPOINTS.PROMOTION.GET_BY_ID(id)
     );
-    if (!res.success || res.data == null) {
-        throw new Error(res.message ?? "Get promotion failed");
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get promotion failed");
     }
-    return res.data;
+    return apiRes.data;
 };
 
 export const deletePromotion = async (id: string): Promise<void> => {
