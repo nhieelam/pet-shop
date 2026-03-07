@@ -52,7 +52,7 @@ const mockProducts: Product[] = [
   {
     id: "prod_001",
     name: "Thức ăn cao cấp cho chó",
-    sku: "DOG-FOOD-001",
+    sku: "DOG-FxOOD-001",
     category: "Thức ăn cho chó",
     price: 350000,
     stock: 45,
@@ -147,15 +147,6 @@ export default function AdminProductListPage() {
   // Delete confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      applyFilters();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, categoryFilters, statusFilter, products]);
-
   // Apply filters
   const applyFilters = useCallback(() => {
     let filtered = [...products];
@@ -179,6 +170,15 @@ export default function AdminProductListPage() {
 
     setFilteredProducts(filtered);
     setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, categoryFilters, statusFilter, products]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      applyFilters();
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [searchTerm, categoryFilters, statusFilter, products]);
 
   // Reset filters
