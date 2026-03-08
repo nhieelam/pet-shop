@@ -10,22 +10,44 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
-/* =========================
-   REQUEST INTERCEPTOR
-   Tự thêm Authorization
-========================= */
 apiClient.interceptors.request.use(
     (config) => {
       const token = getAuthToken();
 
       if (token) {
+        config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
       }
 
       return config;
     },
+    (error) => Promise.reject(error)
+);
+
+apiClient.interceptors.response.use(
+    (response) => response,
     (error) => {
-      return Promise.reject(error);
+
+      if (error.response) {
+
+        if (error.response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+
+        const message =
+            error.response.data?.message ||
+            error.response.data?.error ||
+            "Server error";
+
+        return Promise.reject(new Error(message));
+      }
+
+      if (error.request) {
+        return Promise.reject(new Error("Server không phản hồi"));
+      }
+
+      return Promise.reject(new Error(error.message));
     }
 );
 

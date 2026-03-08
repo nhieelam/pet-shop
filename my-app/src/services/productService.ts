@@ -4,8 +4,8 @@ import type {
     ProductCreationRequest,
     ProductUpdateRequest,
 } from "../types/productTypes";
-import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
+import type { ApiResponse } from "../types/apiResponse";
 
 export const createProduct = async (
     credentials: ProductCreationRequest
@@ -14,29 +14,29 @@ export const createProduct = async (
         API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
         credentials
     );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create product failed");
+    const api = res.data;
+    if (!api.success || api.data == null) {
+        throw new Error(api.message ?? "Create product failed");
     }
-    return apiRes.data;
+    return api.data;
 };
 
 export const getAllProducts = async (): Promise<ProductResponse[]> => {
     const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
         API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL
     );
-    return res.data?.data ?? [];
+    return res.data.data ?? [];
 };
 
 export const getProductById = async (productId: string): Promise<ProductResponse> => {
     const res = await apiClient.get<ApiResponse<ProductResponse>>(
         API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
     );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get product failed");
+    const api = res.data;
+    if (!api.success || api.data == null) {
+        throw new Error(api.message ?? "Get product failed");
     }
-    return apiRes.data;
+    return api.data;
 };
 
 export const updateProduct = async (
@@ -47,11 +47,11 @@ export const updateProduct = async (
         API_CONFIG.ENDPOINTS.PRODUCT.UPDATE(productId),
         body
     );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Update product failed");
+    const api = res.data;
+    if (!api.success || api.data == null) {
+        throw new Error(api.message ?? "Update product failed");
     }
-    return apiRes.data;
+    return api.data;
 };
 
 export const deleteProduct = async (productId: string): Promise<void> => {
@@ -66,5 +66,6 @@ export const getAllProductsPaginated = async (
         API_CONFIG.ENDPOINTS.PRODUCT.PAGINATE,
         { params: { page, size } }
     );
-    return res.data?.data ?? [];
+    const api = res.data;
+    return api.data ?? [];
 };

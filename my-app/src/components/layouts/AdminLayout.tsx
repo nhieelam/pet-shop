@@ -9,7 +9,7 @@ const AdminLayout = () => {
 
         {/* Content */}
         <div className="ml-64 min-h-screen bg-slate-100">
-          <main className="p-6">
+          <main className="">
             <Outlet />
           </main>
         </div>
