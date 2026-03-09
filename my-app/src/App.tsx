@@ -9,7 +9,7 @@ import ListProductsPage from "./pages/admin/ListProductsPage/ListProductsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage/ManageOrdersPage";
 import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/ManageProductCategoryPage";
 import ManageServicesPage from "./pages/admin/ManageServicesPage/ManageServicesPage";
-import StockPage from "./pages/admin/StockPage/StockPage";
+import PurchasePage from "./pages/admin/PurchasePage/PurchasePage.tsx";
 import AdminDashBoard from "./pages/admin/DashBoardPage/AdminDashBoard";
 
 import UserLayout from "./components/layouts/UserLayout";
@@ -19,6 +19,8 @@ import LoginPage from "./pages/user/LoginPage/LoginPage";
 import { AuthProvider } from "./context/authContext";
 
 import "./App.css";
+import StaffPage from "./pages/admin/StaffPage/StaffPage.tsx";
+import CustomerPage from "./pages/admin/CustomerPage/CustomerPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -54,6 +56,8 @@ const App: React.FC = () => {
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="" element={<AdminDashBoard />} />
               <Route path="dashBoard" element={<AdminDashBoard />} />
+              <Route path="staffs" element={<StaffPage />} />
+              <Route path="customers" element={<CustomerPage />} />
               <Route path="listProducts" element={<ListProductsPage />} />
               <Route path="manageOrders" element={<ManageOrdersPage />} />
               <Route
@@ -64,7 +68,7 @@ const App: React.FC = () => {
                   path="manageServices"
                   element={<ManageServicesPage />}
               />
-              <Route path="stock" element={<StockPage />} />
+              <Route path="purchases" element={<PurchasePage />} />
             </Route>
           </Routes>
         </AuthProvider>

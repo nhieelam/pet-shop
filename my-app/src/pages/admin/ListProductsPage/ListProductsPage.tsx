@@ -16,10 +16,6 @@ const SORT_OPTIONS = [
   {value: "quantity-desc", label: "Stock (High-Low)"},
 ] as const;
 
-// const UNIT_OPTIONS = [
-//   "piece", "kg", "g", "lb", "oz", "pack", "bag", "bottle", "box",
-// ];
-
 const UNIT_OPTIONS = [
   {value: "G", label: "Gram (g)"},
   {value: "KG", label: "Kilogram (kg)"},
@@ -638,7 +634,7 @@ export default function ListProductsPage() {
                         <select id="product-category" required value={formData.categoryId}
                                 onChange={(e) => setFormData((d) => ({...d, categoryId: e.target.value}))}
                                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                          <option value="">Select category</option>
+                          <option value={editingProduct? editingProduct.categoryId: ""}>{editingProduct? editingProduct.categoryName: "Select category"}</option>
                           {categories.map((c) => (
                               <option key={c.id} value={c.id}>{c.name}</option>
                           ))}

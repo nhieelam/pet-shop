@@ -3,6 +3,7 @@
 import {useEffect} from "react";
 import {useLogin} from "./useLogin";
 import Loader from "../../../components/ui/loader";
+import {Link} from "react-router-dom";
 
 export default function LoginPage() {
   const {
@@ -156,12 +157,12 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Chưa có tài khoản?{" "}
-                <a
-                    href="/register"
+                <Link
+                    to="/register"
                     className="text-blue-600 hover:text-blue-800 font-bold"
                 >
                   Đăng ký ngay
-                </a>
+                </Link>
               </p>
             </div>
           </div>

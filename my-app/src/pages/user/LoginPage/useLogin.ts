@@ -57,11 +57,6 @@ export function useLogin(): UseLoginReturn {
     try {
       await login({ userName, password });
 
-      setUserName("");
-      setPassword("");
-
-      alert("Đăng nhập thành công!");
-
       // 🔥 Kiểm tra nếu đang ở đường dẫn admin
       if (location.pathname.includes("/admin")) {
         navigate("/admin/dashboard");
@@ -73,7 +68,7 @@ export function useLogin(): UseLoginReturn {
       console.error("Login error:", error);
 
       if (error instanceof Error) {
-        setErrors({ general: error.message });
+        setErrors({ general: "Sai thông tin đăng nhập, vui lòng thử lại" });
       } else {
         setErrors({
           general: "Đăng nhập thất bại. Vui lòng thử lại.",

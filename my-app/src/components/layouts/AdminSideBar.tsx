@@ -7,11 +7,13 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Trang chủ", href: "/admin/dashBoard" },
-  { label: "Danh sách sản phẩm", href: "/admin/listProducts" },
-  { label: "Nhập kho", href: "/admin/stock" },
-  { label: "Quản lí hóa đơn", href: "/admin/manageOrders" },
-  { label: "Quản lí danh mục", href: "/admin/manageProductCategory" },
-  { label: "Quản lí dịch vụ", href: "/admin/manageServices" },
+  { label: "Nhân viên", href: "/admin/staffs" },
+  { label: "Khách hàng", href: "/admin/customers" },
+  { label: "Sản phẩm", href: "/admin/listProducts" },
+  { label: "Phiếu nhập", href: "/admin/purchases" },
+  { label: "Hóa đơn", href: "/admin/manageOrders" },
+  { label: "Danh mục", href: "/admin/manageProductCategory" },
+  { label: "dịch vụ", href: "/admin/manageServices" },
 ];
 
 const AdminSidebar: React.FC = () => {

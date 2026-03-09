@@ -31,6 +31,7 @@ export const API_CONFIG = {
             CREATE: "/staffs",
             GET_ALL: "/staffs",
             GET_BY_ID: (id: string) => `/staffs/${id}`,
+            UPDATE: (id: string) => `/staffs/${id}`,
             UPDATE_SHIFT: (id: string, shift: number) => `/staffs/${id}/shift?shift=${shift}`,
             DELETE: (id: string) => `/staffs/${id}`,
             GET_INFO: "/staffs/info",
@@ -41,6 +42,7 @@ export const API_CONFIG = {
             GET_ALL: "/customers",
             GET_BY_ID: (id: string) => `/customers/${id}`,
             GET_INFO: "/customers/info",
+            UPDATE: (id: string) => `/customers/${id}`,
             ADD_POINTS: (id: string) => `/customers/${id}/points`,
             DELETE: (id: string) => `/customers/${id}`,
         },
@@ -89,6 +91,7 @@ export const API_CONFIG = {
             GET_ALL: "/categories",
             GET_BY_ID: (id: string) => `/categories/${id}`,
             UPDATE: (id: string) => `/categories/${id}`,
+            DELETE: (id: string) => `/categories/${id}`,
         },
 
         INVENTORY: {

@@ -21,7 +21,8 @@ export const login = async (credentials: AuthRequest): Promise<AuthResponse> => 
     try {
         const res = await apiClient.post<ApiResponse<AuthResponse>>(
             API_CONFIG.ENDPOINTS.AUTH.LOGIN,
-            credentials
+            credentials,
+            {skipAuth:true}
         );
         const apiRes = res.data;
 
@@ -50,7 +51,8 @@ export const login = async (credentials: AuthRequest): Promise<AuthResponse> => 
 export const verifyToken = async (request: IntrospectRequest): Promise<IntrospectResponse> => {
     const res = await apiClient.post<ApiResponse<IntrospectResponse>>(
         API_CONFIG.ENDPOINTS.AUTH.INTROSPECT,
-        request
+        request,
+        {skipAuth:true}
     );
     const apiRes = res.data;
     if (!apiRes.success || !apiRes.data) {

@@ -205,6 +205,7 @@ export function useListProducts() {
 
   const openEditModal = useCallback((product: ProductResponse) => {
     setEditingProduct(product);
+    console.log(product);
     setProductModalOpen(true);
   }, []);
 

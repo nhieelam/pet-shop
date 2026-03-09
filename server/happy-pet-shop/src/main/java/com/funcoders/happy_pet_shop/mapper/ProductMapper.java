@@ -17,5 +17,6 @@ public interface ProductMapper {
     void updateProduct(@MappingTarget Product productEntity, ProductUpdateRequest request);
 
     @Mapping(target = "categoryName", source = "category.name")
+    @Mapping(target = "categoryId", source = "category.id")
     ProductResponse toResponse(Product productEntity);
 }

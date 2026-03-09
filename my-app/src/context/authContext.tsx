@@ -22,7 +22,7 @@ interface AuthContextType {
   setUser: (user: CustomerResponse | null) => void;
   loading: boolean;
   error: string | null;
-  login: (credentials: AuthRequest) => Promise<void>;
+  login: (credentials: AuthRequest) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -90,12 +90,13 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
 
   /* ---------- LOGIN ---------- */
-  const login = async (credentials: AuthRequest)=> {
+  const login = async (credentials: AuthRequest) => {
     setLoading(true);
     setError(null);
 
     try {
       const authData = await loginService(credentials);
+
       setIsAuthenticated(true);
 
       storeAuthToken(authData.token);
@@ -107,6 +108,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
         setUser(customer);
       }
+      return true;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

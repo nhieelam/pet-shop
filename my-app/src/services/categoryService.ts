@@ -71,3 +71,13 @@ export const updateCategoryById = async (
 
   return apiData.data;
 };
+
+export const deleteCategoryById = async (id: string): Promise<void> => {
+  const res = await apiClient.delete<ApiResponse<unknown>>(
+    API_CONFIG.ENDPOINTS.CATEGORY.DELETE(id)
+  );
+  const apiData = res.data;
+  if (!apiData.success) {
+    throw new Error(apiData.message ?? "Delete category failed");
+  }
+};

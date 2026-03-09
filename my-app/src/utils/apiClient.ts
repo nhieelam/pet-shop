@@ -2,6 +2,12 @@ import axios from "axios";
 import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
 
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean;
+  }
+}
+
 export const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   headers: {
@@ -12,11 +18,14 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-      const token = getAuthToken();
 
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
+      if (!config.skipAuth) {
+        const token = getAuthToken();
+
+        if (token) {
+          config.headers = config.headers || {};
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
 
       return config;
@@ -30,7 +39,9 @@ apiClient.interceptors.response.use(
 
       if (error.response) {
 
-        if (error.response.status === 401) {
+        // Only redirect to login on 401 for authenticated requests (e.g. expired token).
+        // Do NOT redirect when login itself fails (login request uses skipAuth).
+        if (error.response.status === 401 && !error.config?.skipAuth) {
           localStorage.removeItem("token");
           window.location.href = "/login";
         }

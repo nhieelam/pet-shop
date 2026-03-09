@@ -35,6 +35,21 @@ export const getStaffById = async (id: string): Promise<StaffResponse> => {
     return apiRes.data;
 };
 
+// export const updateStaff = async (
+//     id: string,
+//     request: StaffUpdateRequest
+// ): Promise<StaffResponse> => {
+//     const res = await apiClient.put<ApiResponse<StaffResponse>>(
+//         API_CONFIG.ENDPOINTS.STAFF.UPDATE(id),
+//         request
+//     );
+//     const apiRes = res.data;
+//     if (!apiRes.success || apiRes.data == null) {
+//         throw new Error(apiRes.message ?? "Update staff failed");
+//     }
+//     return apiRes.data;
+// };
+
 export const updateStaffShift = async (
     id: string,
     shift: number

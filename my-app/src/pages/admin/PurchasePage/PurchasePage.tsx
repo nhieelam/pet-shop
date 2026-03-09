@@ -1,8 +1,8 @@
 "use client";
 
 import {useState} from "react";
-import {useManageOrders} from "./hooks/useManageOrders";
-import type {InvoiceResponse} from "../../../types/invoiceTypes";
+import {usePurchase} from "./usePurchase";
+import type {PurchaseDetailResponse, PurchaseResponse} from "../../../types/purchaseTypes";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
@@ -29,25 +29,26 @@ function statusClass(status: string): string {
   return "bg-slate-100 text-slate-700";
 }
 
-function OrderGridCard({
-                         invoice,
-                         isSelected,
-                         onSelect,
-                         onDelete,
-                       }: {
-  invoice: InvoiceResponse;
+function PurchaseGridCard({
+                            purchase,
+                            isSelected,
+                            onSelect,
+                            onDelete,
+                          }: {
+  purchase: PurchaseResponse;
   isSelected: boolean;
-  onSelect: (inv: InvoiceResponse) => void;
-  onDelete: (inv: InvoiceResponse) => void;
+  onSelect: (p: PurchaseResponse) => void;
+  onDelete: (p: PurchaseResponse) => void;
 }) {
-  const emoji = "🛒";
-  const status = invoice.status ?? "—";
+  const emoji = "📦";
+  const status = purchase.status ?? "—";
+  const supplierName = purchase.supplier?.name ?? "—";
   return (
       <div
           role="button"
           tabIndex={0}
-          onClick={() => onSelect(invoice)}
-          onKeyDown={(e) => e.key === "Enter" && onSelect(invoice)}
+          onClick={() => onSelect(purchase)}
+          onKeyDown={(e) => e.key === "Enter" && onSelect(purchase)}
           className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all group animate-fade-in cursor-pointer ${
               isSelected ? "border-emerald-500 ring-2 ring-emerald-200 shadow-md" : "border-slate-100 hover:shadow-lg"
           }`}
@@ -59,16 +60,16 @@ function OrderGridCard({
         </span>
         </div>
         <div className="p-4">
-          <p className="text-xs text-slate-500 font-mono mb-1">{invoice.id}</p>
-          <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">{invoice.customerName ?? "—"}</h3>
-          <p className="text-sm text-slate-600 mb-2">{formatCurrency(invoice.realAmount ?? invoice.totalAmount ?? 0)}</p>
-          <p className="text-xs text-slate-500 mb-3">{formatDate(invoice.createdAt ?? "")}</p>
+          <p className="text-xs text-slate-500 font-mono mb-1">{purchase.id}</p>
+          <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">{supplierName}</h3>
+          <p className="text-sm text-slate-600 mb-2">{formatCurrency(purchase.totalAmount ?? 0)}</p>
+          <p className="text-xs text-slate-500 mb-3">{formatDate(purchase.createdAt ?? "")}</p>
           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(invoice);
+                  onDelete(purchase);
                 }}
                 className="p-2 hover:bg-rose-50 rounded-lg transition-all"
                 title="Delete"
@@ -81,25 +82,26 @@ function OrderGridCard({
   );
 }
 
-function OrderListRow({
-                        invoice,
-                        isSelected,
-                        onSelect,
-                        onDelete,
-                      }: {
-  invoice: InvoiceResponse;
+function PurchaseListRow({
+                           purchase,
+                           isSelected,
+                           onSelect,
+                           onDelete,
+                         }: {
+  purchase: PurchaseResponse;
   isSelected: boolean;
-  onSelect: (inv: InvoiceResponse) => void;
-  onDelete: (inv: InvoiceResponse) => void;
+  onSelect: (p: PurchaseResponse) => void;
+  onDelete: (p: PurchaseResponse) => void;
 }) {
-  const emoji = "🛒";
-  const status = invoice.status ?? "—";
+  const emoji = "📦";
+  const status = purchase.status ?? "—";
+  const supplierName = purchase.supplier?.name ?? "—";
   return (
       <div
           role="button"
           tabIndex={0}
-          onClick={() => onSelect(invoice)}
-          onKeyDown={(e) => e.key === "Enter" && onSelect(invoice)}
+          onClick={() => onSelect(purchase)}
+          onKeyDown={(e) => e.key === "Enter" && onSelect(purchase)}
           className={`bg-white rounded-2xl shadow-sm border p-4 transition-all product-row animate-fade-in cursor-pointer ${
               isSelected ? "border-emerald-500 ring-2 ring-emerald-200 shadow-md" : "border-slate-100 hover:shadow-lg"
           }`}
@@ -110,12 +112,12 @@ function OrderListRow({
             <span className="text-2xl">{emoji}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-500 font-mono truncate">{invoice.id}</p>
-            <h3 className="font-semibold text-slate-800 truncate">{invoice.customerName ?? "—"}</h3>
-            <p className="text-sm text-slate-500">{formatDate(invoice.createdAt ?? "")}</p>
+            <p className="text-xs text-slate-500 font-mono truncate">{purchase.id}</p>
+            <h3 className="font-semibold text-slate-800 truncate">{supplierName}</h3>
+            <p className="text-sm text-slate-500">{formatDate(purchase.createdAt ?? "")}</p>
           </div>
           <div className="text-right flex-shrink-0">
-            <p className="font-bold text-emerald-600">{formatCurrency(invoice.realAmount ?? invoice.totalAmount ?? 0)}</p>
+            <p className="font-bold text-emerald-600">{formatCurrency(purchase.totalAmount ?? 0)}</p>
             <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
             {status}
           </span>
@@ -125,7 +127,7 @@ function OrderListRow({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(invoice);
+                  onDelete(purchase);
                 }}
                 className="p-2 hover:bg-rose-50 rounded-lg transition-all"
                 title="Delete"
@@ -138,10 +140,10 @@ function OrderListRow({
   );
 }
 
-export default function ManageOrdersPage() {
+export default function PurchasePage() {
   const {
-    invoices: filteredInvoices,
-    allInvoices,
+    purchases: filteredPurchases,
+    allPurchases,
     loading,
     error,
     search,
@@ -153,23 +155,23 @@ export default function ManageOrdersPage() {
     stats,
     uniqueStatuses,
     deleteModalOpen,
-    selectedInvoice,
-    invoiceToDelete,
+    selectedPurchase,
+    purchaseToDelete,
     toast,
     openDetailModal,
     closeDetailModal,
     openDeleteModal,
     closeDeleteModal,
-    handleDeleteInvoice,
+    handleDeletePurchase,
     clearFilters,
-  } = useManageOrders();
+  } = usePurchase();
 
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
   const confirmDelete = async () => {
     setDeleteSubmitting(true);
     try {
-      await handleDeleteInvoice();
+      await handleDeletePurchase();
     } finally {
       setDeleteSubmitting(false);
     }
@@ -199,14 +201,14 @@ export default function ManageOrdersPage() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold">Pet Shop Admin</h1>
-                  <p className="text-emerald-100 text-xs">Manage orders (invoices)</p>
+                  <p className="text-emerald-100 text-xs">Manage purchases</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div
                     className="hidden sm:flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
-                  <span>🛒</span>
-                  <span>{stats.total} Orders</span>
+                  <span>📦</span>
+                  <span>{stats.total} Purchases</span>
                 </div>
               </div>
             </div>
@@ -214,21 +216,20 @@ export default function ManageOrdersPage() {
         </header>
 
         <div
-          style={{
-            maxWidth: "1600px",
-          }}
+            style={{
+              maxWidth: "1600px",
+            }}
         >
-
           <div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div
                   className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">🛒</span>
+                    <span className="text-2xl">📦</span>
                   </div>
                   <div>
-                    <p className="text-slate-500 text-xs font-medium">Total Orders</p>
+                    <p className="text-slate-500 text-xs font-medium">Total Purchases</p>
                     <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
                   </div>
                 </div>
@@ -242,7 +243,7 @@ export default function ManageOrdersPage() {
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
                     <input
                         type="text"
-                        placeholder="Search by invoice ID, customer name, or address..."
+                        placeholder="Search by purchase ID or supplier name..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white"
@@ -284,12 +285,12 @@ export default function ManageOrdersPage() {
           </div>
           <main className="flex-1 flex flex-col lg:flex-row min-h-0 w-full items-stretch">
 
-            {/* Left: Orders list — same max width as header so search bar matches header width */}
-            <div className="flex-1 min-w- flex-col overflow-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* Left: Purchases list */}
+            <div className="flex-1 min-w-0 flex flex-col overflow-auto px-4 sm:px-6 lg:px-8 py-6">
 
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-slate-500">
-                  Showing {filteredInvoices.length} of {allInvoices.length} orders
+                  Showing {filteredPurchases.length} of {allPurchases.length} purchases
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -319,14 +320,14 @@ export default function ManageOrdersPage() {
                   <div className="text-center py-16">
                     <div
                         className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"/>
-                    <p className="text-slate-500">Loading orders...</p>
+                    <p className="text-slate-500">Loading purchases...</p>
                   </div>
-              ) : filteredInvoices.length === 0 ? (
+              ) : filteredPurchases.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-5xl">🛒</span>
+                      <span className="text-5xl">📦</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-slate-700 mb-2">No orders found</h3>
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">No purchases found</h3>
                     <p className="text-slate-500">Try adjusting your search or filters</p>
                   </div>
               ) : (
@@ -338,20 +339,20 @@ export default function ManageOrdersPage() {
                       }`}
                   >
                     {viewMode === "grid"
-                        ? filteredInvoices.map((inv) => (
-                            <OrderGridCard
-                                key={inv.id}
-                                invoice={inv}
-                                isSelected={selectedInvoice?.id === inv.id}
+                        ? filteredPurchases.map((p) => (
+                            <PurchaseGridCard
+                                key={p.id}
+                                purchase={p}
+                                isSelected={selectedPurchase?.id === p.id}
                                 onSelect={openDetailModal}
                                 onDelete={openDeleteModal}
                             />
                         ))
-                        : filteredInvoices.map((inv) => (
-                            <OrderListRow
-                                key={inv.id}
-                                invoice={inv}
-                                isSelected={selectedInvoice?.id === inv.id}
+                        : filteredPurchases.map((p) => (
+                            <PurchaseListRow
+                                key={p.id}
+                                purchase={p}
+                                isSelected={selectedPurchase?.id === p.id}
                                 onSelect={openDetailModal}
                                 onDelete={openDeleteModal}
                             />
@@ -360,13 +361,13 @@ export default function ManageOrdersPage() {
               )}
             </div>
 
-            {/* Right: Order detail panel — same height as list (stretches with main) */}
+            {/* Right: Purchase detail panel */}
             <div
                 className="w-full lg:w-[400px] xl:w-[420px] flex-shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 bg-slate-50/50 flex flex-col min-h-0 max-h-[50vh] lg:max-h-none">
               <div
                   className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-800">Order detail</h2>
-                {selectedInvoice && (
+                <h2 className="text-lg font-bold text-slate-800">Purchase detail</h2>
+                {selectedPurchase && (
                     <button
                         type="button"
                         onClick={closeDetailModal}
@@ -378,57 +379,54 @@ export default function ManageOrdersPage() {
                 )}
               </div>
               <div className="flex-1 overflow-y-auto p-4">
-                {!selectedInvoice ? (
+                {!selectedPurchase ? (
                     <div
                         className="flex flex-col items-center justify-center h-full min-h-[200px] text-center text-slate-500">
                       <span className="text-5xl mb-3">👆</span>
-                      <p className="font-medium text-slate-600">Select an order</p>
-                      <p className="text-sm mt-1">Click an order on the left to view its details here.</p>
+                      <p className="font-medium text-slate-600">Select a purchase</p>
+                      <p className="text-sm mt-1">Click a purchase on the left to view its details here.</p>
                     </div>
                 ) : (
                     <div className="space-y-4 animate-fade-in">
                       <div>
-                        <p className="text-xs text-slate-500 font-mono">{selectedInvoice.id}</p>
-                        <p className="text-sm font-medium text-slate-700 mt-1">Customer: {selectedInvoice.customerName ?? "—"}</p>
+                        <p className="text-xs text-slate-500 font-mono">{selectedPurchase.id}</p>
+                        <p className="text-sm font-medium text-slate-700 mt-1">
+                          Supplier: {selectedPurchase.supplier?.name ?? "—"}
+                        </p>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <p className="text-slate-500">Total</p>
-                          <p className="font-semibold text-slate-800">{formatCurrency(selectedInvoice.totalAmount ?? 0)}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">Paid</p>
-                          <p className="font-semibold text-emerald-600">{formatCurrency(selectedInvoice.realAmount ?? 0)}</p>
+                          <p className="font-semibold text-slate-800">{formatCurrency(selectedPurchase.totalAmount ?? 0)}</p>
                         </div>
                         <div>
                           <p className="text-slate-500">Status</p>
                           <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(selectedInvoice.status ?? "")}`}>
-                            {selectedInvoice.status ?? "—"}
-                        </span>
-                        </div>
-                        <div>
-                          <p className="text-slate-500">Payment</p>
-                          <p className="font-medium text-slate-800">{selectedInvoice.paymentMethod ?? "—"}</p>
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(selectedPurchase.status ?? "")}`}
+                          >
+                        {selectedPurchase.status ?? "—"}
+                      </span>
                         </div>
                       </div>
                       <div>
                         <p className="text-slate-500 text-sm">Created</p>
-                        <p className="text-slate-800">{formatDate(selectedInvoice.createdAt ?? "")}</p>
+                        <p className="text-slate-800">{formatDate(selectedPurchase.createdAt ?? "")}</p>
                       </div>
-                      {selectedInvoice.shippingAddress && (
+                      {selectedPurchase.supplier?.address && (
                           <div>
-                            <p className="text-slate-500 text-sm">Shipping address</p>
-                            <p className="text-slate-800">{selectedInvoice.shippingAddress}</p>
+                            <p className="text-slate-500 text-sm">Supplier address</p>
+                            <p className="text-slate-800">{selectedPurchase.supplier.address}</p>
                           </div>
                       )}
-                      {selectedInvoice.invoiceDetails && selectedInvoice.invoiceDetails.length > 0 && (
+                      {selectedPurchase.purchaseDetails && selectedPurchase.purchaseDetails.length > 0 && (
                           <div>
                             <p className="text-slate-700 font-medium mb-2">Items</p>
                             <ul className="space-y-2 border-t border-slate-200 pt-2">
-                              {selectedInvoice.invoiceDetails.map((d) => (
+                              {selectedPurchase.purchaseDetails.map((d: PurchaseDetailResponse) => (
                                   <li key={d.id} className="flex justify-between text-sm">
-                                    <span>Qty: {d.quantity} × {formatCurrency(d.unitPrice ?? 0)}</span>
+                            <span>
+                              {d.productName ?? d.productId} — Qty: {d.quantity} × {formatCurrency(d.unitPrice ?? 0)}
+                            </span>
                                     <span className="font-medium">{formatCurrency(d.totalPrice ?? 0)}</span>
                                   </li>
                               ))}
@@ -437,10 +435,10 @@ export default function ManageOrdersPage() {
                       )}
                       <button
                           type="button"
-                          onClick={() => openDeleteModal(selectedInvoice)}
+                          onClick={() => openDeleteModal(selectedPurchase)}
                           className="w-full mt-4 py-2.5 border border-rose-200 text-rose-600 rounded-xl font-medium hover:bg-rose-50 transition-all"
                       >
-                        Delete order
+                        Delete purchase
                       </button>
                     </div>
                 )}
@@ -449,7 +447,7 @@ export default function ManageOrdersPage() {
           </main>
 
           {/* Delete Modal */}
-          {deleteModalOpen && invoiceToDelete && (
+          {deleteModalOpen && purchaseToDelete && (
               <div className="fixed inset-0 z-50 overflow-y-auto">
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden/>
                 <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -461,9 +459,10 @@ export default function ManageOrdersPage() {
                       <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-2xl">🗑️</span>
                       </div>
-                      <h3 className="text-xl font-bold text-slate-800 mb-2">Delete order?</h3>
+                      <h3 className="text-xl font-bold text-slate-800 mb-2">Delete purchase?</h3>
                       <p className="text-slate-500 mb-6">
-                        Are you sure you want to delete order &quot;{invoiceToDelete.id}&quot;? This action cannot be
+                        Are you sure you want to delete purchase &quot;{purchaseToDelete.id}&quot;? This action cannot
+                        be
                         undone.
                       </p>
                       <div className="flex gap-3">

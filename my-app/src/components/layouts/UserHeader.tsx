@@ -9,9 +9,7 @@ export default function UserHeader() {
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + "/");
@@ -21,147 +19,156 @@ export default function UserHeader() {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
 
-      if (currentScroll > lastScrollY) {
-        // scroll down
-        setShowHeader(false);
-      } else {
-        // scroll up
-        setShowHeader(true);
-      }
+      if (currentScroll > lastScrollY) setShowHeader(false);
+      else setShowHeader(true);
 
       setLastScrollY(currentScroll);
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  return (
-      <header
-          className={`sticky top-0 left-0 w-full z-50 bg-blue-600 text-white shadow-lg transition-all duration-300 
-              ${
-              showHeader ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-              }`}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo/Brand */}
-            <div className="flex-shrink-0">
-              <Link to="/user/products" className="text-2xl font-bold">
-                🐾 Happy Pet Shop
-              </Link>
-            </div>
+  const navItem =
+      "px-4 py-2 rounded-full transition-all duration-300 font-medium flex items-center gap-1";
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-8">
+  const activeItem = "bg-white text-blue-600 shadow";
+
+  return (
+      <>
+        <style>
+          <style>
+            {`
+              header {
+                font-family: Fredoka, sans-serif;
+              }
+            `}
+          </style>
+        </style>
+        <header
+            className={`sticky top-0 w-full z-50 backdrop-blur-md bg-gradient-to-r from-[#ff8e53] via-[#ff9a5a] to-[#ffb347]border-b border-white/30text-white shadow-lg transition-all duration-300
+          ${showHeader ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
+        >
+          <nav className="max-w-7xl mx-auto px-6">
+            <div className="flex justify-between items-center h-16">
+
+              {/* Logo */}
               <Link
                   to="/user/products"
-                  className={`hover:text-blue-200 transition duration-300 font-medium ${
-                      isActive("/user/products") ? "text-blue-200 underline" : ""
-                  }`}
+                  className="flex items-center gap-2 text-2xl font-bold tracking-wide hover:scale-105 transition"
               >
-                Sản phẩm
+                🐾 <span>Happy Pet Shop</span>
               </Link>
-              <Link
-                  to="/user/services"
-                  className={`hover:text-blue-200 transition duration-300 font-medium ${
-                      isActive("/user/services") ? "text-blue-200 underline" : ""
-                  }`}
-              >
-                Dịch vụ
-              </Link>
-              <Link
-                  to="/user/cart"
-                  className={`hover:text-blue-200 transition duration-300 font-medium ${
-                      isActive("/user/cart") ? "text-blue-200 underline" : ""
-                  }`}
-              >
-                🛒 Giỏ hàng
-              </Link>
-              <Link
-                  to="/user/profile"
-                  className={`hover:text-blue-200 transition duration-300 font-medium ${
-                      isActive("/user/profile") ? "text-blue-200 underline" : ""
-                  }`}
-              >
-                👤 Tài khoản
-              </Link>
-            </div>
 
-            {/* Mobile Menu Button */}
-            <button
-                onClick={toggleMenu}
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-blue-700 focus:outline-none"
-                aria-label="Toggle menu"
-            >
-              <svg
-                  className="h-6 w-6"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-              >
-                {isMenuOpen ? (
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                ) : (
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                )}
-              </svg>
-            </button>
-          </div>
+              {/* Desktop Menu */}
+              <div className="hidden md:flex items-center gap-4">
 
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-              <div className="md:hidden pb-4">
                 <Link
                     to="/user/products"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md hover:bg-blue-700 transition duration-300 font-medium ${
-                        isActive("/user/products") ? "bg-blue-700" : ""
+                    className={`${navItem} ${
+                        isActive("/user/products") ? activeItem : "hover:bg-white/20"
                     }`}
                 >
-                  Sản phẩm
+                  🦴 Sản phẩm
                 </Link>
+
                 <Link
                     to="/user/services"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md hover:bg-blue-700 transition duration-300 font-medium ${
-                        isActive("/user/services") ? "bg-blue-700" : ""
+                    className={`${navItem} ${
+                        isActive("/user/services") ? activeItem : "hover:bg-white/20"
                     }`}
                 >
-                  Dịch vụ
+                  🛁 Dịch vụ
                 </Link>
+
                 <Link
                     to="/user/cart"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md hover:bg-blue-700 transition duration-300 font-medium ${
-                        isActive("/user/cart") ? "bg-blue-700" : ""
+                    className={`${navItem} ${
+                        isActive("/user/cart") ? activeItem : "hover:bg-white/20"
                     }`}
                 >
                   🛒 Giỏ hàng
                 </Link>
+
                 <Link
                     to="/user/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md hover:bg-blue-700 transition duration-300 font-medium ${
-                        isActive("/user/profile") ? "bg-blue-700" : ""
+                    className={`${navItem} ${
+                        isActive("/user/profile") ? activeItem : "hover:bg-white/20"
                     }`}
                 >
-                  👤 Tài khoản
+                  🐶 Tài khoản
                 </Link>
+
               </div>
-          )}
-        </nav>
-      </header>
+
+              {/* Mobile button */}
+              <button
+                  onClick={toggleMenu}
+                  className="md:hidden p-2 rounded-lg hover:bg-white/20 transition"
+              >
+                <svg
+                    className="h-6 w-6"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                  {isMenuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                  ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
+                  )}
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+                <div className="md:hidden pb-4 pt-2 space-y-2">
+
+                  <Link
+                      to="/user/products"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block ${navItem} ${
+                          isActive("/user/products") ? activeItem : "hover:bg-white/20"
+                      }`}
+                  >
+                    🦴 Sản phẩm
+                  </Link>
+
+                  <Link
+                      to="/user/services"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block ${navItem} ${
+                          isActive("/user/services") ? activeItem : "hover:bg-white/20"
+                      }`}
+                  >
+                    🛁 Dịch vụ
+                  </Link>
+
+                  <Link
+                      to="/user/cart"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block ${navItem} ${
+                          isActive("/user/cart") ? activeItem : "hover:bg-white/20"
+                      }`}
+                  >
+                    🛒 Giỏ hàng
+                  </Link>
+
+                  <Link
+                      to="/user/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block ${navItem} ${
+                          isActive("/user/profile") ? activeItem : "hover:bg-white/20"
+                      }`}
+                  >
+                    🐶 Tài khoản
+                  </Link>
+
+                </div>
+            )}
+          </nav>
+        </header>
+      </>
   );
 }

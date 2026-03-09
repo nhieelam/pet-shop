@@ -1,5 +1,5 @@
 import type { UserCreationRequest } from "../types/userTypes";
-import type { CustomerResponse } from "../types/customerTypes";
+import type { CustomerResponse, CustomerUpdateRequest } from "../types/customerTypes";
 import type { ApiResponse } from "../types/apiResponse";
 import { apiClient } from "../utils/apiClient";
 import { API_CONFIG } from "../config/apiConfig";
@@ -46,6 +46,21 @@ export const getInfo = async (): Promise<CustomerResponse> => {
     const apiRes = res.data;
     if (!apiRes.success || apiRes.data == null) {
         throw new Error(apiRes.message ?? "Get info failed");
+    }
+    return apiRes.data;
+};
+
+export const updateCustomer = async (
+    id: string,
+    request: CustomerUpdateRequest
+): Promise<CustomerResponse> => {
+    const res = await apiClient.put<ApiResponse<CustomerResponse>>(
+        API_CONFIG.ENDPOINTS.CUSTOMER.UPDATE(id),
+        request
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update customer failed");
     }
     return apiRes.data;
 };
