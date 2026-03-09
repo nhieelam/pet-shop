@@ -1,9 +1,10 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useListProducts} from "./useListProducts";
-import type {ProductResponse} from "../../../types/productTypes";
-import type {ProductCreationRequest, ProductUpdateRequest} from "../../../types/productTypes";
+import { useState, useEffect, useRef } from "react";
+import { useListProducts } from "./useListProducts";
+import type { ProductResponse } from "../../../types/productTypes";
+import type { ProductCreationRequest, ProductUpdateRequest } from "../../../types/productTypes";
+import { uploadImageToCloudinary, isCloudinaryConfigured } from "../../../services/cloudinaryService";
 
 const SORT_OPTIONS = [
   {value: "newest", label: "Newest First"},
@@ -199,6 +200,9 @@ export default function ListProductsPage() {
 
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -212,6 +216,25 @@ export default function ListProductsPage() {
     imageUrl: "",
     available: true,
   });
+
+  const cloudinaryEnabled = isCloudinaryConfigured();
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setImageUploadError(null);
+    setImageUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setFormData((d) => ({ ...d, imageUrl: url }));
+    } catch (err) {
+      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   useEffect(() => {
     if (productModalOpen && editingProduct) {
@@ -692,13 +715,79 @@ export default function ListProductsPage() {
                                onChange={(e) => setFormData((d) => ({...d, expiry: e.target.value}))}
                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"/>
                       </div>
-                      <div>
-                        <label htmlFor="product-image" className="block text-sm font-medium text-slate-700 mb-1.5">Image
-                          URL</label>
-                        <input id="product-image" type="url" value={formData.imageUrl}
-                               onChange={(e) => setFormData((d) => ({...d, imageUrl: e.target.value}))}
-                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                               placeholder="https://..."/>
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Product image</label>
+                        <div className="space-y-3">
+                          {cloudinaryEnabled && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageFileChange}
+                                disabled={imageUploading}
+                                className="hidden"
+                                id="product-image-file"
+                              />
+                              <label
+                                htmlFor="product-image-file"
+                                className={`inline-flex items-center gap-2 px-4 py-2.5 border rounded-xl font-medium cursor-pointer transition-all ${
+                                  imageUploading
+                                    ? "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"
+                                    : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                }`}
+                              >
+                                {imageUploading ? (
+                                  <>
+                                    <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                    Uploading…
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>📷</span>
+                                    Choose from file (upload to Cloudinary)
+                                  </>
+                                )}
+                              </label>
+                              {imageUploadError && (
+                                <p className="text-sm text-rose-600">{imageUploadError}</p>
+                              )}
+                            </div>
+                          )}
+                          <div>
+                            <label htmlFor="product-image-url" className="block text-xs text-slate-500 mb-1">
+                              {cloudinaryEnabled ? "Or paste image URL" : "Image URL"}
+                            </label>
+                            <input
+                              id="product-image-url"
+                              type="url"
+                              value={formData.imageUrl}
+                              onChange={(e) => {
+                                setFormData((d) => ({ ...d, imageUrl: e.target.value }));
+                                setImageUploadError(null);
+                              }}
+                              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                              placeholder="https://..."
+                            />
+                          </div>
+                          {formData.imageUrl && (
+                            <div className="flex items-start gap-3">
+                              <div className="w-20 h-20 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex-shrink-0">
+                                <img
+                                  src={formData.imageUrl}
+                                  alt="Preview"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                              </div>
+                              <p className="text-xs text-slate-500 break-all flex-1 min-w-0">
+                                Current: {formData.imageUrl}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 pt-6 sm:col-span-2">
                         <input id="product-available" type="checkbox" checked={formData.available}

@@ -73,7 +73,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
         setIsAuthenticated(true);
 
-        if (location.pathname === "/login") {
+        if (!location.pathname.includes("/admin") && !location.pathname.includes("/login")) {
           const customer: CustomerResponse = await getInfo();
 
           setUser(customer);

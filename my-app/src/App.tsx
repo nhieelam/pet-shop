@@ -21,6 +21,7 @@ import { AuthProvider } from "./context/authContext";
 import "./App.css";
 import StaffPage from "./pages/admin/StaffPage/StaffPage.tsx";
 import CustomerPage from "./pages/admin/CustomerPage/CustomerPage.tsx";
+import SupplierPage from "./pages/admin/SupplierPage/SupplierPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -60,6 +61,7 @@ const App: React.FC = () => {
               <Route path="customers" element={<CustomerPage />} />
               <Route path="listProducts" element={<ListProductsPage />} />
               <Route path="manageOrders" element={<ManageOrdersPage />} />
+              <Route path="suppliers" element={<SupplierPage />} />
               <Route
                   path="manageProductCategory"
                   element={<ManageProductCategoryPage />}

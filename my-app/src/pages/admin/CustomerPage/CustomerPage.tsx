@@ -613,17 +613,6 @@ export default function CustomerPage() {
                     placeholder="Optional"
                   />
                 </div>
-                <div>
-                  <label htmlFor="edit-points" className="block text-sm font-medium text-slate-700 mb-1">Points</label>
-                  <input
-                    id="edit-points"
-                    type="number"
-                    min={0}
-                    value={editFormData.points}
-                    onChange={(e) => setEditFormData((d) => ({ ...d, points: parseInt(e.target.value, 10) || 0 }))}
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
-                  />
-                </div>
                 <div className="flex gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"

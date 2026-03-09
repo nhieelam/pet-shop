@@ -3,7 +3,7 @@
 import {useEffect} from "react";
 import {useLogin} from "./useLogin";
 import Loader from "../../../components/ui/loader";
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 
 export default function LoginPage() {
   const {
@@ -16,21 +16,23 @@ export default function LoginPage() {
     handleSubmit,
     clearError,
   } = useLogin();
+  const location = useLocation();
+  const notAdmin = !location.pathname.includes("/admin");
 
-  // 🔒 Chặn scroll khi loading
   useEffect(() => {
-    if (isLoading) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    document.body.style.overflow = isLoading ? "hidden" : "auto";
   }, [isLoading]);
 
   return (
       <div
-          className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12 relative">
+          className="min-h-screen bg-gradient-to-br from-emerald-100 via-sky-100 to-indigo-100 flex items-center justify-center px-4 relative overflow-hidden">
 
-        {/* 🔥 Overlay Loader */}
+        {/* Paw decoration */}
+        <div className="absolute text-7xl opacity-10 top-10 left-10">🐾</div>
+        <div className="absolute text-7xl opacity-10 bottom-20 right-20">🐾</div>
+        <div className="absolute text-6xl opacity-10 top-1/2 left-1/4">🐾</div>
+
+        {/* Loader overlay */}
         {isLoading && (
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
               <Loader/>
@@ -38,135 +40,154 @@ export default function LoginPage() {
         )}
 
         <div
-            className={`w-full max-w-md transition ${
-                isLoading ? "opacity-50 pointer-events-none" : ""
+            className={`w-full max-w-md transition-all duration-300 ${
+                isLoading ? "opacity-40 pointer-events-none scale-95" : ""
             }`}
         >
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
+
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-blue-600 mb-2">🐾</h1>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Đăng Nhập
+
+              <div className="flex justify-center mb-4 text-5xl">
+                🐶🐱
+              </div>
+
+              <h2 className="text-3xl font-bold text-slate-800">
+                Happy Pet Shop
               </h2>
-              <p className="text-gray-600">
-                Chào mừng bạn quay lại Happy Pet Shop
+
+              <p className="text-slate-500 text-sm mt-1">
+                Chăm sóc thú cưng với tình yêu
               </p>
+
+              <div className="mt-4 text-lg font-semibold text-emerald-600">
+                Đăng nhập hệ thống
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+
+              {/* Error */}
               {errors.general && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    <p className="text-sm font-semibold">{errors.general}</p>
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                    {errors.general}
                   </div>
               )}
 
               {/* Username */}
               <div>
-                <label
-                    htmlFor="userName"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Tên Đăng Nhập
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Username
                 </label>
+
                 <input
                     type="text"
-                    id="userName"
                     value={userName}
                     onChange={(e) => {
                       setUserName(e.target.value);
                       clearError("userName");
                     }}
-                    placeholder="Nhập username của bạn"
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                    placeholder="Nhập username"
+                    className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition ${
                         errors.userName
                             ? "border-red-500 focus:ring-red-400"
-                            : "border-gray-300 focus:ring-blue-400"
+                            : "border-slate-200 focus:ring-emerald-400"
                     }`}
                 />
+
                 {errors.userName && (
-                    <p className="text-red-500 text-sm mt-2">
-                      {errors.userName}
-                    </p>
+                    <p className="text-red-500 text-xs mt-1">{errors.userName}</p>
                 )}
               </div>
 
               {/* Password */}
               <div>
-                <label
-                    htmlFor="password"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Mật khẩu
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Password
                 </label>
+
                 <input
                     type="password"
-                    id="password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       clearError("password");
                     }}
-                    placeholder="Nhập mật khẩu của bạn"
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                    placeholder="Nhập mật khẩu"
+                    className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition ${
                         errors.password
                             ? "border-red-500 focus:ring-red-400"
-                            : "border-gray-300 focus:ring-blue-400"
+                            : "border-slate-200 focus:ring-emerald-400"
                     }`}
                 />
+
                 {errors.password && (
-                    <p className="text-red-500 text-sm mt-2">
-                      {errors.password}
-                    </p>
+                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
+              {/* Options */}
+              <div className="flex items-center justify-between text-sm">
+
+                <label className="flex items-center gap-2 text-slate-600">
                   <input
                       type="checkbox"
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-400 cursor-pointer"
+                      className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-400"
                   />
-                  <span className="ml-2 text-sm text-gray-600">
-                  Ghi nhớ tôi
-                </span>
+                  Ghi nhớ
                 </label>
-                <a
-                    href="/forgot-password"
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+
+                <Link
+                    to="/forgot-password"
+                    className="text-emerald-600 hover:text-emerald-700 font-medium"
                 >
                   Quên mật khẩu?
-                </a>
+                </Link>
               </div>
 
+              {/* Button */}
               <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition disabled:opacity-50"
               >
-                {isLoading ? "Đang đăng nhập..." : "Đăng Nhập"}
+                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
+
             </form>
 
-            <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-3 text-gray-500 text-sm">hoặc</span>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                Chưa có tài khoản?{" "}
-                <Link
-                    to="/register"
-                    className="text-blue-600 hover:text-blue-800 font-bold"
-                >
-                  Đăng ký ngay
-                </Link>
-              </p>
-            </div>
+            {/* Register */}
+            {
+                notAdmin &&
+                <>
+                  <div className="flex items-center my-6">
+                    <div className="flex-1 border-t border-slate-200"></div>
+                    <span className="px-3 text-sm text-slate-400">hoặc</span>
+                    <div className="flex-1 border-t border-slate-200"></div>
+                  </div>
+                  <p className="text-center text-sm text-slate-600">
+                    Chưa có tài khoản?{" "}
+                    <Link
+                        to="/register"
+                        className="font-semibold text-emerald-600 hover:text-emerald-700"
+                    >
+                      Đăng ký ngay
+                    </Link>
+                  </p>
+                </>
+            }
+
           </div>
+
+          {/* Footer */
+          }
+          <p className="text-center text-xs text-slate-400 mt-6">
+            © 2026 Happy Pet Shop
+          </p>
         </div>
       </div>
-  );
+  )
+      ;
 }
