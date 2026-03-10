@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import {useAuth} from "../../../context/authContext.tsx";
+import {useAuth} from "../../context/authContext.tsx";
 import {useState} from "react";
 
 interface LoginErrors {

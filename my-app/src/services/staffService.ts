@@ -35,6 +35,17 @@ export const getStaffById = async (id: string): Promise<StaffResponse> => {
     return apiRes.data;
 };
 
+// export const getInfo = async (): Promise<StaffResponse> => {
+//   const res = await apiClient.get<ApiResponse<StaffResponse>>(
+//       API_CONFIG.ENDPOINTS.STAFF.GET_INFO
+//   );
+//   const apiRes = res.data;
+//   if (!apiRes.success || apiRes.data == null) {
+//     throw new Error(apiRes.message ?? "Get info failed");
+//   }
+//   return apiRes.data;
+// };
+
 // export const updateStaff = async (
 //     id: string,
 //     request: StaffUpdateRequest

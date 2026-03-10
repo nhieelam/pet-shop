@@ -745,7 +745,7 @@ export default function ListProductsPage() {
                                 ) : (
                                   <>
                                     <span>📷</span>
-                                    Choose from file (upload to Cloudinary)
+                                    Choose from file
                                   </>
                                 )}
                               </label>

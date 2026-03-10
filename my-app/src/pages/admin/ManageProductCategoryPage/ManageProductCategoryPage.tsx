@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useManageProductCategory } from "./hooks/useManageProductCategory";
+import { useManageProductCategory } from "./useManageProductCategory.ts";
 import type {
   CategoryResponse,
   CategoryCreationRequest,

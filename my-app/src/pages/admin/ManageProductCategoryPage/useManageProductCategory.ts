@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { CategoryResponse, CategoryCreationRequest, CategoryUpdateRequest } from "../../../../types/categoryTypes";
-import * as categoryService from "../../../../services/categoryService";
+import type { CategoryResponse, CategoryCreationRequest, CategoryUpdateRequest } from "../../../types/categoryTypes.ts";
+import * as categoryService from "../../../services/categoryService.ts";
 
 export type ViewMode = "grid" | "list";
 

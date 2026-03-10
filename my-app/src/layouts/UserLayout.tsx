@@ -1,8 +1,8 @@
 "use client";
 
 import { Outlet } from "react-router-dom";
-import UserHeader from "./UserHeader";
-import UserFooter from "./UserFooter";
+import UserHeader from "../components/UserHeader.tsx";
+import UserFooter from "../components/UserFooter.tsx";
 
 export default function UserLayout() {
   return (

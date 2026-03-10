@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,9 +35,13 @@ import java.util.UUID;
 public class CustomerService {
     CustomerRepository customerRepository;
     CustomerMapper customerMapper;
+
+    UserRepository userRepository;
     UserMapper userMapper;
 
     RoleRepository roleRepository;
+
+    PasswordEncoder passwordEncoder;
 
     @Transactional
     public CustomerResponse createCustomer(UserCreationRequest request) {
@@ -45,6 +50,7 @@ public class CustomerService {
 
         User userEntity = userMapper.toEntity(request);
         userEntity.setUsername(userEntity.getPhone());
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         userEntity.setRoles(Set.of(userRole));
 
         Cart cart = new Cart();
@@ -52,7 +58,7 @@ public class CustomerService {
         Customer customer = Customer.builder()
                 .user(userEntity)
                 .points(BigDecimal.ZERO)
-                .cart(cart)
+                .cart(new Cart())
                 .build();
 
         cart.setCustomer(customer);

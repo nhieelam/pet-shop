@@ -9,10 +9,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Trang chủ", href: "/admin/dashBoard" },
   { label: "Nhân viên", href: "/admin/staffs" },
   { label: "Khách hàng", href: "/admin/customers" },
+  { label: "Nhà cung cấp", href: "/admin/suppliers" },
   { label: "Sản phẩm", href: "/admin/listProducts" },
   { label: "Phiếu nhập", href: "/admin/purchases" },
   { label: "Hóa đơn", href: "/admin/manageOrders" },
-  { label: "Nhà cung cấp", href: "/admin/suppliers" },
   { label: "Danh mục", href: "/admin/manageProductCategory" },
   { label: "dịch vụ", href: "/admin/manageServices" },
 ];

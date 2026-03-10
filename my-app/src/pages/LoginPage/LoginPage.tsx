@@ -1,8 +1,8 @@
 "use client";
 
-import {useEffect} from "react";
-import {useLogin} from "./useLogin";
-import Loader from "../../../components/ui/loader";
+import {useEffect, useState} from "react";
+import {useLogin} from "./useLogin.ts";
+import Loader from "../../components/ui/loader.tsx";
 import {Link, useLocation} from "react-router-dom";
 
 export default function LoginPage() {
@@ -18,6 +18,7 @@ export default function LoginPage() {
   } = useLogin();
   const location = useLocation();
   const notAdmin = !location.pathname.includes("/admin");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = isLoading ? "hidden" : "auto";
@@ -107,20 +108,31 @@ export default function LoginPage() {
                   Password
                 </label>
 
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      clearError("password");
-                    }}
-                    placeholder="Nhập mật khẩu"
-                    className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition ${
-                        errors.password
-                            ? "border-red-500 focus:ring-red-400"
-                            : "border-slate-200 focus:ring-emerald-400"
-                    }`}
-                />
+                <div className="relative">
+                  <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        clearError("password");
+                      }}
+                      placeholder="Nhập mật khẩu"
+                      className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition pr-12 ${
+                          errors.password
+                              ? "border-red-500 focus:ring-red-400"
+                              : "border-slate-200 focus:ring-emerald-400"
+                      }`}
+                  />
+
+                  {/* Eye Button */}
+                  <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? "🧐" : "😎"}
+                  </button>
+                </div>
 
                 {errors.password && (
                     <p className="text-red-500 text-xs mt-1">{errors.password}</p>
@@ -188,6 +200,5 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-  )
-      ;
+  );
 }

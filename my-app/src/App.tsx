@@ -12,9 +12,9 @@ import ManageServicesPage from "./pages/admin/ManageServicesPage/ManageServicesP
 import PurchasePage from "./pages/admin/PurchasePage/PurchasePage.tsx";
 import AdminDashBoard from "./pages/admin/DashBoardPage/AdminDashBoard";
 
-import UserLayout from "./components/layouts/UserLayout";
-import AdminLayout from "./components/layouts/AdminLayout";
-import LoginPage from "./pages/user/LoginPage/LoginPage";
+import UserLayout from "./layouts/UserLayout";
+import AdminLayout from "./layouts/AdminLayout";
+import LoginPage from "./pages/LoginPage/LoginPage";
 
 import { AuthProvider } from "./context/authContext";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import {useState} from "react";
-import {useManageOrders} from "./hooks/useManageOrders";
+import {useManageOrders} from "./useManageOrders.ts";
 import type {InvoiceResponse} from "../../../types/invoiceTypes";
 
 function formatCurrency(value: number): string {
