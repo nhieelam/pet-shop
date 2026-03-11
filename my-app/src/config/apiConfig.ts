@@ -44,6 +44,7 @@ export const API_CONFIG = {
             GET_INFO: "/customers/info",
             UPDATE: (id: string) => `/customers/${id}`,
             ADD_POINTS: (id: string) => `/customers/${id}/points`,
+            ADD_CART_ITEM: (customerId: string) => `/customers/${customerId}/items`,
             DELETE: (id: string) => `/customers/${id}`,
         },
 

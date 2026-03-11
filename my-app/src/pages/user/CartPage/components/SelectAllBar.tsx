@@ -1,24 +1,23 @@
 "use client";
 
-interface CartItem {
-  id: string;
-  isSelected: boolean;
-  quantity: number;
-}
+import type { CartItemResponse } from "../../../../types/cartTypes";
 
 interface SelectAllBarProps {
-  items: CartItem[];
+  items: CartItemResponse[];
+  selection: Record<string, boolean>;
   allSelected: boolean;
   onSelectAll: (selectAll: boolean) => void;
 }
 
 export default function SelectAllBar({
   items,
+  selection,
   allSelected,
   onSelectAll,
 }: SelectAllBarProps) {
-  const selectedCount = items.filter((item) => item.isSelected).length;
-  const totalQuantity = items.reduce((sum, item) => sum + (item.isSelected ? item.quantity : 0), 0);
+  const isSelected = (item: CartItemResponse) => selection[item.id] ?? true;
+  const selectedCount = items.filter((item) => isSelected(item)).length;
+  const totalQuantity = items.reduce((sum, item) => sum + (isSelected(item) ? item.quantity : 0), 0);
 
   return (
     <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 z-10 shadow-sm">

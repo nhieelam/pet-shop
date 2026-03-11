@@ -6,14 +6,14 @@ interface Address {
   fullAddress: string;
   isDefault: boolean;
 }
-interface AddressFormData {
-  id: string;
-  name: string;
-  phone: string;
-  location: string;
-  address: string;
-  type: "house" | "office";
-}
+// interface AddressFormData {
+//   id: string;
+//   name: string;
+//   phone: string;
+//   location: string;
+//   address: string;
+//   type: "house" | "office";
+// }
 
 const MOCK_ADDRESSES: Address[] = [
   { id: "addr_001", label: "Yên Nhi", phone: "(+84) 793 472 637", fullAddress: "506/49/60C, Lạc Long Quân...", isDefault: true },

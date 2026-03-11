@@ -1,18 +1,18 @@
 "use client";
 
-interface CartItem {
-  id: string;
-  price: number;
-  quantity: number;
-  isSelected: boolean;
-}
+import type { CartItemResponse } from "../../../../types/cartTypes";
 
 interface CartSummaryProps {
-  items: CartItem[];
+  items: CartItemResponse[];
+  selection: Record<string, boolean>;
   onCheckout: () => void;
 }
 
-export default function CartSummary({ items, onCheckout }: CartSummaryProps) {
+function getPrice(item: CartItemResponse): number {
+  return item.product?.price ?? item.inventory?.product?.price ?? 0;
+}
+
+export default function CartSummary({ items, selection, onCheckout }: CartSummaryProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -20,9 +20,9 @@ export default function CartSummary({ items, onCheckout }: CartSummaryProps) {
     }).format(value);
   };
 
-  // Calculate totals for selected items only
-  const selectedItems = items.filter((item) => item.isSelected);
-  const subtotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const isSelected = (item: CartItemResponse) => selection[item.id] ?? true;
+  const selectedItems = items.filter((item) => isSelected(item));
+  const subtotal = selectedItems.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const shippingFee = subtotal > 0 ? 30000 : 0; // Free shipping for order > 0
   const grandTotal = subtotal + shippingFee;
   const selectedCount = selectedItems.length;

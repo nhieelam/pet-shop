@@ -2,12 +2,14 @@
 
 import {useEffect, useState} from "react";
 import {Link, useLocation} from "react-router-dom";
+import {useAuth} from "../context/authContext.tsx";
 
 export default function UserHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const {user} = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -72,14 +74,14 @@ export default function UserHeader() {
                   🦴 Sản phẩm
                 </Link>
 
-                <Link
-                    to="/user/services"
-                    className={`${navItem} ${
-                        isActive("/user/services") ? activeItem : "hover:bg-white/20"
-                    }`}
-                >
-                  🛁 Dịch vụ
-                </Link>
+                {/*<Link*/}
+                {/*    to="/user/services"*/}
+                {/*    className={`${navItem} ${*/}
+                {/*        isActive("/user/services") ? activeItem : "hover:bg-white/20"*/}
+                {/*    }`}*/}
+                {/*>*/}
+                {/*  🛁 Dịch vụ*/}
+                {/*</Link>*/}
 
                 <Link
                     to="/user/cart"
@@ -90,14 +92,23 @@ export default function UserHeader() {
                   🛒 Giỏ hàng
                 </Link>
 
-                <Link
-                    to="/user/profile"
-                    className={`${navItem} ${
-                        isActive("/user/profile") ? activeItem : "hover:bg-white/20"
-                    }`}
-                >
-                  🐶 Tài khoản
-                </Link>
+                {user ? (
+                    <Link
+                        to="/user/profile"
+                        className={`${navItem} ${
+                            isActive("/user/profile") ? activeItem : "hover:bg-white/20"
+                        }`}
+                    >
+                      🐶 Tài khoản
+                    </Link>
+                ) : (
+                    <Link
+                        to="/login"
+                        className={`${navItem} hover:bg-white/20`}
+                    >
+                      🔑 Đăng nhập
+                    </Link>
+                )}
 
               </div>
 
@@ -135,15 +146,15 @@ export default function UserHeader() {
                     🦴 Sản phẩm
                   </Link>
 
-                  <Link
-                      to="/user/services"
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`block ${navItem} ${
-                          isActive("/user/services") ? activeItem : "hover:bg-white/20"
-                      }`}
-                  >
-                    🛁 Dịch vụ
-                  </Link>
+                  {/*<Link*/}
+                  {/*    to="/user/services"*/}
+                  {/*    onClick={() => setIsMenuOpen(false)}*/}
+                  {/*    className={`block ${navItem} ${*/}
+                  {/*        isActive("/user/services") ? activeItem : "hover:bg-white/20"*/}
+                  {/*    }`}*/}
+                  {/*>*/}
+                  {/*  🛁 Dịch vụ*/}
+                  {/*</Link>*/}
 
                   <Link
                       to="/user/cart"

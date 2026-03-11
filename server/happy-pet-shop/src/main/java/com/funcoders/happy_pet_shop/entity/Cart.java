@@ -30,7 +30,7 @@ public class Cart {
     @JoinColumn(name = "customer_id", nullable = false, unique = true)
     Customer customer;
 
-    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     Set<CartItem> cartItems;
 
     @Column(nullable = false, updatable = false)

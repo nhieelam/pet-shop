@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useProfile } from "./hooks/useProfile";
 import ProfileHeader from "./components/ProfileHeader";
 import AddressList from "./components/AddressList";
 import InvoiceHistory from "./components/InvoiceHistory";
@@ -8,6 +9,23 @@ import OverviewTab from "./components/overview";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"overview" | "addresses" | "invoices">("overview");
+  const { user, loading } = useProfile();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <p className="text-gray-600">Đang tải...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <p className="text-gray-600">Vui lòng đăng nhập để xem hồ sơ.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">

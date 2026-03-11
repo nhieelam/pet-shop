@@ -13,6 +13,7 @@ import type {CustomerResponse} from "../types/customerTypes";
 import {getAuthToken, storeAuthToken} from "../utils/storageUtils.ts";
 import {useLocation} from "react-router-dom";
 import {getInfo} from "../services/customerService.ts"
+import {logout as logoutService} from "../services/authService.ts";
 
 /* =========================
    CONTEXT TYPE
@@ -122,10 +123,17 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   };
 
   /* ---------- LOGOUT ---------- */
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setError(null);
-    localStorage.removeItem("auth_user");
+
+    const tokenString = getAuthToken();
+
+    if (tokenString) {
+      await logoutService({ token: tokenString });
+    } else {
+      await logoutService();
+    }
   };
 
   return (

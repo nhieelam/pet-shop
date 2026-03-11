@@ -65,9 +65,13 @@ public enum ErrorType {
     CART_EMPTY("Giỏ hàng đang trống", 5003, HttpStatus.BAD_REQUEST),
 
     // ===== CART ITEM =====
-    CART_ITEM_NOT_FOUND("Sản phẩm trong giỏ hàng không tồn tại", 5101, HttpStatus.NOT_FOUND),
-    CART_ITEM_ALREADY_EXISTS("Sản phẩm đã tồn tại trong giỏ hàng", 5102, HttpStatus.BAD_REQUEST),
-    INVALID_CART_ITEM_QUANTITY("Số lượng sản phẩm trong giỏ không hợp lệ", 5103, HttpStatus.BAD_REQUEST),
+    CART_ITEM_PRODUCT_NOT_FOUND("Sản phẩm không tồn tại", 5104, HttpStatus.NOT_FOUND),
+    CART_ITEM_OUT_OF_STOCK("Sản phẩm đã hết hàng", 5105, HttpStatus.BAD_REQUEST),
+    CART_ITEM_QUANTITY_EXCEEDS_STOCK("Số lượng vượt quá tồn kho", 5106, HttpStatus.BAD_REQUEST),
+    CART_ITEM_LIMIT_EXCEEDED("Số lượng sản phẩm vượt quá giới hạn cho phép", 5107, HttpStatus.BAD_REQUEST),
+    CART_ITEM_ALREADY_REMOVED("Sản phẩm đã bị xóa khỏi giỏ hàng", 5108, HttpStatus.BAD_REQUEST),
+    CART_ITEM_INVALID_PRODUCT_ID("ID sản phẩm không hợp lệ", 5109, HttpStatus.BAD_REQUEST),
+    CART_ITEM_INVALID_CART_ID("ID giỏ hàng không hợp lệ", 5110, HttpStatus.BAD_REQUEST),
 
     // ===== INVOICE / ORDER =====
     INVOICE_NOT_FOUND("Hóa đơn không tồn tại", 6001, HttpStatus.NOT_FOUND),

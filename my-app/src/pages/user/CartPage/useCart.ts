@@ -1,121 +1,150 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useAuth } from "../../../context/authContext";
+import { getInfo } from "../../../services/customerService";
+import { addOrUpdateCartItem } from "../../../services/cartService";
+import type { CartItemResponse } from "../../../types/cartTypes";
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  isSelected: boolean;
+export function getProductId(item: CartItemResponse): string {
+  return item.product?.id ?? item.inventory?.product?.id ?? item.id;
 }
 
-const mockCartItems: CartItem[] = [
-  {
-    id: "prod_001",
-    name: "Dog Food Premium - Thức ăn chó cao cấp",
-    price: 450000,
-    quantity: 2,
-    image: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=200&h=200&fit=crop",
-    isSelected: true,
-  },
-  {
-    id: "prod_002",
-    name: "Cat Bed - Giường mèo êm ái",
-    price: 280000,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=200&h=200&fit=crop",
-    isSelected: true,
-  },
-  {
-    id: "prod_003",
-    name: "Dog Leash - Dây xích chó chất lượng cao",
-    price: 95000,
-    quantity: 3,
-    image: "https://images.unsplash.com/photo-1558788353-f76d92427f16?w=200&h=200&fit=crop",
-    isSelected: false,
-  },
-  {
-    id: "prod_004",
-    name: "Pet Toys Set - Bộ đồ chơi thú cưng",
-    price: 180000,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200&h=200&fit=crop",
-    isSelected: true,
-  },
-  {
-    id: "prod_005",
-    name: "Pet Grooming Kit - Bộ vệ sinh thú cưng",
-    price: 320000,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1552053831-71594a27c62d?w=200&h=200&fit=crop",
-    isSelected: false,
-  },
-];
+export interface UseCartReturn {
+  items: CartItemResponse[];
+  selection: Record<string, boolean>;
+  allSelected: boolean;
+  loading: boolean;
+  error: string | null;
+  isAuthenticated: boolean;
+  toggleSelect: (id: string) => void;
+  selectAll: (selectAll: boolean) => void;
+  incrementQuantity: (id: string) => void;
+  decrementQuantity: (id: string) => void;
+  removeItem: (id: string) => void;
+  checkout: () => void;
+  refreshCart: () => Promise<void>;
+}
 
-export function useCart() {
-  const [items, setItems] = useState<CartItem[]>(mockCartItems);
+export function useCart(): UseCartReturn {
+  const { user, setUser, isAuthenticated } = useAuth();
+  const [selection, setSelection] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const toggleSelect = (id: string) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      )
-    );
-  };
+  const items: CartItemResponse[] = user?.cart?.cartItems ?? [];
 
-  const selectAll = (selectAll: boolean) => {
-    setItems((prevItems) =>
-      prevItems.map((item) => ({ ...item, isSelected: selectAll }))
-    );
-  };
+  const refreshCart = useCallback(async () => {
+    try {
+      const customer = await getInfo();
+      setUser(customer);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không thể tải giỏ hàng");
+    }
+  }, [setUser]);
 
-  const incrementQuantity = (id: string) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    };
+  }, []);
 
-  const decrementQuantity = (id: string) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(0, item.quantity - 1) }
-          : item
-      )
-    );
-  };
+  const toggleSelect = useCallback((id: string) => {
+    setSelection((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
-  const removeItem = (id: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
+  const selectAll = useCallback((selectAll: boolean) => {
+    setSelection((prev) => {
+      const next = { ...prev };
+      items.forEach((item) => {
+        next[item.id] = selectAll;
+      });
+      return next;
+    });
+  }, [items]);
 
-  const checkout = () => {
-    const selectedItems = items.filter((item) => item.isSelected);
+  const updateQuantity = useCallback(
+    async (productId: string, newQuantity: number) => {
+      if (!user?.id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        await addOrUpdateCartItem(user.id, { productId, quantity: newQuantity });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Cập nhật thất bại");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user?.id]
+  );
 
-    if (selectedItems.length === 0) {
-      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+  const incrementQuantity = useCallback(
+    (id: string) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+      updateQuantity(getProductId(item), item.quantity + 1);
+    },
+    [items, updateQuantity]
+  );
+
+  const decrementQuantity = useCallback(
+    (id: string) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+      const next = Math.max(0, item.quantity - 1);
+      updateQuantity(getProductId(item), next);
+    },
+    [items, updateQuantity]
+  );
+
+  const removeItem = useCallback(
+    (id: string) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+      updateQuantity(getProductId(item), 0);
+    },
+    [items, updateQuantity]
+  );
+
+  const checkout = useCallback(() => {
+    const selected = items.filter((item) => selection[item.id] ?? true);
+    if (selected.length === 0) {
+      setError("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
       return;
     }
-
-    sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+    setError(null);
+    const product = (item: CartItemResponse) => item.product ?? item.inventory?.product;
+    const payload = selected.map((item) => ({
+      id: item.id,
+      productId: getProductId(item),
+      name: product(item)?.name ?? "Sản phẩm",
+      price: product(item)?.price ?? 0,
+      quantity: item.quantity,
+      image: product(item)?.imageUrl ?? "",
+      isSelected: true,
+    }));
+    sessionStorage.setItem("checkoutItems", JSON.stringify(payload));
     window.location.href = "/payment?source=cart";
-  };
+  }, [items, selection]);
 
   const allSelected = useMemo(
-    () => items.length > 0 && items.every((item) => item.isSelected),
-    [items]
+    () => items.length > 0 && items.every((item) => selection[item.id] ?? true),
+    [items, selection]
   );
 
   return {
     items,
+    selection,
     allSelected,
+    loading,
+    error,
+    isAuthenticated,
     toggleSelect,
     selectAll,
     incrementQuantity,
     decrementQuantity,
     removeItem,
     checkout,
+    refreshCart,
   };
 }

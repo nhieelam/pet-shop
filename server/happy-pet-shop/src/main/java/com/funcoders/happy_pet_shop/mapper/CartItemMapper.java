@@ -6,7 +6,7 @@ import com.funcoders.happy_pet_shop.entity.Cart;
 import com.funcoders.happy_pet_shop.entity.CartItem;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ProductMapper.class})
 public interface CartItemMapper {
     CartItemResponse toResponse(CartItem cartItem);
 }
