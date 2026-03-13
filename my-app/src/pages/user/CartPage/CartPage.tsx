@@ -16,8 +16,9 @@ export default function CartPage() {
     isAuthenticated,
     toggleSelect,
     selectAll,
-    incrementQuantity,
-    decrementQuantity,
+    // incrementQuantity,
+    // decrementQuantity,
+    updateQuantity,
     removeItem,
     checkout,
   } = useCart();
@@ -99,9 +100,8 @@ export default function CartPage() {
                             item={item}
                             isSelected={selection[item.id] ?? true}
                             onToggleSelect={toggleSelect}
-                            onIncrement={incrementQuantity}
-                            onDecrement={decrementQuantity}
                             onRemove={removeItem}
+                            updateQuantity={updateQuantity}
                         />
                     ))}
               </div>

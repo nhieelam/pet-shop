@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useAuth } from "../../../context/authContext";
 import { getInfo } from "../../../services/customerService";
 import { addOrUpdateCartItem } from "../../../services/cartService";
@@ -17,8 +17,9 @@ export interface UseCartReturn {
   isAuthenticated: boolean;
   toggleSelect: (id: string) => void;
   selectAll: (selectAll: boolean) => void;
-  incrementQuantity: (id: string) => void;
-  decrementQuantity: (id: string) => void;
+  // incrementQuantity: (id: string) => void;
+  // decrementQuantity: (id: string) => void;
+  updateQuantity: (productId: string, newQuantity: number) => void;
   removeItem: (id: string) => void;
   checkout: () => void;
   refreshCart: () => Promise<void>;
@@ -29,9 +30,10 @@ export function useCart(): UseCartReturn {
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const items: CartItemResponse[] = user?.cart?.cartItems ?? [];
+  const items: CartItemResponse[] = (user?.cart?.cartItems ?? []).filter(
+    (item) => item.quantity > 0
+  );
 
   const refreshCart = useCallback(async () => {
     try {
@@ -41,12 +43,6 @@ export function useCart(): UseCartReturn {
       setError(e instanceof Error ? e.message : "Không thể tải giỏ hàng");
     }
   }, [setUser]);
-
-  useEffect(() => {
-    return () => {
-      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
-    };
-  }, []);
 
   const toggleSelect = useCallback((id: string) => {
     setSelection((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -68,34 +64,44 @@ export function useCart(): UseCartReturn {
       setLoading(true);
       setError(null);
       try {
-        await addOrUpdateCartItem(user.id, { productId, quantity: newQuantity });
+        const updatedCart = await addOrUpdateCartItem(user.id, {
+          productId,
+          quantity: newQuantity,
+        });
+        const cartItemsWithoutZero = (updatedCart.cartItems ?? []).filter(
+          (item) => item.quantity > 0
+        );
+        setUser({
+          ...user,
+          cart: { ...updatedCart, cartItems: cartItemsWithoutZero },
+        });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Cập nhật thất bại");
       } finally {
         setLoading(false);
       }
     },
-    [user?.id]
+    [user, setUser]
   );
 
-  const incrementQuantity = useCallback(
-    (id: string) => {
-      const item = items.find((i) => i.id === id);
-      if (!item) return;
-      updateQuantity(getProductId(item), item.quantity + 1);
-    },
-    [items, updateQuantity]
-  );
-
-  const decrementQuantity = useCallback(
-    (id: string) => {
-      const item = items.find((i) => i.id === id);
-      if (!item) return;
-      const next = Math.max(0, item.quantity - 1);
-      updateQuantity(getProductId(item), next);
-    },
-    [items, updateQuantity]
-  );
+  // const incrementQuantity = useCallback(
+  //   (id: string) => {
+  //     const item = items.find((i) => i.id === id);
+  //     if (!item) return;
+  //     updateQuantity(getProductId(item), item.quantity + 1);
+  //   },
+  //   [items, updateQuantity]
+  // );
+  //
+  // const decrementQuantity = useCallback(
+  //   (id: string) => {
+  //     const item = items.find((i) => i.id === id);
+  //     if (!item) return;
+  //     const next = Math.max(0, item.quantity - 1);
+  //     updateQuantity(getProductId(item), next);
+  //   },
+  //   [items, updateQuantity]
+  // );
 
   const removeItem = useCallback(
     (id: string) => {
@@ -141,8 +147,9 @@ export function useCart(): UseCartReturn {
     isAuthenticated,
     toggleSelect,
     selectAll,
-    incrementQuantity,
-    decrementQuantity,
+    // incrementQuantity,
+    // decrementQuantity,
+    updateQuantity,
     removeItem,
     checkout,
     refreshCart,

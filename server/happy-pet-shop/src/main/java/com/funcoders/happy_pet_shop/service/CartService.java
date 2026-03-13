@@ -15,6 +15,7 @@ import com.funcoders.happy_pet_shop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class CartService {
     CustomerRepository customerRepository;
 
@@ -71,16 +73,16 @@ public class CartService {
         UUID productId = request.getProductId();
         int quantity = request.getQuantity();
 
-        System.out.println(productId);
-        System.out.println(quantity);
-
         // find cart
         Cart cart = cartRepository.findByCustomer_Id(customerId)
                 .orElseThrow(() -> new AppException(ErrorType.CART_NOT_FOUND));
 
+
         // find product to add
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorType.PRODUCT_NOT_FOUND));
+
+        System.out.println(product.getId());
 
         CartItem existingItem = null;
 

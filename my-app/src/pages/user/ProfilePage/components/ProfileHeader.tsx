@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useProfile } from "../hooks/useProfile";
+import { User } from "lucide-react";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop";
@@ -69,12 +70,13 @@ export default function ProfileHeader() {
       <div className="px-6 pb-6">
         <div className="flex flex-col md:flex-row md:items-end gap-6 -mt-16 mb-6 relative z-10">
           <div className="flex flex-col items-center md:items-start">
-            <img
-              src={DEFAULT_AVATAR}
-              alt={name}
-              className="w-32 h-32 rounded-lg border-4 border-white shadow-lg object-cover"
-            />
-            <p className="text-sm text-gray-500 mt-2">Thành viên từ {joinDate}</p>
+            <div className="w-32 h-32 rounded-lg border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+              <User className="w-16 h-16 text-gray-400" />
+            </div>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Thành viên từ {joinDate}
+            </p>
           </div>
 
           <div className="flex-1">
