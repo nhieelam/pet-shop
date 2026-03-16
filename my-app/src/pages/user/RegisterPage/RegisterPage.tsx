@@ -17,27 +17,6 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Tên đầy đủ
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Nhập tên của bạn"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.fullName
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
-              />
-              {errors.fullName && (
-                <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
-              )}
-            </div>
 
             <div>
               <label htmlFor="userName" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -126,7 +105,28 @@ export default function RegisterPage() {
                 <p className="text-red-500 text-sm mt-2">{errors.confirmPassword}</p>
               )}
             </div>
-
+                        <div>
+              <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+                Địa chỉ
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Nhập địa chỉ"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
+                  errors.address
+                    ? "border-red-500 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-blue-400"
+                }`}
+              />
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-2">{errors.address}</p>
+              )}
+            </div>
+{/* 
             <div>
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               {errors.acceptTerms && (
                 <p className="text-red-500 text-sm mt-2">{errors.acceptTerms}</p>
               )}
-            </div>
+            </div> */}
 
             <button
               type="submit"

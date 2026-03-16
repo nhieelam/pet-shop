@@ -55,9 +55,9 @@ public class AuthController {
         return new ApiResponse<AuthResponse>(response, "Refresh token successfully");
     }
 
-//    @PostMapping("/register")
-//    public ApiResponse<UserResponse> register(@Valid @RequestBody UserRegisterRequest req) {
-//        UserResponse response = authService.register(req);
-//        return new ApiResponse<UserResponse>(response, "Registered successfully");
-//    }
+    @PostMapping("/register")
+    public ApiResponse<UserResponse> register(@Valid @RequestBody UserRegisterRequest req) {
+        UserResponse response = authService.register(req);
+        return new ApiResponse<UserResponse>(response, "Registered successfully");
+    }
 }

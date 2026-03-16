@@ -11,7 +11,7 @@ import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/M
 import ManageServicesPage from "./pages/admin/ManageServicesPage/ManageServicesPage";
 import PurchasePage from "./pages/admin/PurchasePage/PurchasePage.tsx";
 import AdminDashBoard from "./pages/admin/DashBoardPage/AdminDashBoard";
-
+import RegisterPage from "./pages/user/RegisterPage/RegisterPage";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
@@ -33,11 +33,13 @@ const App: React.FC = () => {
                 element={<Navigate to="/user/products" replace />}
             />
 
-            {/* login */}
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-            {/* USER ROUTES */}
+            <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/admin/register" element={<RegisterPage />} />
+
+
             <Route path="/user" element={<UserLayout />}>
               <Route path="cart" element={<CartPage />} />
               <Route path="profile" element={<ProfilePage />} />

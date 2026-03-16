@@ -1,15 +1,19 @@
-import { RegisterFormData, RegisterFormErrors } from "./types";
+import type {RegisterFormData, RegisterFormErrors} from "./types";
+
+const initialFormData: RegisterFormData = {
+  userName: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  address : "",
+};
+
 
 export const validateForm = (
   formData: RegisterFormData
 ): RegisterFormErrors => {
   const errors: RegisterFormErrors = {};
 
-  if (!formData.fullName.trim()) {
-    errors.fullName = "Tên không được để trống";
-  } else if (formData.fullName.length < 3) {
-    errors.fullName = "Tên phải có ít nhất 3 ký tự";
-  }
 
   if (!formData.userName) {
     errors.userName = "userName không được để trống";
@@ -33,10 +37,6 @@ export const validateForm = (
     errors.confirmPassword = "Xác nhận mật khẩu không được để trống";
   } else if (formData.password !== formData.confirmPassword) {
     errors.confirmPassword = "Mật khẩu không khớp";
-  }
-
-  if (!formData.acceptTerms) {
-    errors.acceptTerms = "Bạn phải chấp nhận điều khoản";
   }
 
   return errors;

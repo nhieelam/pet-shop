@@ -29,3 +29,10 @@ export interface LogoutRequest {
 export interface RefreshRequest {
     token: string;
 }
+
+export interface RegisterRequest {
+  userName: string;
+  phone: string;
+  password: string;
+  address?: string;
+}

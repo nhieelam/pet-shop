@@ -4,8 +4,8 @@ spring:
 
     datasource:
         url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
-        username: root
-        password: root
+        username: postgres
+        password: postgres
 #    datasource:
 #        url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
 #        username: postgres
