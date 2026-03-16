@@ -1,7 +1,11 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { validateForm } from "../validation";
 import type { RegisterFormData, RegisterFormErrors } from "../types";
 import type { UseRegisterFormReturn } from "../types";
+import { register } from "@/services/authService";
+import { storeAuthToken, storeUserName } from "@/utils/storageUtils";
+import { UserRole } from "@/enum/user";
 
 const initialFormData: RegisterFormData = {
   userName: "",
@@ -13,6 +17,7 @@ const initialFormData: RegisterFormData = {
 
 
 export function useRegisterForm(): UseRegisterFormReturn {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +43,40 @@ export function useRegisterForm(): UseRegisterFormReturn {
   }, []);
 
   const handleSubmit = useCallback(
+    async (e: React.FormEvent): Promise<void> => {
+      e.preventDefault();
 
+      const validationErrors = validateForm(formData);
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return;
+      }
+
+      setIsLoading(true);
+      setErrors({});
+
+      try {
+        const registerData = {
+          username: formData.userName,
+          phone: formData.phone,
+          password: formData.password,
+          address: formData.address || undefined,
+          role: UserRole.CUSTOMER,
+        };
+
+        const response = await register(registerData);
+
+        storeAuthToken(response.token);
+        storeUserName(formData.userName);
+
+        navigate("/login", { replace: true });
+      } catch (error: unknown) {
+        console.error("Registration error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [formData, navigate]
   );
 
   return {

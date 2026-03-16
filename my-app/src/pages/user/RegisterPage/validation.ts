@@ -17,7 +17,7 @@ export const validateForm = (
 
   if (!formData.userName) {
     errors.userName = "userName không được để trống";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.userName)) {
+  } else if (!/^[a-zA-Z0-9_]+$/.test(formData.userName)) {
     errors.userName = "userName không hợp lệ";
   }
 

@@ -23,7 +23,7 @@ export default function RegisterPage() {
                 Tên Đăng Nhập
               </label>
               <input
-                type="email"
+                type="text"
                 id="userName"
                 name="userName"
                 value={formData.userName}

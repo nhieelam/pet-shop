@@ -200,7 +200,7 @@ public class AuthService {
 
 
         Role role = roleRepository.findByRoleName(req.getRole())
-                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorType.ROLE_NOT_FOUND));
 
 
         User user = User.builder()

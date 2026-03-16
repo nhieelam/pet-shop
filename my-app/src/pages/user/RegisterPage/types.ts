@@ -11,7 +11,8 @@ export interface RegisterFormErrors {
   phone?: string;
   password?: string;
   confirmPassword?: string;
-  address ?: string;
+  address?: string;
+  general?: string;
 }
 export interface UseRegisterFormReturn {
   formData: RegisterFormData;

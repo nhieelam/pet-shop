@@ -1,3 +1,5 @@
+import { UserRole } from "../enum/user";
+
 export interface AuthRequest {
   userName: string;
   password: string;
@@ -31,8 +33,9 @@ export interface RefreshRequest {
 }
 
 export interface RegisterRequest {
-  userName: string;
+  username: string;
   phone: string;
   password: string;
   address?: string;
+  role: UserRole;
 }
