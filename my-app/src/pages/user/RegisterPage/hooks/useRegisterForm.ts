@@ -69,7 +69,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
         storeAuthToken(response.token);
         storeUserName(formData.userName);
 
-        navigate("/login", { replace: true });
+        navigate("/user/products", { replace: true });
       } catch (error: unknown) {
         console.error("Registration error:", error);
       } finally {
