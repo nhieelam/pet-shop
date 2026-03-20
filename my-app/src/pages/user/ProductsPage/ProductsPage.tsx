@@ -7,7 +7,6 @@ import SearchBar from "./components/SearchBar";
 import Pagination from "./components/Pagination";
 
 import {useProductManager} from "./hooks/useProductManager";
-import {ITEMS_PER_PAGE} from "./constants";
 import {useEffect, useState} from "react";
 import type {ProductResponse} from "@/types/productTypes";
 import Loader from "@/components/ui/loader";
@@ -16,6 +15,8 @@ import {getAllProducts} from "@/services/productService";
 import {getAllCategories} from "@/services/categoryService";
 
 export default function ProductsPage() {
+  const ITEMS_PER_PAGE = 12;
+
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [loading, setLoading] = useState(true);

@@ -4,7 +4,6 @@ import ProfilePage from "./pages/user/ProfilePage/ProfilePage";
 import ProductsPage from "./pages/user/ProductsPage/ProductsPage";
 import ServicesPage from "./pages/user/ServicesPage/ServicesPage";
 import DetailedProductPage from "./pages/user/DetailedProductPage/DetailedProductPage";
-import DetailedServicePage from "./pages/user/DetailedServicePage/DetailedServicePage";
 import ListProductsPage from "./pages/admin/ListProductsPage/ListProductsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage/ManageOrdersPage";
 import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/ManageProductCategoryPage";
@@ -49,13 +48,9 @@ const App: React.FC = () => {
                   path="detailedProduct/:id"
                   element={<DetailedProductPage />}
               />
-              <Route
-                  path="detailedService/:id"
-                  element={<DetailedServicePage />}
-              />
+ 
             </Route>
 
-            {/* ADMIN ROUTES */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="" element={<AdminDashBoard />} />
               <Route path="dashBoard" element={<AdminDashBoard />} />
