@@ -6,11 +6,6 @@ spring:
         url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
         username: root
         password: root
-#    datasource:
-#        url: "jdbc:postgresql://db.gtgtnfgfjocuucvmdmzl.supabase.co:5432/postgres"
-#        username: postgres
-#        password: lamthaiyennhi20051011
-
     jpa:
         hibernate:
             ddl-auto: update
