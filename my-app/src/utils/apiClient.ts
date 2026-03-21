@@ -25,6 +25,16 @@ apiClient.interceptors.request.use(
         if (token) {
           config.headers = config.headers || {};
           config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          // Remove Authorization header if token is not available
+          if (config.headers) {
+            delete config.headers.Authorization;
+          }
+        }
+      } else {
+        // Explicitly remove Authorization header when skipAuth is true
+        if (config.headers) {
+          delete config.headers.Authorization;
         }
       }
 

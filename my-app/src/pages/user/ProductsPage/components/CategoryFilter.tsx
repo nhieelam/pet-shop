@@ -13,6 +13,7 @@ export default function CategoryFilter({
   onCategoriesChange,
   layout = "sidebar",
 }: CategoryFilterProps) {
+  
   const handleToggleCategory = (category: string) => {
     if (selectedCategories.includes(category)) {
       onCategoriesChange(selectedCategories.filter((cat) => cat !== category));

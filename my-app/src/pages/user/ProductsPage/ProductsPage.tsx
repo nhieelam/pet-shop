@@ -7,23 +7,33 @@ import SearchBar from "./components/SearchBar";
 import Pagination from "./components/Pagination";
 
 import {useProductManager} from "./hooks/useProductManager";
-import {CATEGORIES, ITEMS_PER_PAGE} from "./constants";
 import {useEffect, useState} from "react";
-import type {ProductResponse} from "../../../types/productTypes.ts";
-import Loader from "../../../components/ui/loader.tsx";
+import type {ProductResponse} from "@/types/productTypes";
+import Loader from "@/components/ui/loader";
 import axios from "axios";
-import {getAllProducts} from "../../../services/productService.ts";
+import {getAllProducts} from "@/services/productService";
+import {getAllCategories} from "@/services/categoryService";
 
 export default function ProductsPage() {
+  const ITEMS_PER_PAGE = 12;
+
   const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getAllProducts();
-        setProducts(data);
+        const [productsData, categoriesData] = await Promise.all([
+          getAllProducts(),
+          getAllCategories(),
+        ]);
+
+        setProducts(productsData);
+        
+        const categoryNames = categoriesData.map((cat) => cat.name);
+        setCategories(["All", ...categoryNames]);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           setError(err.response?.data?.message || "Lỗi từ server");
@@ -35,7 +45,7 @@ export default function ProductsPage() {
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
   const {
@@ -81,7 +91,6 @@ export default function ProductsPage() {
         )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-          {/* SEARCH */}
           <div className="mb-8">
             <SearchBar onSearch={handleSearch}/>
           </div>
@@ -89,12 +98,11 @@ export default function ProductsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-            {/* SIDEBAR FILTER */}
             <div className="lg:col-span-1 space-y-6">
 
               <div className="bg-white rounded-2xl shadow-md p-5">
                 <CategoryFilter
-                    categories={CATEGORIES}
+                    categories={categories}
                     selectedCategories={selectedCategories}
                     onCategoriesChange={handleCategoryChange}
                     layout="sidebar"
@@ -115,21 +123,8 @@ export default function ProductsPage() {
             </div>
 
 
-            {/* PRODUCT AREA */}
             <div className="lg:col-span-3">
 
-              {/* MOBILE CATEGORY */}
-              <div className="mb-6 lg:hidden">
-                <CategoryFilter
-                    categories={CATEGORIES}
-                    selectedCategories={selectedCategories}
-                    onCategoriesChange={handleCategoryChange}
-                    layout="tabs"
-                />
-              </div>
-
-
-              {/* RESULT INFO */}
               <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
 
                 <p className="text-gray-700 text-lg">
@@ -143,7 +138,6 @@ export default function ProductsPage() {
               </div>
 
 
-              {/* PRODUCT GRID */}
               {paginatedProducts.length > 0 ? (
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">

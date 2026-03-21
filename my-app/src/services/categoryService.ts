@@ -26,7 +26,8 @@ export const createCategory = async (
 
 export const getAllCategories = async (): Promise<CategoryResponse[]> => {
   const res = await apiClient.get<ApiResponse<CategoryResponse[]>>(
-      API_CONFIG.ENDPOINTS.CATEGORY.GET_ALL
+      API_CONFIG.ENDPOINTS.CATEGORY.GET_ALL,
+      { skipAuth: true }
   );
 
   const apiData = res.data;

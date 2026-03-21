@@ -50,7 +50,6 @@ export function useProductManager({
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
 
-    // 🔍 Search theo name (DTO mới)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter((product) =>
@@ -58,12 +57,10 @@ export function useProductManager({
       );
     }
 
-    // 💰 Filter theo price
     filtered = filtered.filter(
         (product) => product.price >= minPrice && product.price <= maxPrice
     );
 
-    // Sort by name or price
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-asc":

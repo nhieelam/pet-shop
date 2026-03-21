@@ -1,3 +1,5 @@
+import { UserRole } from "../enum/user";
+
 export interface AuthRequest {
   userName: string;
   password: string;
@@ -28,4 +30,12 @@ export interface LogoutRequest {
 
 export interface RefreshRequest {
     token: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  phone: string;
+  password: string;
+  address?: string;
+  role: UserRole;
 }

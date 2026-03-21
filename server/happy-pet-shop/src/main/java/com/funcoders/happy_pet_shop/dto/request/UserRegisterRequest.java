@@ -25,5 +25,6 @@ public class UserRegisterRequest {
     @Size(max = 255, message = "ADDRESS_TOO_LONG")
     private String address;
 
+    @NotBlank(message = "ROLE_REQUIRED")
     private String role;
 }
