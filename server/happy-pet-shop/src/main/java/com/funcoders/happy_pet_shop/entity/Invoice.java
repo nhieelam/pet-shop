@@ -8,6 +8,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,7 +45,7 @@ public class Invoice {
     Customer customer;
 
     // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     String shippingAddress;
 
     // ===== GIÁ TIỀN =====
@@ -62,11 +64,6 @@ public class Invoice {
     @Column(nullable = false, length = 20)
     PaymentStatus status = PaymentStatus.PENDING;
 
-    // ===== KHUYẾN MÃI =====
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id")
-    Promotion promotion;
-
     // ===== THỜI GIAN =====
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
@@ -77,7 +74,7 @@ public class Invoice {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    Set<InvoiceDetail> invoiceDetails;
+    Set<InvoiceDetail> invoiceDetails = new HashSet<>();
 
     // ===== LIFECYCLE =====
     @PrePersist
@@ -93,8 +90,14 @@ public class Invoice {
 
     // ===== BUSINESS LOGIC =====
     public void recalculateTotalAmount() {
+        if (invoiceDetails == null || invoiceDetails.isEmpty()) {
+            this.totalAmount = BigDecimal.ZERO;
+            return;
+        }
+
         this.totalAmount = invoiceDetails.stream()
                 .map(InvoiceDetail::getTotalPrice)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

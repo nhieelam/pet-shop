@@ -1,26 +1,29 @@
 export interface RegisterFormData {
-  fullName: string;
-  userName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   phone: string;
   password: string;
   confirmPassword: string;
-  acceptTerms: boolean;
+  address: string;
 }
 
 export interface RegisterFormErrors {
-  fullName?: string;
-  userName?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   phone?: string;
   password?: string;
   confirmPassword?: string;
-  acceptTerms?: string;
+  address?: string;
+  general?: string;
 }
 
-export const initialFormData: RegisterFormData = {
-  fullName: "",
-  userName: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  acceptTerms: false,
-};
+export interface UseRegisterFormReturn {
+  formData: RegisterFormData;
+  errors: RegisterFormErrors;
+  isLoading: boolean;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
+  resetForm: () => void;
+}

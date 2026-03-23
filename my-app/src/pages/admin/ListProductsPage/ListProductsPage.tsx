@@ -1,977 +1,851 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useListProducts } from "./useListProducts";
+import type { ProductResponse } from "../../../types/productTypes";
+import type { ProductCreationRequest, ProductUpdateRequest } from "../../../types/productTypes";
+import { uploadImageToCloudinary, isCloudinaryConfigured } from "../../../services/cloudinaryService";
 
-// Types
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: "active" | "inactive";
-  description?: string;
-  images: string[];
-  updatedAt: string;
-}
+const SORT_OPTIONS = [
+  {value: "newest", label: "Newest First"},
+  {value: "oldest", label: "Oldest First"},
+  {value: "name-asc", label: "Name (A-Z)"},
+  {value: "name-desc", label: "Name (Z-A)"},
+  {value: "price-asc", label: "Price (Low-High)"},
+  {value: "price-desc", label: "Price (High-Low)"},
+  {value: "quantity-asc", label: "Stock (Low-High)"},
+  {value: "quantity-desc", label: "Stock (High-Low)"},
+] as const;
 
-interface ProductFormData {
-  name: string;
-  sku: string;
-  category: string;
-  price: number | string;
-  stock: number | string;
-  description: string;
-  images: string[];
-  status: "active" | "inactive";
-}
+const UNIT_OPTIONS = [
+  {value: "G", label: "Gram (g)"},
+  {value: "KG", label: "Kilogram (kg)"},
+  {value: "PHAN", label: "Phần"},
 
-interface FormErrors {
-  name?: string;
-  sku?: string;
-  category?: string;
-  price?: string;
-  stock?: string;
-}
-
-// Mock categories
-const categories = [
-  "Thức ăn cho chó",
-  "Thức ăn cho mèo",
-  "Đồ chơi",
-  "Phụ kiện",
-  "Vệ sinh",
-  "Y tế",
-  "Quần áo",
-  "Khác",
+  {value: "PIECE", label: "Piece"},
+  {value: "PACK", label: "Pack"},
+  {value: "BAG", label: "Bag"},
+  {value: "BOTTLE", label: "Bottle"},
+  {value: "BOX", label: "Box"}
 ];
 
-// Mock data
-const mockProducts: Product[] = [
-  {
-    id: "prod_001",
-    name: "Thức ăn cao cấp cho chó",
-    sku: "DOG-FOOD-001",
-    category: "Thức ăn cho chó",
-    price: 350000,
-    stock: 45,
-    status: "active",
-    description: "Thức ăn dinh dưỡng cao cấp cho chó mọi lứa tuổi",
-    images: ["https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=200"],
-    updatedAt: "2026-01-05T10:30:00",
-  },
-  {
-    id: "prod_002",
-    name: "Giường mèo êm ái",
-    sku: "CAT-BED-002",
-    category: "Phụ kiện",
-    price: 280000,
-    stock: 12,
-    status: "active",
-    description: "Giường cho mèo chất liệu cotton mềm mại",
-    images: ["https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=200"],
-    updatedAt: "2026-01-04T14:20:00",
-  },
-  {
-    id: "prod_003",
-    name: "Dây xích chó cao cấp",
-    sku: "DOG-LEASH-003",
-    category: "Phụ kiện",
-    price: 95000,
-    stock: 0,
-    status: "inactive",
-    description: "Dây xích chắc chắn, an toàn",
-    images: ["https://images.unsplash.com/photo-1558788353-f76d92427f16?w=200"],
-    updatedAt: "2026-01-03T09:15:00",
-  },
-  {
-    id: "prod_004",
-    name: "Bộ đồ chơi thú cưng",
-    sku: "TOY-SET-004",
-    category: "Đồ chơi",
-    price: 180000,
-    stock: 28,
-    status: "active",
-    description: "Bộ 5 món đồ chơi an toàn cho thú cưng",
-    images: ["https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200"],
-    updatedAt: "2026-01-02T16:45:00",
-  },
-  {
-    id: "prod_005",
-    name: "Bộ vệ sinh thú cưng",
-    sku: "GROOM-KIT-005",
-    category: "Vệ sinh",
-    price: 320000,
-    stock: 18,
-    status: "active",
-    description: "Bộ dụng cụ vệ sinh hoàn chỉnh",
-    images: ["https://images.unsplash.com/photo-1552053831-71594a27c62d?w=200"],
-    updatedAt: "2026-01-01T11:20:00",
-  },
-];
+function ProductGridCard({
+                           product,
+                           categoryName,
+                           onEdit,
+                           onDelete,
+                         }: {
+  product: ProductResponse;
+  categoryName: string;
+  onEdit: (p: ProductResponse) => void;
+  onDelete: (p: ProductResponse) => void;
+}) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const emoji = "📦";
+  const q = product.quantity ?? 0;
+  const stockClass = q === 0 ? "text-rose-500 bg-rose-50" : q <= 10 ? "text-amber-500 bg-amber-50" : "text-emerald-500 bg-emerald-50";
+  const stockText = q === 0 ? "Out of Stock" : q <= 10 ? "Low Stock" : "In Stock";
+  const availableClass = product.available !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500";
+  const isExpired = product.expiryDate && new Date(product.expiryDate) < new Date();
+  const isExpiringSoon = product.expiryDate && !isExpired && new Date(product.expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const showImg = product.imageUrl && !imgFailed;
 
-export default function AdminProductListPage() {
-  // State for products
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  return (
+      <div
+          className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all group animate-fade-in">
+        <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+          {showImg ? (
+              <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={() => setImgFailed(true)}
+              />
+          ) : (
+              <span className="text-6xl">{emoji}</span>
+          )}
+          <div className="absolute top-3 right-3 flex gap-2">
+            <span
+                className={`${availableClass} px-2 py-1 rounded-full text-xs font-medium`}>{product.available !== false ? "Active" : "Inactive"}</span>
+          </div>
+          {isExpired && <div
+              className="absolute top-3 left-3 bg-rose-500 text-white px-2 py-1 rounded-full text-xs font-medium">Expired</div>}
+          {isExpiringSoon && !isExpired && <div
+              className="absolute top-3 left-3 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-medium">Expiring
+            Soon</div>}
+        </div>
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h3 className="font-semibold text-slate-800 line-clamp-1">{product.name || "Unnamed Product"}</h3>
+            <span className="text-lg font-bold text-emerald-600">${(product.price ?? 0).toFixed(2)}</span>
+          </div>
+          <p className="text-sm text-slate-500 mb-3 line-clamp-2">{product.description || "No description"}</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span
+                className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{categoryName || "Uncategorized"}</span>
+            {product.brand ?
+                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{product.brand}</span> : null}
+          </div>
+          <div className="flex items-center justify-between">
+            <span
+                className={`${stockClass} text-xs px-2 py-1 rounded-full font-medium`}>{stockText}: {q} {product.unit || "pcs"}</span>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button type="button" onClick={() => onEdit(product)}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-all" title="Edit">✏️
+              </button>
+              <button type="button" onClick={() => onDelete(product)}
+                      className="p-2 hover:bg-rose-50 rounded-lg transition-all" title="Delete">🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  );
+}
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+function ProductListRow({
+                          product,
+                          categoryName,
+                          onEdit,
+                          onDelete,
+                        }: {
+  product: ProductResponse;
+  categoryName: string;
+  onEdit: (p: ProductResponse) => void;
+  onDelete: (p: ProductResponse) => void;
+}) {
+  const emoji = "📦";
+  const q = product.quantity ?? 0;
+  const stockClass = q === 0 ? "text-rose-500 bg-rose-50" : q <= 10 ? "text-amber-500 bg-amber-50" : "text-emerald-500 bg-emerald-50";
+  const stockText = q === 0 ? "Out of Stock" : q <= 10 ? "Low Stock" : "In Stock";
 
-  // Filter state
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState("");
+  return (
+      <div
+          className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 hover:shadow-lg transition-all product-row animate-fade-in">
+        <div className="flex items-center gap-4">
+          <div
+              className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {product.imageUrl ? (
+                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy"/>
+            ) : (
+                <span className="text-3xl">{emoji}</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-slate-800 truncate">{product.name || "Unnamed Product"}</h3>
+              <span
+                  className={`${product.available !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"} px-2 py-0.5 rounded-full text-xs font-medium`}>{product.available !== false ? "Active" : "Inactive"}</span>
+            </div>
+            <p className="text-sm text-slate-500 truncate">{product.description || "No description"}</p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <span
+                  className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{categoryName || "Uncategorized"}</span>
+              {product.brand ? <span
+                  className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{product.brand}</span> : null}
+              {product.origin ? <span
+                  className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full">{product.origin}</span> : null}
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className="text-xl font-bold text-emerald-600">${(product.price ?? 0).toFixed(2)}</p>
+            <span
+                className={`${stockClass} text-xs px-2 py-1 rounded-full font-medium inline-block mt-1`}>{stockText}: {q}</span>
+          </div>
+          <div className="flex gap-1 flex-shrink-0">
+            <button type="button" onClick={() => onEdit(product)}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-all" title="Edit">✏️
+            </button>
+            <button type="button" onClick={() => onDelete(product)}
+                    className="p-2 hover:bg-rose-50 rounded-lg transition-all" title="Delete">🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+export default function ListProductsPage() {
+  const {
+    products: filteredProducts,
+    allProducts,
+    categories,
+    loading,
+    error,
+    filters,
+    updateFilter,
+    clearAllFilters,
+    filtersVisible,
+    setFiltersVisible,
+    viewMode,
+    setViewMode,
+    stats,
+    uniqueBrands,
+    uniqueOrigins,
+    activeFilterCount,
+    productModalOpen,
+    deleteModalOpen,
+    editingProduct,
+    productToDelete,
+    toast,
+    openAddModal,
+    openEditModal,
+    closeProductModal,
+    openDeleteModal,
+    closeDeleteModal,
+    handleCreateOrUpdateProduct,
+    handleDeleteProduct,
+  } = useListProducts();
 
-  // Form state
-  const [formData, setFormData] = useState<ProductFormData>({
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [formData, setFormData] = useState({
     name: "",
-    sku: "",
-    category: "",
-    price: "",
-    stock: "",
     description: "",
-    images: [],
-    status: "active",
+    categoryId: "",
+    brand: "",
+    price: "",
+    quantity: "",
+    unit: "piece",
+    origin: "",
+    expiry: "",
+    imageUrl: "",
+    available: true,
   });
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [imagePreview, setImagePreview] = useState<string[]>([]);
 
-  // Delete confirmation
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const cloudinaryEnabled = isCloudinaryConfigured();
 
-  // Debounced search
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setImageUploadError(null);
+    setImageUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setFormData((d) => ({ ...d, imageUrl: url }));
+    } catch (err) {
+      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      applyFilters();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, categoryFilters, statusFilter, products]);
-
-  // Apply filters
-  const applyFilters = useCallback(() => {
-    let filtered = [...products];
-
-    // Search by name
-    if (searchTerm) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    if (productModalOpen && editingProduct) {
+      setFormData({
+        name: editingProduct.name ?? "",
+        description: editingProduct.description ?? "",
+        categoryId: editingProduct.categoryId ?? "",
+        brand: editingProduct.brand ?? "",
+        price: String(editingProduct.price ?? ""),
+        quantity: String(editingProduct.quantity ?? ""),
+        unit: editingProduct.unit ?? "piece",
+        origin: editingProduct.origin ?? "",
+        expiry: editingProduct.expiryDate ? editingProduct.expiryDate.slice(0, 10) : "",
+        imageUrl: editingProduct.imageUrl ?? "",
+        available: editingProduct.available !== false,
+      });
+    } else if (productModalOpen && !editingProduct) {
+      setFormData({
+        name: "",
+        description: "",
+        categoryId: "",
+        brand: "",
+        price: "",
+        quantity: "",
+        unit: "piece",
+        origin: "",
+        expiry: "",
+        imageUrl: "",
+        available: true,
+      });
     }
+  }, [productModalOpen, editingProduct]);
 
-    // Filter by category
-    if (categoryFilters.length > 0) {
-      filtered = filtered.filter((p) => categoryFilters.includes(p.category));
+  const getCategoryName = (product: ProductResponse) => {
+    const id = product.categoryId;
+    if (id) {
+      const cat = categories.find((c) => c.id === id);
+      if (cat) return cat.name;
     }
-
-    // Filter by status
-    if (statusFilter) {
-      filtered = filtered.filter((p) => p.status === statusFilter);
-    }
-
-    setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, categoryFilters, statusFilter, products]);
-
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm("");
-    setCategoryFilters([]);
-    setStatusFilter("");
+    return product.categoryName ?? "Uncategorized";
   };
 
-  // Toggle category filter chips (allows multi-select)
-  const toggleCategoryFilter = (category: string) => {
-    setCategoryFilters((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Open create modal
-  const handleCreateProduct = () => {
-    setModalMode("create");
-    setFormData({
-      name: "",
-      sku: "",
-      category: "",
-      price: "",
-      stock: "",
-      description: "",
-      images: [],
-      status: "active",
-    });
-    setImagePreview([]);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Open edit modal
-  const handleEditProduct = (product: Product) => {
-    setModalMode("edit");
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-      description: product.description || "",
-      images: product.images,
-      status: product.status,
-    });
-    setImagePreview(product.images);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Validate form
-  const validateForm = (): boolean => {
-    const errors: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Tên sản phẩm là bắt buộc";
-    }
-
-    if (!formData.sku.trim()) {
-      errors.sku = "Mã SKU là bắt buộc";
-    } else {
-      // Check SKU uniqueness
-      const isDuplicate = products.some(
-        (p) =>
-          p.sku === formData.sku &&
-          (modalMode === "create" || p.id !== editingProduct?.id)
-      );
-      if (isDuplicate) {
-        errors.sku = "Mã SKU đã tồn tại";
-      }
-    }
-
-    if (!formData.category) {
-      errors.category = "Danh mục là bắt buộc";
-    }
-
-    if (!formData.price || parseFloat(formData.price.toString()) <= 0) {
-      errors.price = "Giá phải lớn hơn 0";
-    }
-
-    if (
-      formData.stock === "" ||
-      parseInt(formData.stock.toString()) < 0
-    ) {
-      errors.stock = "Số lượng không hợp lệ";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Handle form submit
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    const productData: Product = {
-      id:
-        modalMode === "create"
-          ? `prod_${Date.now()}`
-          : editingProduct!.id,
-      name: formData.name,
-      sku: formData.sku,
-      category: formData.category,
-      price: parseFloat(formData.price.toString()),
-      stock: parseInt(formData.stock.toString()),
-      description: formData.description,
-      images: imagePreview.length > 0 ? imagePreview : ["https://via.placeholder.com/200"],
-      status: formData.status,
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (modalMode === "create") {
-      setProducts([productData, ...products]);
-      alert("Thêm sản phẩm thành công!");
-    } else {
-      setProducts(
-        products.map((p) => (p.id === productData.id ? productData : p))
-      );
-      alert("Cập nhật sản phẩm thành công!");
-    }
-
-    setIsModalOpen(false);
-  };
-
-  // Handle delete
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
-    setDeleteConfirmId(null);
-    alert("Xóa sản phẩm thành công!");
-  };
-
-  // Handle add image URL
-  const handleAddImage = () => {
-    const url = prompt("Nhập URL hình ảnh:");
-    if (url) {
-      setImagePreview([...imagePreview, url]);
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const payload: ProductCreationRequest & Partial<ProductUpdateRequest> = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        categoryId: formData.categoryId,
+        brand: formData.brand.trim() || undefined,
+        price: parseFloat(formData.price) || 0,
+        quantity: parseInt(formData.quantity, 10) || 0,
+        unit: formData.unit,
+        origin: formData.origin.trim() || undefined,
+        imageUrl: formData.imageUrl.trim() || undefined,
+      };
+      if (formData.expiry) (payload as ProductUpdateRequest).expiryDate = formData.expiry;
+      await handleCreateOrUpdateProduct(payload);
+    } finally {
+      setFormSubmitting(false);
     }
   };
 
-  // Handle remove image
-  const handleRemoveImage = (index: number) => {
-    setImagePreview(imagePreview.filter((_, i) => i !== index));
-  };
-
-  // Handle view history (mock)
-  const handleViewHistory = (product: Product) => {
-    alert(`Xem lịch sử thay đổi cho sản phẩm: ${product.name}\n\n(Chức năng đang được phát triển)`);
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeleteProduct();
+    } finally {
+      setDeleteSubmitting(false);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
+        <style>{`
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .product-row:hover { background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+      `}</style>
+
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            🛍️ Quản Lý Sản Phẩm
-          </h1>
-          <p className="text-gray-600">
-            Tổng số: <span className="font-bold">{filteredProducts.length}</span> sản phẩm
-          </p>
-        </div>
-
-        {/* Filters & Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                🔍 Tìm kiếm theo tên
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Nhập tên sản phẩm..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                📦 Danh mục
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => {
-                  const isActive = categoryFilters.includes(cat);
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => toggleCategoryFilter(cat)}
-                      className={`px-3 py-2 rounded-lg border text-sm font-semibold transition ${
-                        isActive
-                          ? "bg-blue-600 text-white border-blue-600 shadow"
-                          : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
+        <header
+            className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-lg sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-2xl">🐾</span></div>
+                <div>
+                  <h1 className="text-xl font-bold">Pet Shop Admin</h1>
+                  <p className="text-emerald-100 text-xs">Manage your products efficiently</p>
+                </div>
               </div>
-              {categoryFilters.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setCategoryFilters([])}
-                  className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-800"
-                >
-                  Bỏ chọn danh mục
+              <div className="flex items-center gap-3">
+                <div
+                    className="hidden sm:flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
+                  <span>📦</span>
+                  <span>{stats.total} Products</span>
+                </div>
+                <button type="button" onClick={openAddModal}
+                        className="flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-xl font-semibold hover:bg-emerald-50 transition-all shadow-md hover:shadow-lg">
+                  <span>➕</span>
+                  <span className="hidden sm:inline">Add Product</span>
                 </button>
-              )}
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                ⚡ Trạng thái
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Tất cả</option>
-                <option value="active">Đang bán</option>
-                <option value="inactive">Ngừng bán</option>
-              </select>
+              </div>
             </div>
           </div>
+        </header>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={handleCreateProduct}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition flex items-center gap-2"
-            >
-              <span>➕</span>
-              Thêm sản phẩm
-            </button>
-            <button
-              onClick={resetFilters}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition flex items-center gap-2"
-            >
-              <span>🔄</span>
-              Đặt lại bộ lọc
-            </button>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Hình ảnh
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Tên sản phẩm
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Danh mục
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Giá
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Tồn kho
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Cập nhật
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                      Không tìm thấy sản phẩm nào
-                    </td>
-                  </tr>
-                ) : (
-                  currentProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      {/* Image */}
-                      <td className="px-6 py-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </td>
-
-                      {/* Name */}
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-800">
-                          {product.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          SKU: {product.sku}
-                        </div>
-                      </td>
-
-                      {/* Category */}
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
-                          {product.category}
-                        </span>
-                      </td>
-
-                      {/* Price */}
-                      <td className="px-6 py-4">
-                        <span className="font-bold text-blue-600">
-                          {formatCurrency(product.price)}
-                        </span>
-                      </td>
-
-                      {/* Stock */}
-                      <td className="px-6 py-4">
-                        <span
-                          className={`font-semibold ${
-                            product.stock === 0
-                              ? "text-red-600"
-                              : product.stock < 10
-                              ? "text-yellow-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {product.stock}
-                        </span>
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.status === "active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {product.status === "active"
-                            ? "Đang bán"
-                            : "Ngừng bán"}
-                        </span>
-                      </td>
-
-                      {/* Updated At */}
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatDate(product.updatedAt)}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
-                            title="Chỉnh sửa"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirmId(product.id)}
-                            className="text-red-600 hover:text-red-800 font-semibold text-sm"
-                            title="Xóa"
-                          >
-                            🗑️
-                          </button>
-                          <button
-                            onClick={() => handleViewHistory(product)}
-                            className="text-gray-600 hover:text-gray-800 font-semibold text-sm"
-                            title="Lịch sử thay đổi"
-                          >
-                            📋
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredProducts.length > 0 && (
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                {/* Page Size Selector */}
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700">
-                    Hiển thị:
-                  </label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-                  <span className="text-sm text-gray-700">
-                    / {filteredProducts.length} sản phẩm
-                  </span>
-                </div>
-
-                {/* Pagination Controls */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
-                  >
-                    ← Trước
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, i) => {
-                      const page = i + 1;
-                      // Show first, last, current, and adjacent pages
-                      if (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-1 rounded-lg font-semibold text-sm ${
-                              currentPage === page
-                                ? "bg-blue-600 text-white"
-                                : "bg-white border border-gray-300 hover:bg-gray-50"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      } else if (
-                        page === currentPage - 2 ||
-                        page === currentPage + 2
-                      ) {
-                        return (
-                          <span key={page} className="px-2 text-gray-500">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
-                  >
-                    Sau →
-                  </button>
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div
+                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center"><span
+                    className="text-2xl">📦</span></div>
+                <div>
+                  <p className="text-slate-500 text-xs font-medium">Total Products</p>
+                  <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </div>
+            <div
+                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><span
+                    className="text-2xl">✓</span></div>
+                <div>
+                  <p className="text-slate-500 text-xs font-medium">Available</p>
+                  <p className="text-2xl font-bold text-slate-800">{stats.available}</p>
+                </div>
+              </div>
+            </div>
+            <div
+                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center"><span
+                    className="text-2xl">⚠</span></div>
+                <div>
+                  <p className="text-slate-500 text-xs font-medium">Low Stock</p>
+                  <p className="text-2xl font-bold text-slate-800">{stats.lowStock}</p>
+                </div>
+              </div>
+            </div>
+            <div
+                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center"><span
+                    className="text-2xl">✕</span></div>
+                <div>
+                  <p className="text-slate-500 text-xs font-medium">Out of Stock</p>
+                  <p className="text-2xl font-bold text-slate-800">{stats.outOfStock}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      {/* Create/Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-2xl">
-              <h2 className="text-2xl font-bold text-white">
-                {modalMode === "create" ? "➕ Thêm sản phẩm mới" : "✏️ Chỉnh sửa sản phẩm"}
-              </h2>
+          {/* Filters */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                  <input
+                      type="text"
+                      placeholder="Search products by name, brand, or description..."
+                      value={filters.search}
+                      onChange={(e) => updateFilter("search", e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    onClick={() => setFiltersVisible((v) => !v)}
+                    className={`flex items-center gap-2 px-4 py-3 border rounded-xl font-medium text-slate-600 transition-all ${filtersVisible ? "bg-emerald-50 border-emerald-300 text-emerald-600" : "border-slate-200 hover:bg-slate-50"}`}
+                >
+                  <span>Filters</span>
+                  {activeFilterCount > 0 && (
+                      <span
+                          className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">{activeFilterCount}</span>
+                  )}
+                </button>
+                <button type="button" onClick={clearAllFilters}
+                        className="flex items-center gap-2 px-4 py-3 border border-slate-200 rounded-xl hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all font-medium text-slate-600">
+                  <span>Clear</span>
+                </button>
+              </div>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-              <div className="space-y-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Tên sản phẩm <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                      formErrors.name ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="VD: Thức ăn cho chó cao cấp"
-                  />
-                  {formErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
-                  )}
-                </div>
-
-                {/* SKU */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Mã SKU <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sku}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sku: e.target.value.toUpperCase() })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                      formErrors.sku ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="VD: DOG-FOOD-001"
-                  />
-                  {formErrors.sku && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.sku}</p>
-                  )}
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Danh mục <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => {
-                      const isSelected = formData.category === cat;
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() =>
-                            setFormData({ ...formData, category: cat })
-                          }
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold transition ${
-                            isSelected
-                              ? "bg-blue-600 text-white border-blue-600 shadow"
-                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
-                          }`}
-                          aria-pressed={isSelected}
-                        >
-                          {cat}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {formErrors.category && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
-                  )}
-                </div>
-
-                {/* Price & Stock */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Giá (VND) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                        formErrors.price ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="0"
-                      min="0"
-                    />
-                    {formErrors.price && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Tồn kho <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.stock}
-                      onChange={(e) =>
-                        setFormData({ ...formData, stock: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                        formErrors.stock ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="0"
-                      min="0"
-                    />
-                    {formErrors.stock && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.stock}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Mô tả
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
-                    placeholder="Mô tả chi tiết về sản phẩm..."
-                    rows={4}
-                  />
-                </div>
-
-                {/* Images */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Hình ảnh
-                  </label>
-                  <div className="space-y-3">
-                    {imagePreview.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3">
-                        {imagePreview.map((url, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={url}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg border-2 border-gray-300"
-                            />
-                            <button
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                            >
-                              ×
-                            </button>
-                          </div>
+            {filtersVisible && (
+                <div className="mt-4 pt-4 border-t border-slate-100 animate-slide-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                      <select
+                          value={filters.categoryId}
+                          onChange={(e) => updateFilter("categoryId", e.target.value)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white"
+                      >
+                        <option value="">All Categories</option>
+                        {categories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Brand</label>
+                      <select
+                          value={filters.brand}
+                          onChange={(e) => updateFilter("brand", e.target.value)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                      >
+                        <option value="">All Brands</option>
+                        {uniqueBrands.map((b) => (
+                            <option key={b} value={b}>{b}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Availability</label>
+                      <select
+                          value={filters.availability}
+                          onChange={(e) => updateFilter("availability", e.target.value)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                      >
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="unavailable">Unavailable</option>
+                        <option value="lowstock">Low Stock (≤10)</option>
+                        <option value="outofstock">Out of Stock</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Price Range</label>
+                      <div className="flex gap-2">
+                        <input
+                            type="number"
+                            placeholder="Min"
+                            value={filters.priceMin}
+                            onChange={(e) => updateFilter("priceMin", e.target.value)}
+                            className="w-1/2 px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                        />
+                        <input
+                            type="number"
+                            placeholder="Max"
+                            value={filters.priceMax}
+                            onChange={(e) => updateFilter("priceMax", e.target.value)}
+                            className="w-1/2 px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                        />
                       </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleAddImage}
-                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold transition"
-                    >
-                      + Thêm URL hình ảnh
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Origin</label>
+                      <select
+                          value={filters.origin}
+                          onChange={(e) => updateFilter("origin", e.target.value)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                      >
+                        <option value="">All Origins</option>
+                        {uniqueOrigins.map((o) => (
+                            <option key={o} value={o}>{o}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                      <select
+                          value={filters.sortBy}
+                          onChange={(e) => updateFilter("sortBy", e.target.value as typeof filters.sortBy)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                      >
+                        {SORT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Expiry Status</label>
+                      <select
+                          value={filters.expiry}
+                          onChange={(e) => updateFilter("expiry", e.target.value)}
+                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                      >
+                        <option value="">All Products</option>
+                        <option value="expired">Expired</option>
+                        <option value="expiring-soon">Expiring Soon (30 days)</option>
+                        <option value="valid">Valid</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+            )}
+          </div>
+
+          {/* Results & View Toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-slate-500">Showing {filteredProducts.length} of {allProducts.length} products</p>
+            <div className="flex items-center gap-2">
+              <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-emerald-100 text-emerald-600" : "hover:bg-slate-100 text-slate-400"}`}
+                  title="Grid"
+              >▦
+              </button>
+              <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-emerald-100 text-emerald-600" : "hover:bg-slate-100 text-slate-400"}`}
+                  title="List"
+              >≡
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          {error && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4 text-rose-800">{error}</div>
+          )}
+
+          {loading ? (
+              <div className="text-center py-16">
+                <div
+                    className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"/>
+                <p className="text-slate-500">Loading products...</p>
+              </div>
+          ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><span
+                    className="text-5xl">🐕</span></div>
+                <h3 className="text-xl font-semibold text-slate-700 mb-2">No products found</h3>
+                <p className="text-slate-500 mb-6">Try adjusting your filters or add a new product</p>
+                <button type="button" onClick={openAddModal}
+                        className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-600 transition-all">
+                  <span>➕</span> Add Your First Product
+                </button>
+              </div>
+          ) : (
+              <div
+                  className={`grid gap-4 ${
+                      viewMode === "grid"
+                          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                          : "grid-cols-1"
+                  }`}
+              >
+                {viewMode === "grid"
+                    ? filteredProducts.map((p) => (
+                        <ProductGridCard
+                            key={p.id}
+                            product={p}
+                            categoryName={getCategoryName(p)}
+                            onEdit={openEditModal}
+                            onDelete={openDeleteModal}
+                        />
+                    ))
+                    : filteredProducts.map((p) => (
+                        <ProductListRow
+                            key={p.id}
+                            product={p}
+                            categoryName={getCategoryName(p)}
+                            onEdit={openEditModal}
+                            onDelete={openDeleteModal}
+                        />
+                    ))}
+              </div>
+          )}
+
+          {allProducts.length >= 999 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 mt-4">
+                <p className="text-amber-800 font-medium">Maximum product limit (999) reached. Please delete some
+                  products to add more.</p>
+              </div>
+          )}
+        </main>
+
+        {/* Product Modal */}
+        {productModalOpen && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeProductModal} aria-hidden/>
+              <div className="relative min-h-screen flex items-center justify-center p-4">
+                <div
+                    className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-in"
+                    onClick={(e) => e.stopPropagation()}>
+                  <div
+                      className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-slate-800">{editingProduct ? "Edit Product" : "Add New Product"}</h2>
+                    <button type="button" onClick={closeProductModal}
+                            className="p-2 hover:bg-slate-100 rounded-lg transition-all">✕
                     </button>
                   </div>
+                  <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="sm:col-span-2">
+                        <label htmlFor="product-name" className="block text-sm font-medium text-slate-700 mb-1.5">Product
+                          Name *</label>
+                        <input id="product-name" type="text" required value={formData.name}
+                               onChange={(e) => setFormData((d) => ({...d, name: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                               placeholder="e.g., Premium Dog Food"/>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label htmlFor="product-description"
+                               className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+                        <textarea id="product-description" rows={3} value={formData.description}
+                                  onChange={(e) => setFormData((d) => ({...d, description: e.target.value}))}
+                                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
+                                  placeholder="Product description..."/>
+                      </div>
+                      <div>
+                        <label htmlFor="product-category" className="block text-sm font-medium text-slate-700 mb-1.5">Category
+                          *</label>
+                        <select id="product-category" required value={formData.categoryId}
+                                onChange={(e) => setFormData((d) => ({...d, categoryId: e.target.value}))}
+                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                          <option value={editingProduct? editingProduct.categoryId: ""}>{editingProduct? editingProduct.categoryName: "Select category"}</option>
+                          {categories.map((c) => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="product-brand"
+                               className="block text-sm font-medium text-slate-700 mb-1.5">Brand</label>
+                        <input id="product-brand" type="text" value={formData.brand}
+                               onChange={(e) => setFormData((d) => ({...d, brand: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                               placeholder="e.g., Royal Canin"/>
+                      </div>
+                      <div>
+                        <label htmlFor="product-price" className="block text-sm font-medium text-slate-700 mb-1.5">Price
+                          ($) *</label>
+                        <input id="product-price" type="number" required min={0} step={0.01} value={formData.price}
+                               onChange={(e) => setFormData((d) => ({...d, price: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                               placeholder="0.00"/>
+                      </div>
+                      <div>
+                        <label htmlFor="product-quantity" className="block text-sm font-medium text-slate-700 mb-1.5">Quantity
+                          *</label>
+                        <input id="product-quantity" type="number" required min={0} value={formData.quantity}
+                               onChange={(e) => setFormData((d) => ({...d, quantity: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                               placeholder="0"/>
+                      </div>
+                      <div>
+                        <label htmlFor="product-unit"
+                               className="block text-sm font-medium text-slate-700 mb-1.5">Unit</label>
+                        <select id="product-unit" value={formData.unit}
+                                onChange={(e) => setFormData((d) => ({...d, unit: e.target.value}))}
+                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                          {UNIT_OPTIONS.map((u) => (
+                              <option key={u.value} value={u.value}>
+                                {u.label}
+                              </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="product-origin"
+                               className="block text-sm font-medium text-slate-700 mb-1.5">Origin</label>
+                        <input id="product-origin" type="text" value={formData.origin}
+                               onChange={(e) => setFormData((d) => ({...d, origin: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                               placeholder="e.g., USA"/>
+                      </div>
+                      <div>
+                        <label htmlFor="product-expiry" className="block text-sm font-medium text-slate-700 mb-1.5">Expiry
+                          Date</label>
+                        <input id="product-expiry" type="date" value={formData.expiry}
+                               onChange={(e) => setFormData((d) => ({...d, expiry: e.target.value}))}
+                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"/>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Product image</label>
+                        <div className="space-y-3">
+                          {cloudinaryEnabled && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageFileChange}
+                                disabled={imageUploading}
+                                className="hidden"
+                                id="product-image-file"
+                              />
+                              <label
+                                htmlFor="product-image-file"
+                                className={`inline-flex items-center gap-2 px-4 py-2.5 border rounded-xl font-medium cursor-pointer transition-all ${
+                                  imageUploading
+                                    ? "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"
+                                    : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                }`}
+                              >
+                                {imageUploading ? (
+                                  <>
+                                    <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                    Uploading…
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>📷</span>
+                                    Choose from file
+                                  </>
+                                )}
+                              </label>
+                              {imageUploadError && (
+                                <p className="text-sm text-rose-600">{imageUploadError}</p>
+                              )}
+                            </div>
+                          )}
+                          <div>
+                            <label htmlFor="product-image-url" className="block text-xs text-slate-500 mb-1">
+                              {cloudinaryEnabled ? "Or paste image URL" : "Image URL"}
+                            </label>
+                            <input
+                              id="product-image-url"
+                              type="url"
+                              value={formData.imageUrl}
+                              onChange={(e) => {
+                                setFormData((d) => ({ ...d, imageUrl: e.target.value }));
+                                setImageUploadError(null);
+                              }}
+                              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                              placeholder="https://..."
+                            />
+                          </div>
+                          {formData.imageUrl && (
+                            <div className="flex items-start gap-3">
+                              <div className="w-20 h-20 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex-shrink-0">
+                                <img
+                                  src={formData.imageUrl}
+                                  alt="Preview"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                              </div>
+                              <p className="text-xs text-slate-500 break-all flex-1 min-w-0">
+                                Current: {formData.imageUrl}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 pt-6 sm:col-span-2">
+                        <input id="product-available" type="checkbox" checked={formData.available}
+                               onChange={(e) => setFormData((d) => ({...d, available: e.target.checked}))}
+                               className="w-5 h-5 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"/>
+                        <label htmlFor="product-available" className="text-sm font-medium text-slate-700">Available for
+                          sale</label>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-4 border-t border-slate-100">
+                      <button type="button" onClick={closeProductModal}
+                              className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-all">Cancel
+                      </button>
+                      <button type="submit" disabled={formSubmitting}
+                              className="flex-1 px-4 py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
+                        {formSubmitting ? "Saving..." : editingProduct ? "Save Changes" : "Add Product"}
+                      </button>
+                    </div>
+                  </form>
                 </div>
+              </div>
+            </div>
+        )}
 
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Trạng thái
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="status"
-                        value="active"
-                        checked={formData.status === "active"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            status: e.target.value as "active" | "inactive",
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-gray-700">Đang bán</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="status"
-                        value="inactive"
-                        checked={formData.status === "inactive"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            status: e.target.value as "active" | "inactive",
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-gray-700">Ngừng bán</span>
-                    </label>
+        {/* Delete Modal */}
+        {deleteModalOpen && productToDelete && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden/>
+              <div className="relative min-h-screen flex items-center justify-center p-4">
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-slide-in"
+                     onClick={(e) => e.stopPropagation()}>
+                  <div className="p-6 text-center">
+                    <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🗑️</span></div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Product?</h3>
+                    <p className="text-slate-500 mb-6">Are you sure you want to
+                      delete &quot;{productToDelete.name || "this product"}&quot;?</p>
+                    <div className="flex gap-3">
+                      <button type="button" onClick={closeDeleteModal}
+                              className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-all">Cancel
+                      </button>
+                      <button type="button" onClick={confirmDelete} disabled={deleteSubmitting}
+                              className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-xl font-semibold hover:bg-rose-600 transition-all">{deleteSubmitting ? "Deleting..." : "Delete"}</button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+        )}
 
-            {/* Modal Footer */}
-            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex gap-3 justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-              >
-                {modalMode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"}
-              </button>
+        {/* Toast */}
+        {toast && (
+            <div
+                className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slide-in ${toast.type === "success" ? "bg-emerald-500" : toast.type === "error" ? "bg-rose-500" : "bg-slate-700"} text-white`}>
+              <span>{toast.type === "success" ? "✓" : toast.type === "error" ? "!" : "ℹ"}</span>
+              <span className="font-medium">{toast.message}</span>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                Xác nhận xóa
-              </h3>
-              <p className="text-gray-600">
-                Bạn có chắc chắn muốn xóa sản phẩm này không? Hành động này không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => handleDeleteProduct(deleteConfirmId)}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
+        )}
+      </div>
   );
 }

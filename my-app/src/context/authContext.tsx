@@ -6,29 +6,46 @@ import {
   type ReactNode,
 } from "react";
 
-import {login as loginService, verifyToken} from "../services/authService";
-
+import {
+  login as loginService,
+  logout as logoutService,
+  register as registerService,
+  verifyToken,
+} from "../services/authService";
 import type {AuthRequest, IntrospectRequest} from "../types/authTypes";
 import type {CustomerResponse} from "../types/customerTypes";
+import type {UserCreationRequest} from "../types/userTypes";
 import {getAuthToken, storeAuthToken} from "../utils/storageUtils.ts";
 import {useLocation} from "react-router-dom";
-import {getInfo} from "../services/customerService.ts"
+import {getInfo} from "../services/customerService.ts";
 
 /* =========================
    CONTEXT TYPE
 ========================= */
 interface AuthContextType {
   user: CustomerResponse | null;
-  setUser: (user: CustomerResponse) => void;
+  setUser: (user: CustomerResponse | null) => void;
   loading: boolean;
   error: string | null;
-  login: (credentials: AuthRequest) => Promise<void>;
+  login: (credentials: AuthRequest) => Promise<boolean>;
+  register: (payload: UserCreationRequest) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// HOOK
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+
+  return context;
+};
 
 // Create provider for context
 export const AuthProvider = ({children}: { children: ReactNode }) => {
@@ -62,7 +79,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
         setIsAuthenticated(true);
 
-        if (location.pathname === "/login") {
+        if (!location.pathname.includes("/admin") && !location.pathname.includes("/login")) {
           const customer: CustomerResponse = await getInfo();
 
           setUser(customer);
@@ -79,12 +96,13 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
 
   /* ---------- LOGIN ---------- */
-  const login = async (credentials: AuthRequest)=> {
+  const login = async (credentials: AuthRequest) => {
     setLoading(true);
     setError(null);
 
     try {
       const authData = await loginService(credentials);
+
       setIsAuthenticated(true);
 
       storeAuthToken(authData.token);
@@ -96,6 +114,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
         setUser(customer);
       }
+      return true;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -108,11 +127,53 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     }
   };
 
+  /* ---------- REGISTER ---------- */
+  const register = async (payload: UserCreationRequest) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const authData = await registerService(payload);
+
+      setIsAuthenticated(true);
+
+      storeAuthToken(authData.token);
+
+      localStorage.setItem("auth_user", JSON.stringify(authData));
+
+      if (
+        location.pathname === "/register" ||
+        location.pathname === "/admin/register"
+      ) {
+        const customer: CustomerResponse = await getInfo();
+
+        setUser(customer);
+      }
+      return true;
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Đăng ký thất bại");
+      }
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ---------- LOGOUT ---------- */
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setError(null);
-    localStorage.removeItem("auth_user");
+
+    const tokenString = getAuthToken();
+
+    if (tokenString) {
+      await logoutService({ token: tokenString });
+    } else {
+      await logoutService();
+    }
   };
 
   return (
@@ -123,8 +184,9 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             loading,
             error,
             login,
+            register,
             logout,
-            isAuthenticated
+            isAuthenticated,
           }}
       >
         {children}
@@ -132,15 +194,3 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   );
 };
 
-/* =========================
-   HOOK
-========================= */
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
-  return context;
-};

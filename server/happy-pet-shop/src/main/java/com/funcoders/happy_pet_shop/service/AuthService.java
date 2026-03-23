@@ -1,22 +1,33 @@
 package com.funcoders.happy_pet_shop.service;
 
-import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
-import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
-import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
-import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
+import com.funcoders.happy_pet_shop.dto.request.*;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
+import com.funcoders.happy_pet_shop.dto.response.UserResponse;
+
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
+import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.constant.UserStatus;
+import com.funcoders.happy_pet_shop.entity.Cart;
+import com.funcoders.happy_pet_shop.entity.Customer;
 import com.funcoders.happy_pet_shop.entity.InvalidatedToken;
+import com.funcoders.happy_pet_shop.entity.Role;
+import com.funcoders.happy_pet_shop.entity.Staff;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
+import com.funcoders.happy_pet_shop.mapper.CustomerMapper;
+import com.funcoders.happy_pet_shop.mapper.UserMapper;
+import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
+import com.funcoders.happy_pet_shop.repository.RoleRepository;
+import com.funcoders.happy_pet_shop.repository.StaffRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,23 +38,29 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
-
-import static java.rmi.server.LogStream.log;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthService {
-    UserRepository userRepository;
-    InvalidatedTokenRepository invalidatedTokenRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
+    UserRepository userRepository;
+    UserMapper userMapper;
+    CustomerRepository customerRepository;
+    CustomerMapper customerMapper;
+
+    RoleRepository roleRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Value("${jwt.key}")
     @NonFinal
@@ -98,7 +115,7 @@ public class AuthService {
 
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (Exception e) {
-            log(e.getMessage());
+            log.debug("Logout failed: {}", e.getMessage());
         }
     }
 
@@ -173,5 +190,101 @@ public class AuthService {
             throw new AppException(ErrorType.UNAUTHORIZED);
 
         return signedJWT;
+    }
+
+    @Transactional
+    public AuthResponse register(UserCreationRequest request) {
+        // find customer's role
+        Role userRole = roleRepository.findById(UserRole.USER_ROLE)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+
+        // create user entity
+        User userEntity = userMapper.toEntity(request);
+        userEntity.setUsername(userEntity.getPhone());
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+        userEntity.setRoles(Set.of(userRole));
+
+        // create cart
+        Cart cart = new Cart();
+
+        // create customer entity
+        Customer customer = Customer.builder()
+                .user(userEntity)
+                .points(BigDecimal.ZERO)
+                .cart(cart)
+                .build();
+
+        // set customer to cart
+        cart.setCustomer(customer);
+
+        // save customer
+        Customer savedCustomer = customerRepository.save(customer);
+
+        // create token
+        String token = generateToken(userEntity);
+
+        // return register response
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
+
+        return response;
+
+//        String username = req.getUsername().trim();
+//        if (userRepository.existsByUsername(username)) {
+//            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
+//        }
+//
+//        Role role = roleRepository.findByRoleName(req.getRole())
+//                .orElseThrow(() -> new AppException(ErrorType.ROLE_NOT_FOUND));
+//
+//
+//        User user = User.builder()
+//                .username(username)
+//                .password(passwordEncoder.encode(req.getPassword()))
+//                .phone(req.getPhone())
+//                .address(req.getAddress())
+//                .roles(Set.of(role))
+//                .status(UserStatus.ACTIVATED)
+//                .build();
+//
+//        User savedUser;
+//        if (UserRole.USER_ROLE.equals(role.getRoleName())) {
+//            Cart cart = new Cart();
+//            Customer customer = Customer.builder()
+//                    .user(user)
+//                    .points(BigDecimal.ZERO)
+//                    .cart(cart)
+//                    .build();
+//            cart.setCustomer(customer);
+//            Customer savedCustomer = customerRepository.save(customer);
+//            savedUser = savedCustomer.getUser();
+//        } else if (UserRole.STAFF_ROLE.equals(role.getRoleName())) {
+//            Staff staff = Staff.builder()
+//                    .user(user)
+//                    .build();
+//            Staff savedStaff = staffRepository.save(staff);
+//            savedUser = savedStaff.getUser();
+//        } else {
+//            savedUser = userRepository.save(user);
+//        }
+//
+//        return toUserResponse(savedUser);
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .status(user.getStatus())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 }

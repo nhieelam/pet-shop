@@ -1,38 +1,30 @@
 import { useState, useMemo, useCallback } from "react";
-
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  availableAmount: number;
-  image: string;
-  description: string;
-  category: string;
-}
+import type { ProductResponse } from "../../../../types/productTypes";
 
 type SortOption = "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
 interface UseProductManagerOptions {
-  products: Product[];
+  products: ProductResponse[];
   itemsPerPage?: number;
 }
 
 interface UseProductManagerReturn {
-  selectedCategories: string[];
   searchQuery: string;
   minPrice: number;
   maxPrice: number;
   sortBy: SortOption;
   currentPage: number;
-  
-  filteredAndSortedProducts: Product[];
-  paginatedProducts: Product[];
+
+  filteredAndSortedProducts: ProductResponse[];
+  paginatedProducts: ProductResponse[];
   totalItems: number;
   totalPages: number;
   startIndex: number;
   endIndex: number;
-  
+
+  selectedCategories: string[];
   handleCategoryChange: (categories: string[]) => void;
+
   handleSearch: (query: string) => void;
   handlePriceFilterChange: (min: number, max: number) => void;
   handleSort: (sortType: string) => void;
@@ -41,14 +33,15 @@ interface UseProductManagerReturn {
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 12;
-const DEFAULT_MAX_PRICE = 1000000;
+const DEFAULT_MAX_PRICE = 1_000_000;
 
 export function useProductManager({
-  products,
-  itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
-}: UseProductManagerOptions): UseProductManagerReturn {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+                                    products,
+                                    itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
+                                  }: UseProductManagerOptions): UseProductManagerReturn {
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(DEFAULT_MAX_PRICE);
   const [sortBy, setSortBy] = useState<SortOption>("price-asc");
@@ -57,40 +50,38 @@ export function useProductManager({
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
 
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((product) =>
-        selectedCategories.includes(product.category)
-      );
-    }
-
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(query)
+          product.name.toLowerCase().includes(query)
       );
     }
 
     filtered = filtered.filter(
-      (product) => product.price >= minPrice && product.price <= maxPrice
+        (product) => product.price >= minPrice && product.price <= maxPrice
     );
 
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
           return a.price - b.price;
+
         case "price-desc":
           return b.price - a.price;
+
         case "name-asc":
           return a.name.localeCompare(b.name);
+
         case "name-desc":
           return b.name.localeCompare(a.name);
+
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [products, selectedCategories, searchQuery, minPrice, maxPrice, sortBy]);
+  }, [products, searchQuery, minPrice, maxPrice, sortBy]);
 
   const totalItems = filteredAndSortedProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -131,7 +122,6 @@ export function useProductManager({
   }, []);
 
   const resetFilters = useCallback(() => {
-    setSelectedCategories([]);
     setSearchQuery("");
     setMinPrice(0);
     setMaxPrice(DEFAULT_MAX_PRICE);
@@ -140,21 +130,22 @@ export function useProductManager({
   }, []);
 
   return {
-    selectedCategories,
     searchQuery,
     minPrice,
     maxPrice,
     sortBy,
     currentPage,
-    
+
+    handleCategoryChange,
+    selectedCategories,
+
     filteredAndSortedProducts,
     paginatedProducts,
     totalItems,
     totalPages,
     startIndex,
     endIndex,
-    
-    handleCategoryChange,
+
     handleSearch,
     handlePriceFilterChange,
     handleSort,
@@ -162,4 +153,3 @@ export function useProductManager({
     resetFilters,
   };
 }
-

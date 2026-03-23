@@ -1,17 +1,24 @@
 import { useState, useCallback } from "react";
-import { RegisterFormData, RegisterFormErrors, initialFormData } from "../types";
+import { useNavigate, useLocation } from "react-router-dom";
 import { validateForm } from "../validation";
+import type { RegisterFormData, RegisterFormErrors } from "../types";
+import type { UseRegisterFormReturn } from "../types";
+import { useAuth } from "@/context/authContext";
 
-interface UseRegisterFormReturn {
-  formData: RegisterFormData;
-  errors: RegisterFormErrors;
-  isLoading: boolean;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  resetForm: () => void;
-}
+const initialFormData: RegisterFormData = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  address: "",
+};
 
 export function useRegisterForm(): UseRegisterFormReturn {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { register: registerUser } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -37,32 +44,47 @@ export function useRegisterForm(): UseRegisterFormReturn {
   }, []);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent): Promise<void> => {
       e.preventDefault();
 
       const validationErrors = validateForm(formData);
-      setErrors(validationErrors);
-
       if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
         return;
       }
 
       setIsLoading(true);
+      setErrors({});
 
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        console.log("Registration attempt with:", formData);
-        alert("Đăng ký thành công! Vui lòng đăng nhập.");
-        resetForm();
-      } catch (error) {
+        await registerUser({
+          firstName: formData.firstName.trim() || undefined,
+          lastName: formData.lastName.trim() || undefined,
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          password: formData.password,
+          address: formData.address.trim() || undefined,
+        });
+
+        if (location.pathname.includes("/admin")) {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/user/products", { replace: true });
+        }
+      } catch (error: unknown) {
         console.error("Registration error:", error);
-        alert("Đăng ký thất bại. Vui lòng thử lại.");
+        if (error instanceof Error) {
+          setErrors({
+            general: error.message || "Đăng ký thất bại, vui lòng thử lại",
+          });
+        } else {
+          setErrors({ general: "Đăng ký thất bại. Vui lòng thử lại." });
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [formData, resetForm]
+    [formData, navigate, location.pathname, registerUser]
   );
 
   return {

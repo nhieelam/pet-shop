@@ -32,10 +32,12 @@ public class UserService {
 
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
+
         User userEntity = userMapper.toEntity(request);
         userEntity.setUsername(userEntity.getPhone());
 
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+        System.out.println(userEntity.getPassword());
 
         return userMapper.toResponse(userRepository.save(userEntity));
     }
@@ -61,7 +63,7 @@ public class UserService {
     @Transactional
     public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
-            throw new AppException(ErrorType.NOT_FOUND);
+            throw new AppException(ErrorType.USER_NOT_FOUND);
         }
         userRepository.deleteById(id);
     }
@@ -69,7 +71,7 @@ public class UserService {
     @Transactional
     public UserResponse updateUser(UUID id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
         userMapper.updateUser(user, request);
 

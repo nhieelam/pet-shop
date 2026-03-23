@@ -6,9 +6,16 @@ export default function RegisterPage() {
   const { formData, errors, isLoading, handleChange, handleSubmit } =
     useRegisterForm();
 
+  const inputClass = (hasError: boolean) =>
+    `w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
+      hasError
+        ? "border-red-500 focus:ring-red-400"
+        : "border-gray-300 focus:ring-blue-400"
+    }`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-blue-600 mb-2">🐾</h1>
@@ -17,53 +24,85 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Tên đầy đủ
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Nhập tên của bạn"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.fullName
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
-              />
-              {errors.fullName && (
-                <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
-              )}
+            {errors.general && (
+              <p className="text-red-500 text-sm text-center bg-red-50 border border-red-200 rounded-lg py-2 px-3">
+                {errors.general}
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Họ <span className="text-gray-400 font-normal">(tuỳ chọn)</span>
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="Họ"
+                  maxLength={50}
+                  className={inputClass(!!errors.firstName)}
+                />
+                {errors.firstName && (
+                  <p className="text-red-500 text-sm mt-2">{errors.firstName}</p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Tên <span className="text-gray-400 font-normal">(tuỳ chọn)</span>
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Tên"
+                  maxLength={50}
+                  className={inputClass(!!errors.lastName)}
+                />
+                {errors.lastName && (
+                  <p className="text-red-500 text-sm mt-2">{errors.lastName}</p>
+                )}
+              </div>
             </div>
 
             <div>
-              <label htmlFor="userName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Tên Đăng Nhập
+              <label
+                htmlFor="email"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
-                id="userName"
-                name="userName"
-                value={formData.userName}
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="Nhập userName của bạn"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.userName
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
+                placeholder="email@example.com"
+                maxLength={100}
+                className={inputClass(!!errors.email)}
               />
-              {errors.userName && (
-                <p className="text-red-500 text-sm mt-2">{errors.userName}</p>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-2">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                Số điện thoại
+              <label
+                htmlFor="phone"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Số điện thoại <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -71,12 +110,8 @@ export default function RegisterPage() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="Nhập số điện thoại (0xxx...)"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.phone
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
+                placeholder="0xxxxxxxxx hoặc +84xxxxxxxxx"
+                className={inputClass(!!errors.phone)}
               />
               {errors.phone && (
                 <p className="text-red-500 text-sm mt-2">{errors.phone}</p>
@@ -84,8 +119,33 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Mật khẩu
+              <label
+                htmlFor="address"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Địa chỉ <span className="text-gray-400 font-normal">(tuỳ chọn)</span>
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Nhập địa chỉ"
+                maxLength={255}
+                className={inputClass(!!errors.address)}
+              />
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-2">{errors.address}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Mật khẩu <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -93,12 +153,8 @@ export default function RegisterPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Nhập mật khẩu (ít nhất 6 ký tự)"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.password
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
+                placeholder="Ít nhất 6 ký tự: chữ hoa, chữ thường, số"
+                className={inputClass(!!errors.password)}
               />
               {errors.password && (
                 <p className="text-red-500 text-sm mt-2">{errors.password}</p>
@@ -106,8 +162,11 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
-                Xác nhận mật khẩu
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Xác nhận mật khẩu <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -116,35 +175,12 @@ export default function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Nhập lại mật khẩu"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition ${
-                  errors.confirmPassword
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-400"
-                }`}
+                className={inputClass(!!errors.confirmPassword)}
               />
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-2">{errors.confirmPassword}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="acceptTerms"
-                  checked={formData.acceptTerms}
-                  onChange={handleChange}
-                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">
-                  Tôi đồng ý với{" "}
-                  <a href="#" className="text-blue-600 hover:underline">
-                    điều khoản và điều kiện
-                  </a>
-                </span>
-              </label>
-              {errors.acceptTerms && (
-                <p className="text-red-500 text-sm mt-2">{errors.acceptTerms}</p>
+                <p className="text-red-500 text-sm mt-2">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
 
@@ -166,7 +202,10 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Đã có tài khoản?{" "}
-              <a href="/login" className="text-blue-600 hover:text-blue-800 font-bold">
+              <a
+                href="/login"
+                className="text-blue-600 hover:text-blue-800 font-bold"
+              >
                 Đăng nhập
               </a>
             </p>

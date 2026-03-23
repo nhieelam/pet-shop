@@ -1,32 +1,45 @@
-import { RegisterFormData, RegisterFormErrors } from "./types";
+import type {RegisterFormData, RegisterFormErrors} from "./types";
+
+const MAX_NAME = 50;
+const MAX_EMAIL = 100;
+const MAX_ADDRESS = 255;
 
 export const validateForm = (
   formData: RegisterFormData
 ): RegisterFormErrors => {
   const errors: RegisterFormErrors = {};
 
-  if (!formData.fullName.trim()) {
-    errors.fullName = "Tên không được để trống";
-  } else if (formData.fullName.length < 3) {
-    errors.fullName = "Tên phải có ít nhất 3 ký tự";
+  const first = formData.firstName.trim();
+  if (first.length > MAX_NAME) {
+    errors.firstName = `Họ không quá ${MAX_NAME} ký tự`;
   }
 
-  if (!formData.userName) {
-    errors.userName = "userName không được để trống";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.userName)) {
-    errors.userName = "userName không hợp lệ";
+  const last = formData.lastName.trim();
+  if (last.length > MAX_NAME) {
+    errors.lastName = `Tên không quá ${MAX_NAME} ký tự`;
+  }
+
+  const email = formData.email.trim();
+  if (!email) {
+    errors.email = "Email không được để trống";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = "Email không hợp lệ";
+  } else if (email.length > MAX_EMAIL) {
+    errors.email = `Email không quá ${MAX_EMAIL} ký tự`;
   }
 
   if (!formData.phone) {
     errors.phone = "Số điện thoại không được để trống";
-  } else if (!/^0\d{9,10}$/.test(formData.phone)) {
-    errors.phone = "Số điện thoại phải bắt đầu bằng 0 và có 10-11 chữ số";
+  } else if (!/^(0|\+84)[0-9]{9}$/.test(formData.phone.trim())) {
+    errors.phone =
+      "Số điện thoại phải là 0xxxxxxxxx hoặc +84xxxxxxxxx (9 chữ số sau mã vùng)";
   }
 
   if (!formData.password) {
     errors.password = "Mật khẩu không được để trống";
-  } else if (formData.password.length < 6) {
-    errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+  } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(formData.password)) {
+    errors.password =
+      "Mật khẩu ít nhất 6 ký tự, gồm chữ hoa, chữ thường và số";
   }
 
   if (!formData.confirmPassword) {
@@ -35,8 +48,9 @@ export const validateForm = (
     errors.confirmPassword = "Mật khẩu không khớp";
   }
 
-  if (!formData.acceptTerms) {
-    errors.acceptTerms = "Bạn phải chấp nhận điều khoản";
+  const addr = formData.address.trim();
+  if (addr.length > MAX_ADDRESS) {
+    errors.address = `Địa chỉ không quá ${MAX_ADDRESS} ký tự`;
   }
 
   return errors;

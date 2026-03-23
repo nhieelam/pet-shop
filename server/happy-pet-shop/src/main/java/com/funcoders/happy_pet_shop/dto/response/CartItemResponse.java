@@ -16,8 +16,6 @@ import java.util.UUID;
 @Builder
 public class CartItemResponse {
     UUID id;
-
-    InventoryResponse inventory;
-
+    ProductResponse product;
     int quantity;
 }

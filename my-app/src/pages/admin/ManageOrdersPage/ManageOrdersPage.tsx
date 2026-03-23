@@ -1,924 +1,506 @@
- "use client";
+"use client";
 
-import { useState, useEffect, useCallback } from "react";
-// Types
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: "active" | "inactive";
-  description?: string;
-  images: string[];
-  updatedAt: string;
+import {useState} from "react";
+import {useManageOrders} from "./useManageOrders.ts";
+import type {InvoiceResponse} from "../../../types/invoiceTypes";
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
 }
 
-interface ProductFormData {
-  name: string;
-  sku: string;
-  category: string;
-  price: number | string;
-  stock: number | string;
-  description: string;
-  images: string[];
-  status: "active" | "inactive";
-}
-
-interface FormErrors {
-  name?: string;
-  sku?: string;
-  category?: string;
-  price?: string;
-  stock?: string;
-}
-
-// Mock categories
-const categories = [
-  "Thức ăn cho chó",
-  "Thức ăn cho mèo",
-  "Đồ chơi",
-  "Phụ kiện",
-  "Vệ sinh",
-  "Y tế",
-  "Quần áo",
-  "Khác",
-];
-
-// Mock data
-const mockProducts: Product[] = [
-  {
-    id: "prod_001",
-    name: "Thức ăn cao cấp cho chó",
-    sku: "DOG-FOOD-001",
-    category: "Thức ăn cho chó",
-    price: 350000,
-    stock: 45,
-    status: "active",
-    description: "Thức ăn dinh dưỡng cao cấp cho chó mọi lứa tuổi",
-    images: ["https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=200"],
-    updatedAt: "2026-01-05T10:30:00",
-  },
-  {
-    id: "prod_002",
-    name: "Giường mèo êm ái",
-    sku: "CAT-BED-002",
-    category: "Phụ kiện",
-    price: 280000,
-    stock: 12,
-    status: "active",
-    description: "Giường cho mèo chất liệu cotton mềm mại",
-    images: ["https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=200"],
-    updatedAt: "2026-01-04T14:20:00",
-  },
-  {
-    id: "prod_003",
-    name: "Dây xích chó cao cấp",
-    sku: "DOG-LEASH-003",
-    category: "Phụ kiện",
-    price: 95000,
-    stock: 0,
-    status: "inactive",
-    description: "Dây xích chắc chắn, an toàn",
-    images: ["https://images.unsplash.com/photo-1558788353-f76d92427f16?w=200"],
-    updatedAt: "2026-01-03T09:15:00",
-  },
-  {
-    id: "prod_004",
-    name: "Bộ đồ chơi thú cưng",
-    sku: "TOY-SET-004",
-    category: "Đồ chơi",
-    price: 180000,
-    stock: 28,
-    status: "active",
-    description: "Bộ 5 món đồ chơi an toàn cho thú cưng",
-    images: ["https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=200"],
-    updatedAt: "2026-01-02T16:45:00",
-  },
-  {
-    id: "prod_005",
-    name: "Bộ vệ sinh thú cưng",
-    sku: "GROOM-KIT-005",
-    category: "Vệ sinh",
-    price: 320000,
-    stock: 18,
-    status: "active",
-    description: "Bộ dụng cụ vệ sinh hoàn chỉnh",
-    images: ["https://images.unsplash.com/photo-1552053831-71594a27c62d?w=200"],
-    updatedAt: "2026-01-01T11:20:00",
-  },
-];
-
-export default function AdminProductListPage() {
-  // State for products
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  // Filter state
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState("");
-
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  // Form state
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: "",
-    sku: "",
-    category: "",
-    price: "",
-    stock: "",
-    description: "",
-    images: [],
-    status: "active",
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [imagePreview, setImagePreview] = useState<string[]>([]);
+}
 
-  // Delete confirmation
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+function statusClass(status: string): string {
+  const s = (status ?? "").toLowerCase();
+  if (s.includes("paid") || s.includes("completed") || s.includes("delivered")) return "bg-emerald-100 text-emerald-700";
+  if (s.includes("cancel") || s.includes("refund")) return "bg-rose-100 text-rose-700";
+  if (s.includes("pending") || s.includes("processing")) return "bg-amber-100 text-amber-700";
+  return "bg-slate-100 text-slate-700";
+}
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      applyFilters();
-    }, 300);
+function OrderGridCard({
+                         invoice,
+                         isSelected,
+                         onSelect,
+                         onDelete,
+                       }: {
+  invoice: InvoiceResponse;
+  isSelected: boolean;
+  onSelect: (inv: InvoiceResponse) => void;
+  onDelete: (inv: InvoiceResponse) => void;
+}) {
+  const emoji = "🛒";
+  const status = invoice.status ?? "—";
+  return (
+      <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onSelect(invoice)}
+          onKeyDown={(e) => e.key === "Enter" && onSelect(invoice)}
+          className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all group animate-fade-in cursor-pointer ${
+              isSelected ? "border-emerald-500 ring-2 ring-emerald-200 shadow-md" : "border-slate-100 hover:shadow-lg"
+          }`}
+      >
+        <div className="relative h-24 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+          <span className="text-4xl">{emoji}</span>
+          <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusClass(status)}`}>
+          {status}
+        </span>
+        </div>
+        <div className="p-4">
+          <p className="text-xs text-slate-500 font-mono mb-1">{invoice.id}</p>
+          <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">{invoice.customerName ?? "—"}</h3>
+          <p className="text-sm text-slate-600 mb-2">{formatCurrency(invoice.realAmount ?? invoice.totalAmount ?? 0)}</p>
+          <p className="text-xs text-slate-500 mb-3">{formatDate(invoice.createdAt ?? "")}</p>
+          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(invoice);
+                }}
+                className="p-2 hover:bg-rose-50 rounded-lg transition-all"
+                title="Delete"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
 
-    return () => clearTimeout(timer);
-  }, [searchTerm, categoryFilters, statusFilter, products]);
+function OrderListRow({
+                        invoice,
+                        isSelected,
+                        onSelect,
+                        onDelete,
+                      }: {
+  invoice: InvoiceResponse;
+  isSelected: boolean;
+  onSelect: (inv: InvoiceResponse) => void;
+  onDelete: (inv: InvoiceResponse) => void;
+}) {
+  const emoji = "🛒";
+  const status = invoice.status ?? "—";
+  return (
+      <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onSelect(invoice)}
+          onKeyDown={(e) => e.key === "Enter" && onSelect(invoice)}
+          className={`bg-white rounded-2xl shadow-sm border p-4 transition-all product-row animate-fade-in cursor-pointer ${
+              isSelected ? "border-emerald-500 ring-2 ring-emerald-200 shadow-md" : "border-slate-100 hover:shadow-lg"
+          }`}
+      >
+        <div className="flex items-center gap-4">
+          <div
+              className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">{emoji}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-500 font-mono truncate">{invoice.id}</p>
+            <h3 className="font-semibold text-slate-800 truncate">{invoice.customerName ?? "—"}</h3>
+            <p className="text-sm text-slate-500">{formatDate(invoice.createdAt ?? "")}</p>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className="font-bold text-emerald-600">{formatCurrency(invoice.realAmount ?? invoice.totalAmount ?? 0)}</p>
+            <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
+            {status}
+          </span>
+          </div>
+          <div className="flex gap-1 flex-shrink-0">
+            <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(invoice);
+                }}
+                className="p-2 hover:bg-rose-50 rounded-lg transition-all"
+                title="Delete"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+  );
+}
 
-  // Apply filters
-  const applyFilters = useCallback(() => {
-    let filtered = [...products];
+export default function ManageOrdersPage() {
+  const {
+    invoices: filteredInvoices,
+    allInvoices,
+    loading,
+    error,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    viewMode,
+    setViewMode,
+    stats,
+    uniqueStatuses,
+    deleteModalOpen,
+    selectedInvoice,
+    invoiceToDelete,
+    toast,
+    openDetailModal,
+    closeDetailModal,
+    openDeleteModal,
+    closeDeleteModal,
+    handleDeleteInvoice,
+    clearFilters,
+  } = useManageOrders();
 
-    // Search by name
-    if (searchTerm) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeleteInvoice();
+    } finally {
+      setDeleteSubmitting(false);
     }
-
-    // Filter by category
-    if (categoryFilters.length > 0) {
-      filtered = filtered.filter((p) => categoryFilters.includes(p.category));
-    }
-
-    // Filter by status
-    if (statusFilter) {
-      filtered = filtered.filter((p) => p.status === statusFilter);
-    }
-
-    setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, categoryFilters, statusFilter, products]);
-
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm("");
-    setCategoryFilters([]);
-    setStatusFilter("");
-  };
-
-  // Toggle category filter chips (allows multi-select)
-  const toggleCategoryFilter = (category: string) => {
-    setCategoryFilters((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Open create modal
-  const handleCreateProduct = () => {
-    setModalMode("create");
-    setFormData({
-      name: "",
-      sku: "",
-      category: "",
-      price: "",
-      stock: "",
-      description: "",
-      images: [],
-      status: "active",
-    });
-    setImagePreview([]);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Open edit modal
-  const handleEditProduct = (product: Product) => {
-    setModalMode("edit");
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-      description: product.description || "",
-      images: product.images,
-      status: product.status,
-    });
-    setImagePreview(product.images);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Validate form
-  const validateForm = (): boolean => {
-    const errors: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Tên sản phẩm là bắt buộc";
-    }
-
-    if (!formData.sku.trim()) {
-      errors.sku = "Mã SKU là bắt buộc";
-    } else {
-      // Check SKU uniqueness
-      const isDuplicate = products.some(
-        (p) =>
-          p.sku === formData.sku &&
-          (modalMode === "create" || p.id !== editingProduct?.id)
-      );
-      if (isDuplicate) {
-        errors.sku = "Mã SKU đã tồn tại";
-      }
-    }
-
-    if (!formData.category) {
-      errors.category = "Danh mục là bắt buộc";
-    }
-
-    if (!formData.price || parseFloat(formData.price.toString()) <= 0) {
-      errors.price = "Giá phải lớn hơn 0";
-    }
-
-    if (
-      formData.stock === "" ||
-      parseInt(formData.stock.toString()) < 0
-    ) {
-      errors.stock = "Số lượng không hợp lệ";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Handle form submit
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    const productData: Product = {
-      id:
-        modalMode === "create"
-          ? `prod_${Date.now()}`
-          : editingProduct!.id,
-      name: formData.name,
-      sku: formData.sku,
-      category: formData.category,
-      price: parseFloat(formData.price.toString()),
-      stock: parseInt(formData.stock.toString()),
-      description: formData.description,
-      images: imagePreview.length > 0 ? imagePreview : ["https://via.placeholder.com/200"],
-      status: formData.status,
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (modalMode === "create") {
-      setProducts([productData, ...products]);
-      alert("Thêm sản phẩm thành công!");
-    } else {
-      setProducts(
-        products.map((p) => (p.id === productData.id ? productData : p))
-      );
-      alert("Cập nhật sản phẩm thành công!");
-    }
-
-    setIsModalOpen(false);
-  };
-
-  // Handle delete
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
-    setDeleteConfirmId(null);
-    alert("Xóa sản phẩm thành công!");
-  };
-
-  // Handle add image URL
-  const handleAddImage = () => {
-    const url = prompt("Nhập URL hình ảnh:");
-    if (url) {
-      setImagePreview([...imagePreview, url]);
-    }
-  };
-
-  // Handle remove image
-  const handleRemoveImage = (index: number) => {
-    setImagePreview(imagePreview.filter((_, i) => i !== index));
-  };
-
-  // Handle view history (mock)
-  const handleViewHistory = (product: Product) => {
-    alert(`Xem lịch sử thay đổi cho sản phẩm: ${product.name}\n\n(Chức năng đang được phát triển)`);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
+        <style>{`
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .product-row:hover { background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+      `}</style>
+
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            🛍️ Quản Lý Dịch Vụ
-          </h1>
-          <p className="text-gray-600">
-            Tổng số: <span className="font-bold">{filteredProducts.length}</span> dịch vụ
-          </p>
-        </div>
-
-        {/* Filters & Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                🔍 Tìm kiếm theo tên
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Nhập tên sản phẩm..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                ⚡ Trạng thái
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Tất cả</option>
-                <option value="active">đã duyệt</option>
-                <option value="inactive">hủy đơn</option>
-                <option value="inactive">đã giao</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={handleCreateProduct}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition flex items-center gap-2"
-            >
-              <span>➕</span>
-              Thêm dịch vụ
-            </button>
-            <button
-              onClick={resetFilters}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition flex items-center gap-2"
-            >
-              <span>🔄</span>
-              Đặt lại bộ lọc
-            </button>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    mã hóa đơn
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Tên khách hàng
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Số điện thoại
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    thời gian tạo hóa đơn
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    tổng giá
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    xem chi tiết
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                      Không tìm thấy sản phẩm nào
-                    </td>
-                  </tr>
-                ) : (
-                  currentProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      {/* Image */}
-                      <td className="px-6 py-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </td>
-
-                      {/* Name */}
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-800">
-                          {product.name}
-                        </div>
-                      </td>
-
-                      {/* Category */}
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
-                          {product.category}
-                        </span>
-                      </td>
-
-                      {/* Price */}
-                      <td className="px-6 py-4">
-                        <span className="font-bold text-blue-600">
-                          {formatCurrency(product.price)}
-                        </span>
-                      </td>
-
-
-                      {/* Status */}
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.status === "active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {product.status === "active"
-                            ? "Đang bán"
-                            : "Ngừng bán"}
-                        </span>
-                      </td>
-
-                      {/* Updated At */}
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatDate(product.updatedAt)}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleEditProduct(product)}
-                            className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
-                            title="Chỉnh sửa"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirmId(product.id)}
-                            className="text-red-600 hover:text-red-800 font-semibold text-sm"
-                            title="Xóa"
-                          >
-                            🗑️
-                          </button>
-                          <button
-                            onClick={() => handleViewHistory(product)}
-                            className="text-gray-600 hover:text-gray-800 font-semibold text-sm"
-                            title="Lịch sử thay đổi"
-                          >
-                            📋
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredProducts.length > 0 && (
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                {/* Page Size Selector */}
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700">
-                    Hiển thị:
-                  </label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-                  <span className="text-sm text-gray-700">
-                    / {filteredProducts.length} sản phẩm
-                  </span>
+        <header
+            className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-lg sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-2xl">🐾</span>
                 </div>
+                <div>
+                  <h1 className="text-xl font-bold">Pet Shop Admin</h1>
+                  <p className="text-emerald-100 text-xs">Manage orders (invoices)</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div
+                    className="hidden sm:flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
+                  <span>🛒</span>
+                  <span>{stats.total} Orders</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
-                {/* Pagination Controls */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
-                  >
-                    ← Trước
-                  </button>
+        <div
+          style={{
+            maxWidth: "1600px",
+          }}
+        >
 
-                  <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, i) => {
-                      const page = i + 1;
-                      // Show first, last, current, and adjacent pages
-                      if (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-1 rounded-lg font-semibold text-sm ${
-                              currentPage === page
-                                ? "bg-blue-600 text-white"
-                                : "bg-white border border-gray-300 hover:bg-gray-50"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      } else if (
-                        page === currentPage - 2 ||
-                        page === currentPage + 2
-                      ) {
-                        return (
-                          <span key={page} className="px-2 text-gray-500">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    })}
+          <div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">🛒</span>
                   </div>
+                  <div>
+                    <p className="text-slate-500 text-xs font-medium">Total Orders</p>
+                    <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Search by invoice ID, customer name, or address..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div
+                      style={{
+                        transform: 'translateY(-20px)',
+                      }}
+                      className="w-full sm:w-auto"
                   >
-                    Sau →
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full sm:w-40 px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                    >
+                      <option value="">All statuses</option>
+                      {uniqueStatuses.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                      style={{
+                        transform: "translateY(-10px)"
+                      }}
+                      type="button"
+                      onClick={clearFilters}
+                      className="flex items-center gap-2 px-4 py-3 border border-slate-200 rounded-xl hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all font-medium text-slate-600 mt-6 sm:mt-0"
+                  >
+                    Clear
                   </button>
                 </div>
               </div>
             </div>
+          </div>
+          <main className="flex-1 flex flex-col lg:flex-row min-h-0 w-full items-stretch">
+
+            {/* Left: Orders list — same max width as header so search bar matches header width */}
+            <div className="flex-1 min-w- flex-col overflow-auto px-4 sm:px-6 lg:px-8 py-6">
+
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-slate-500">
+                  Showing {filteredInvoices.length} of {allInvoices.length} orders
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                      type="button"
+                      onClick={() => setViewMode("grid")}
+                      className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-emerald-100 text-emerald-600" : "hover:bg-slate-100 text-slate-400"}`}
+                      title="Grid"
+                  >
+                    ▦
+                  </button>
+                  <button
+                      type="button"
+                      onClick={() => setViewMode("list")}
+                      className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-emerald-100 text-emerald-600" : "hover:bg-slate-100 text-slate-400"}`}
+                      title="List"
+                  >
+                    ≡
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4 text-rose-800">{error}</div>
+              )}
+
+              {loading ? (
+                  <div className="text-center py-16">
+                    <div
+                        className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"/>
+                    <p className="text-slate-500">Loading orders...</p>
+                  </div>
+              ) : filteredInvoices.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-5xl">🛒</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">No orders found</h3>
+                    <p className="text-slate-500">Try adjusting your search or filters</p>
+                  </div>
+              ) : (
+                  <div
+                      className={`grid gap-4 ${
+                          viewMode === "grid"
+                              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                              : "grid-cols-1"
+                      }`}
+                  >
+                    {viewMode === "grid"
+                        ? filteredInvoices.map((inv) => (
+                            <OrderGridCard
+                                key={inv.id}
+                                invoice={inv}
+                                isSelected={selectedInvoice?.id === inv.id}
+                                onSelect={openDetailModal}
+                                onDelete={openDeleteModal}
+                            />
+                        ))
+                        : filteredInvoices.map((inv) => (
+                            <OrderListRow
+                                key={inv.id}
+                                invoice={inv}
+                                isSelected={selectedInvoice?.id === inv.id}
+                                onSelect={openDetailModal}
+                                onDelete={openDeleteModal}
+                            />
+                        ))}
+                  </div>
+              )}
+            </div>
+
+            {/* Right: Order detail panel — same height as list (stretches with main) */}
+            <div
+                className="w-full lg:w-[400px] xl:w-[420px] flex-shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 bg-slate-50/50 flex flex-col min-h-0 max-h-[50vh] lg:max-h-none">
+              <div
+                  className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-800">Order detail</h2>
+                {selectedInvoice && (
+                    <button
+                        type="button"
+                        onClick={closeDetailModal}
+                        className="p-2 hover:bg-slate-100 rounded-lg transition-all"
+                        title="Close"
+                    >
+                      ✕
+                    </button>
+                )}
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {!selectedInvoice ? (
+                    <div
+                        className="flex flex-col items-center justify-center h-full min-h-[200px] text-center text-slate-500">
+                      <span className="text-5xl mb-3">👆</span>
+                      <p className="font-medium text-slate-600">Select an order</p>
+                      <p className="text-sm mt-1">Click an order on the left to view its details here.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4 animate-fade-in">
+                      <div>
+                        <p className="text-xs text-slate-500 font-mono">{selectedInvoice.id}</p>
+                        <p className="text-sm font-medium text-slate-700 mt-1">Customer: {selectedInvoice.customerName ?? "—"}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-slate-500">Total</p>
+                          <p className="font-semibold text-slate-800">{formatCurrency(selectedInvoice.totalAmount ?? 0)}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Paid</p>
+                          <p className="font-semibold text-emerald-600">{formatCurrency(selectedInvoice.realAmount ?? 0)}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Status</p>
+                          <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(selectedInvoice.status ?? "")}`}>
+                            {selectedInvoice.status ?? "—"}
+                        </span>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Payment</p>
+                          <p className="font-medium text-slate-800">{selectedInvoice.paymentMethod ?? "—"}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-slate-500 text-sm">Created</p>
+                        <p className="text-slate-800">{formatDate(selectedInvoice.createdAt ?? "")}</p>
+                      </div>
+                      {selectedInvoice.shippingAddress && (
+                          <div>
+                            <p className="text-slate-500 text-sm">Shipping address</p>
+                            <p className="text-slate-800">{selectedInvoice.shippingAddress}</p>
+                          </div>
+                      )}
+                      {selectedInvoice.invoiceDetails && selectedInvoice.invoiceDetails.length > 0 && (
+                          <div>
+                            <p className="text-slate-700 font-medium mb-2">Items</p>
+                            <ul className="space-y-2 border-t border-slate-200 pt-2">
+                              {selectedInvoice.invoiceDetails.map((d) => (
+                                  <li key={d.id} className="flex justify-between text-sm">
+                                    <span>Qty: {d.quantity} × {formatCurrency(d.unitPrice ?? 0)}</span>
+                                    <span className="font-medium">{formatCurrency(d.totalPrice ?? 0)}</span>
+                                  </li>
+                              ))}
+                            </ul>
+                          </div>
+                      )}
+                      <button
+                          type="button"
+                          onClick={() => openDeleteModal(selectedInvoice)}
+                          className="w-full mt-4 py-2.5 border border-rose-200 text-rose-600 rounded-xl font-medium hover:bg-rose-50 transition-all"
+                      >
+                        Delete order
+                      </button>
+                    </div>
+                )}
+              </div>
+            </div>
+          </main>
+
+          {/* Delete Modal */}
+          {deleteModalOpen && invoiceToDelete && (
+              <div className="fixed inset-0 z-50 overflow-y-auto">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden/>
+                <div className="relative min-h-screen flex items-center justify-center p-4">
+                  <div
+                      className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-slide-in"
+                      onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="p-6 text-center">
+                      <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl">🗑️</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-800 mb-2">Delete order?</h3>
+                      <p className="text-slate-500 mb-6">
+                        Are you sure you want to delete order &quot;{invoiceToDelete.id}&quot;? This action cannot be
+                        undone.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={closeDeleteModal}
+                            className="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-semibold text-slate-600 hover:bg-slate-50 transition-all"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmDelete}
+                            disabled={deleteSubmitting}
+                            className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-xl font-semibold hover:bg-rose-600 transition-all"
+                        >
+                          {deleteSubmitting ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
           )}
         </div>
+
+        {/* Toast */}
+        {toast && (
+            <div
+                className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slide-in ${
+                    toast.type === "success" ? "bg-emerald-500" : toast.type === "error" ? "bg-rose-500" : "bg-slate-700"
+                } text-white`}
+            >
+              <span>{toast.type === "success" ? "✓" : toast.type === "error" ? "!" : "ℹ"}</span>
+              <span className="font-medium">{toast.message}</span>
+            </div>
+        )}
       </div>
-
-      {/* Create/Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-2xl">
-              <h2 className="text-2xl font-bold text-white">
-                {modalMode === "create" ? "➕ Thêm sản phẩm mới" : "✏️ Chỉnh sửa sản phẩm"}
-              </h2>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-              <div className="space-y-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Tên sản phẩm <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                      formErrors.name ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="VD: Thức ăn cho chó cao cấp"
-                  />
-                  {formErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
-                  )}
-                </div>
-
-                {/* SKU */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Mã SKU <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sku}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sku: e.target.value.toUpperCase() })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                      formErrors.sku ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="VD: DOG-FOOD-001"
-                  />
-                  {formErrors.sku && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.sku}</p>
-                  )}
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Danh mục <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => {
-                      const isSelected = formData.category === cat;
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() =>
-                            setFormData({ ...formData, category: cat })
-                          }
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold transition ${
-                            isSelected
-                              ? "bg-blue-600 text-white border-blue-600 shadow"
-                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
-                          }`}
-                          aria-pressed={isSelected}
-                        >
-                          {cat}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {formErrors.category && (
-                    <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
-                  )}
-                </div>
-
-                {/* Price & Stock */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Giá (VND) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                        formErrors.price ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="0"
-                      min="0"
-                    />
-                    {formErrors.price && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.price}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Tồn kho <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.stock}
-                      onChange={(e) =>
-                        setFormData({ ...formData, stock: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-                        formErrors.stock ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="0"
-                      min="0"
-                    />
-                    {formErrors.stock && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.stock}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Mô tả
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
-                    placeholder="Mô tả chi tiết về sản phẩm..."
-                    rows={4}
-                  />
-                </div>
-
-                {/* Images */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Hình ảnh
-                  </label>
-                  <div className="space-y-3">
-                    {imagePreview.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3">
-                        {imagePreview.map((url, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={url}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg border-2 border-gray-300"
-                            />
-                            <button
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleAddImage}
-                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 text-gray-600 hover:text-blue-600 font-semibold transition"
-                    >
-                      + Thêm URL hình ảnh
-                    </button>
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Trạng thái
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="status"
-                        value="active"
-                        checked={formData.status === "active"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            status: e.target.value as "active" | "inactive",
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-gray-700">Đang bán</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="status"
-                        value="inactive"
-                        checked={formData.status === "inactive"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            status: e.target.value as "active" | "inactive",
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      <span className="text-gray-700">Ngừng bán</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex gap-3 justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-              >
-                {modalMode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                Xác nhận xóa
-              </h3>
-              <p className="text-gray-600">
-                Bạn có chắc chắn muốn xóa sản phẩm này không? Hành động này không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => handleDeleteProduct(deleteConfirmId)}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
   );
 }

@@ -1,61 +1,72 @@
-import axios from "axios";
-import type { ProductResponse, ProductCreationRequest } from "../types/productTypes.ts";
-import { API_CONFIG } from "../config/apiConfig.ts";
-import type { ApiResponse } from "../types/apiResponse.ts";
+import {apiClient} from "../utils/apiClient";
+import type {
+  ProductResponse,
+  ProductCreationRequest,
+  ProductUpdateRequest,
+} from "../types/productTypes";
+import {API_CONFIG} from "../config/apiConfig";
+import type {ApiResponse} from "../types/apiResponse";
 
 export const createProduct = async (
-    cridentials: ProductCreationRequest
+    credentials: ProductCreationRequest
 ): Promise<ProductResponse> => {
-    try {
-        const res = await axios.post<ApiResponse<ProductResponse>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
-            cridentials
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error("createProduct error:", error);
-        throw error;
-    }
+  const res = await apiClient.post<ApiResponse<ProductResponse>>(
+      API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
+      credentials
+  );
+  const api = res.data;
+  if (!api.success || api.data == null) {
+    throw new Error(api.message ?? "Create product failed");
+  }
+  return api.data;
 };
 
 export const getAllProducts = async (): Promise<ProductResponse[]> => {
-    try {
-        const res = await axios.get<ApiResponse<ProductResponse[]>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error("getAllProducts error:", error);
-        throw error;
-    }
+  const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
+      API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL,
+      {skipAuth: true}
+  );
+  return res.data.data ?? [];
 };
 
-export const getProductById = async (
-    productId: string
+export const getProductById = async (productId: string): Promise<ProductResponse> => {
+  const res = await apiClient.get<ApiResponse<ProductResponse>>(
+      API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
+  );
+  const api = res.data;
+  if (!api.success || api.data == null) {
+    throw new Error(api.message ?? "Get product failed");
+  }
+  return api.data;
+};
+
+export const updateProduct = async (
+    productId: string,
+    body: ProductUpdateRequest
 ): Promise<ProductResponse> => {
-    try {
-        const res = await axios.get<ApiResponse<ProductResponse>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error(`getProductById (${productId}) error:`, error);
-        throw error;
-    }
+  const res = await apiClient.put<ApiResponse<ProductResponse>>(
+      API_CONFIG.ENDPOINTS.PRODUCT.UPDATE(productId),
+      body
+  );
+  const api = res.data;
+  if (!api.success || api.data == null) {
+    throw new Error(api.message ?? "Update product failed");
+  }
+  return api.data;
 };
 
-export const deleteProduct = async (
-    productId: string
-): Promise<void> => {
-    try {
-        await axios.delete(
-            API_CONFIG.ENDPOINTS.PRODUCT.DELETE(productId)
-        );
-    } catch (error) {
-        console.error(`deleteProduct (${productId}) error:`, error);
-        throw error;
-    }
+export const deleteProduct = async (productId: string): Promise<void> => {
+  await apiClient.delete(API_CONFIG.ENDPOINTS.PRODUCT.DELETE(productId));
+};
+
+export const getAllProductsPaginated = async (
+    page: number,
+    size: number
+): Promise<ProductResponse[]> => {
+  const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
+      API_CONFIG.ENDPOINTS.PRODUCT.PAGINATE,
+      {params: {page, size}}
+  );
+  const api = res.data;
+  return api.data ?? [];
 };

@@ -1,73 +1,91 @@
-import axios from "axios";
-import type {ProductResponse, ProductCreationRequest} from "../types/productTypes";
-import {API_CONFIG} from "../config/apiConfig";
-import type {ApiResponse} from "../types/apiResponse";
-import type {StaffResponse} from "../types/staffTypes.ts";
-import {getAuthToken} from "../utils/storageUtils.ts";
+import { apiClient } from "../utils/apiClient";
+import type { StaffResponse, StaffCreationRequest } from "../types/staffTypes";
+import type { ApiResponse } from "../types/apiResponse";
+import { API_CONFIG } from "../config/apiConfig";
 
-export const createProduct = async (
-    credentials: ProductCreationRequest
-): Promise<ProductResponse> => {
-    try {
-        const res = await axios.post<ApiResponse<ProductResponse>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
-            credentials
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error("❌ createProduct error:", error);
-        throw error; // để component xử lý tiếp (toast, alert…)
+export const createStaff = async (
+    request: StaffCreationRequest
+): Promise<StaffResponse> => {
+    const res = await apiClient.post<ApiResponse<StaffResponse>>(
+        API_CONFIG.ENDPOINTS.STAFF.CREATE,
+        request
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create staff failed");
     }
+    return apiRes.data;
 };
 
-export const getAllProducts = async (): Promise<ProductResponse[]> => {
-    try {
-        const res = await axios.get<ApiResponse<ProductResponse[]>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error("❌ getAllProducts error:", error);
-        throw error;
-    }
+export const getAllStaff = async (): Promise<StaffResponse[]> => {
+    const res = await apiClient.get<ApiResponse<StaffResponse[]>>(
+        API_CONFIG.ENDPOINTS.STAFF.GET_ALL
+    );
+    return res.data?.data ?? [];
 };
 
-export const getProductById = async (
-    productId: string
-): Promise<ProductResponse> => {
-    try {
-        const res = await axios.get<ApiResponse<ProductResponse>>(
-            API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
-        );
-
-        return res.data.data;
-    } catch (error) {
-        console.error(`❌ getProductById (${productId}) error:`, error);
-        throw error;
+export const getStaffById = async (id: string): Promise<StaffResponse> => {
+    const res = await apiClient.get<ApiResponse<StaffResponse>>(
+        API_CONFIG.ENDPOINTS.STAFF.GET_BY_ID(id)
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get staff failed");
     }
+    return apiRes.data;
 };
 
-export const deleteProduct = async (
-    productId: string
-): Promise<void> => {
-    try {
-        await axios.delete(
-            API_CONFIG.ENDPOINTS.PRODUCT.DELETE(productId)
-        );
-    } catch (error) {
-        console.error(`❌ deleteProduct (${productId}) error:`, error);
-        throw error;
+// export const getInfo = async (): Promise<StaffResponse> => {
+//   const res = await apiClient.get<ApiResponse<StaffResponse>>(
+//       API_CONFIG.ENDPOINTS.STAFF.GET_INFO
+//   );
+//   const apiRes = res.data;
+//   if (!apiRes.success || apiRes.data == null) {
+//     throw new Error(apiRes.message ?? "Get info failed");
+//   }
+//   return apiRes.data;
+// };
+
+// export const updateStaff = async (
+//     id: string,
+//     request: StaffUpdateRequest
+// ): Promise<StaffResponse> => {
+//     const res = await apiClient.put<ApiResponse<StaffResponse>>(
+//         API_CONFIG.ENDPOINTS.STAFF.UPDATE(id),
+//         request
+//     );
+//     const apiRes = res.data;
+//     if (!apiRes.success || apiRes.data == null) {
+//         throw new Error(apiRes.message ?? "Update staff failed");
+//     }
+//     return apiRes.data;
+// };
+
+export const updateStaffShift = async (
+    id: string,
+    shift: number
+): Promise<StaffResponse> => {
+    const res = await apiClient.put<ApiResponse<StaffResponse>>(
+        API_CONFIG.ENDPOINTS.STAFF.UPDATE_SHIFT(id, shift)
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Update shift failed");
     }
+    return apiRes.data;
+};
+
+export const deleteStaff = async (id: string): Promise<void> => {
+    await apiClient.delete(API_CONFIG.ENDPOINTS.STAFF.DELETE(id));
 };
 
 export const getInfo = async (): Promise<StaffResponse> => {
-    const res = await axios.get<ApiResponse<StaffResponse>>(
-        API_CONFIG.ENDPOINTS.STAFF.GET_INFO, {
-            headers: {
-                Authorization: `bearer : ${getAuthToken()}`,
-            }
-        });
-    return res.data.data;
-}
+    const res = await apiClient.get<ApiResponse<StaffResponse>>(
+        API_CONFIG.ENDPOINTS.STAFF.GET_INFO
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Get info failed");
+    }
+    return apiRes.data;
+};

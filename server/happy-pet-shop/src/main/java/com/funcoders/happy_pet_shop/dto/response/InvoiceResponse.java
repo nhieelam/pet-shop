@@ -36,8 +36,6 @@ public class InvoiceResponse {
 
     String shippingAddress;
 
-    PromotionResponse promotion;
-
     PaymentStatus status;
 
     LocalDateTime createdAt;
