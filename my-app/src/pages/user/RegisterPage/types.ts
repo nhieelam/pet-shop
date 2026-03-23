@@ -1,19 +1,24 @@
 export interface RegisterFormData {
-  userName: string;
-  phone : string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
-  address ?: string;
+  address: string;
 }
 
 export interface RegisterFormErrors {
-  userName?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   phone?: string;
   password?: string;
   confirmPassword?: string;
   address?: string;
   general?: string;
 }
+
 export interface UseRegisterFormReturn {
   formData: RegisterFormData;
   errors: RegisterFormErrors;

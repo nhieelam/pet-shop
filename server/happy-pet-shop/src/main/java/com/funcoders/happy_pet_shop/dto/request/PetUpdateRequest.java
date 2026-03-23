@@ -34,5 +34,8 @@ public class PetUpdateRequest {
 
     Boolean vaccinated;
 
+    @Size(max = 500, message = "INVALID_PET_IMAGE_LENGTH")
+    String imageUrl;
+
     Boolean available;
 }

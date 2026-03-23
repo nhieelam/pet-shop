@@ -52,6 +52,9 @@ public class Pet {
     @Column(nullable = false)
     Boolean vaccinated;
 
+    @Column(name = "image_url", length = 500)
+    String imageUrl;
+
     @Column(nullable = false)
     Boolean available;
 

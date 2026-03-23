@@ -45,7 +45,7 @@ public class Invoice {
     Customer customer;
 
     // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     String shippingAddress;
 
     // ===== GIÁ TIỀN =====

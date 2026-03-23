@@ -4,6 +4,8 @@ import ProfilePage from "./pages/user/ProfilePage/ProfilePage";
 import ProductsPage from "./pages/user/ProductsPage/ProductsPage";
 import ServicesPage from "./pages/user/ServicesPage/ServicesPage";
 import DetailedProductPage from "./pages/user/DetailedProductPage/DetailedProductPage";
+import ReviewPage from "./pages/user/ReviewPage/ReviewPage";
+import PetsPage from "./pages/user/PetsPage/PetsPage";
 import ListProductsPage from "./pages/admin/ListProductsPage/ListProductsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage/ManageOrdersPage";
 import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/ManageProductCategoryPage";
@@ -21,6 +23,7 @@ import "./App.css";
 import StaffPage from "./pages/admin/StaffPage/StaffPage.tsx";
 import CustomerPage from "./pages/admin/CustomerPage/CustomerPage.tsx";
 import SupplierPage from "./pages/admin/SupplierPage/SupplierPage.tsx";
+import ManagePetsPage from "./pages/admin/ManagePetsPage/ManagePetsPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -43,11 +46,13 @@ const App: React.FC = () => {
               <Route path="cart" element={<CartPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="products" element={<ProductsPage />} />
+              <Route path="pets" element={<PetsPage />} />
               <Route path="services" element={<ServicesPage />} />
               <Route
                   path="detailedProduct/:id"
                   element={<DetailedProductPage />}
               />
+              <Route path="review" element={<ReviewPage />} />
  
             </Route>
 
@@ -59,6 +64,7 @@ const App: React.FC = () => {
               <Route path="listProducts" element={<ListProductsPage />} />
               <Route path="manageOrders" element={<ManageOrdersPage />} />
               <Route path="suppliers" element={<SupplierPage />} />
+              <Route path="pets" element={<ManagePetsPage />} />
               <Route
                   path="manageProductCategory"
                   element={<ManageProductCategoryPage />}

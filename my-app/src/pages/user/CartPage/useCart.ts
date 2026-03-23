@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/authContext";
 import { getInfo } from "../../../services/customerService";
 import { addOrUpdateCartItem } from "../../../services/cartService";
@@ -27,6 +28,7 @@ export interface UseCartReturn {
 
 export function useCart(): UseCartReturn {
   const { user, setUser, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,8 +132,8 @@ export function useCart(): UseCartReturn {
       isSelected: true,
     }));
     sessionStorage.setItem("checkoutItems", JSON.stringify(payload));
-    window.location.href = "/payment?source=cart";
-  }, [items, selection]);
+    navigate("/user/review");
+  }, [items, selection, navigate]);
 
   const allSelected = useMemo(
     () => items.length > 0 && items.every((item) => selection[item.id] ?? true),

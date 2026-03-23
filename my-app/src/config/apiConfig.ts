@@ -51,6 +51,7 @@ export const API_CONFIG = {
 
         INVOICE: {
             CREATE: "/invoices",
+            REVIEW: "/invoices/review",
             GET_ALL: "/invoices",
             GET_BY_ID: (id: string) => `/invoices/${id}`,
             DELETE: (id: string) => `/invoices/${id}`,

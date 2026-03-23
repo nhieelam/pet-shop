@@ -10,11 +10,40 @@ export interface InvoiceDetailCreationRequest {
 }
 
 export interface InvoiceCreationRequest {
-    staffId: string;
+    staffId?: string;
     customerId: string;
     shippingAddress: string;
     paymentMethod: PaymentMethod;
     invoiceDetails: InvoiceDetailCreationRequest[];
+}
+
+export interface ReviewDetailRequest {
+    productId: string;
+    quantity: number;
+}
+
+export interface ReviewRequest {
+    customerId: string;
+    shippingAddress: string;
+    details: ReviewDetailRequest[];
+}
+
+export interface ReviewDetailResponse {
+    productId: string;
+    productName: string;
+    imageUrl?: string;
+    unitPrice: number;
+    quantity: number;
+    totalPrice: number;
+    discountAmount: number;
+}
+
+export interface ReviewResponse {
+    customerName: string;
+    shippingAddress: string;
+    totalAmount: number;
+    realAmount: number;
+    reviewDetails: ReviewDetailResponse[];
 }
 
 export interface InvoiceDetailResponse {

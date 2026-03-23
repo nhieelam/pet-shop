@@ -1,10 +1,6 @@
 package com.funcoders.happy_pet_shop.controller;
 
-import com.funcoders.happy_pet_shop.dto.request.AuthRequest;
-import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
-import com.funcoders.happy_pet_shop.dto.request.RefreshRequest;
-import com.funcoders.happy_pet_shop.dto.request.UserRegisterRequest;
-import com.funcoders.happy_pet_shop.dto.request.LogoutRequest;
+import com.funcoders.happy_pet_shop.dto.request.*;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
@@ -56,8 +52,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@Valid @RequestBody UserRegisterRequest req) {
-        UserResponse response = authService.register(req);
-        return new ApiResponse<UserResponse>(response, "Registered successfully");
+    public ApiResponse<AuthResponse> register(@Valid @RequestBody UserCreationRequest request) {
+        AuthResponse response = authService.register(request);
+        return new ApiResponse<AuthResponse>(response, "Registered successfully");
     }
 }

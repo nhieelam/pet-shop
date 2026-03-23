@@ -8,7 +8,7 @@ interface CartItemRowProps {
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
   onRemove: (id: string) => void;
-  updateQuantity: (productId: string | undefined, newQuantity: number) => void;
+  updateQuantity: (productId: string, newQuantity: number) => void;
 }
 
 function getProduct(item: CartItemResponse) {
@@ -39,11 +39,13 @@ export default function CartItemRow({
   // function wait and call Api
   useEffect(() => {
     const timer = setTimeout(() => {
-      updateQuantity(item.product?.id, quantity);
+      if (!product?.id) return;
+
+      updateQuantity(product.id, quantity);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [quantity]);
+  }, [quantity, product?.id]);
 
   return (
       <div

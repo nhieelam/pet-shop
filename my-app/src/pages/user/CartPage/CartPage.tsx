@@ -16,8 +16,6 @@ export default function CartPage() {
     isAuthenticated,
     toggleSelect,
     selectAll,
-    // incrementQuantity,
-    // decrementQuantity,
     updateQuantity,
     removeItem,
     checkout,

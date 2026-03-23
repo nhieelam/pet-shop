@@ -1,8 +1,10 @@
 package com.funcoders.happy_pet_shop.controller;
 
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
+import com.funcoders.happy_pet_shop.dto.request.ReviewRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
+import com.funcoders.happy_pet_shop.dto.response.ReviewResponse;
 import com.funcoders.happy_pet_shop.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -21,6 +23,14 @@ import java.util.UUID;
 public class InvoiceController {
 
     InvoiceService invoiceService;
+
+    @PostMapping("/review")
+    public ApiResponse<ReviewResponse> createReview(
+            @Valid @RequestBody ReviewRequest request
+    ) {
+        ReviewResponse response = invoiceService.createReview(request);
+        return new ApiResponse<>(response, "Review invoice successfully");
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

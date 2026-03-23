@@ -6,7 +6,6 @@ import type {
   IntrospectResponse,
   LogoutRequest,
   RefreshRequest,
-  RegisterRequest,
 } from "../types/authTypes";
 import type {ApiResponse} from "../types/apiResponse";
 import {
@@ -17,6 +16,7 @@ import {
 } from "../utils/errorHandler";
 import {apiClient} from "../utils/apiClient";
 import {removeAuthToken, removeUserName} from "../utils/storageUtils";
+import type {UserCreationRequest} from "@/types/userTypes.ts";
 
 export const login = async (credentials: AuthRequest): Promise<AuthResponse> => {
   try {
@@ -74,7 +74,7 @@ export const refresh = async (request: RefreshRequest): Promise<AuthResponse> =>
   return apiRes.data;
 };
 
-export const register = async (credentials: RegisterRequest): Promise<AuthResponse> => {
+export const register = async (credentials: UserCreationRequest): Promise<AuthResponse> => {
   try {
     const res = await apiClient.post<ApiResponse<AuthResponse>>(
         API_CONFIG.ENDPOINTS.AUTH.REGISTER,

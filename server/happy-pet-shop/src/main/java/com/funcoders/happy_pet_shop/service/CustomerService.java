@@ -58,7 +58,7 @@ public class CustomerService {
         Customer customer = Customer.builder()
                 .user(userEntity)
                 .points(BigDecimal.ZERO)
-                .cart(new Cart())
+                .cart(cart)
                 .build();
 
         cart.setCustomer(customer);

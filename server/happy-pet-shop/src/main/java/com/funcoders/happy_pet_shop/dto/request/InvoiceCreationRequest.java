@@ -19,7 +19,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceCreationRequest {
 
-    @NotNull(message = "INVALID_STAFF")
     UUID staffId;
 
     @NotNull(message = "INVALID_CUSTOMER")

@@ -6,14 +6,18 @@ import {
   type ReactNode,
 } from "react";
 
-import {login as loginService, verifyToken} from "../services/authService";
-
+import {
+  login as loginService,
+  logout as logoutService,
+  register as registerService,
+  verifyToken,
+} from "../services/authService";
 import type {AuthRequest, IntrospectRequest} from "../types/authTypes";
 import type {CustomerResponse} from "../types/customerTypes";
+import type {UserCreationRequest} from "../types/userTypes";
 import {getAuthToken, storeAuthToken} from "../utils/storageUtils.ts";
 import {useLocation} from "react-router-dom";
-import {getInfo} from "../services/customerService.ts"
-import {logout as logoutService} from "../services/authService.ts";
+import {getInfo} from "../services/customerService.ts";
 
 /* =========================
    CONTEXT TYPE
@@ -24,6 +28,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (credentials: AuthRequest) => Promise<boolean>;
+  register: (payload: UserCreationRequest) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -122,6 +127,41 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     }
   };
 
+  /* ---------- REGISTER ---------- */
+  const register = async (payload: UserCreationRequest) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const authData = await registerService(payload);
+
+      setIsAuthenticated(true);
+
+      storeAuthToken(authData.token);
+
+      localStorage.setItem("auth_user", JSON.stringify(authData));
+
+      if (
+        location.pathname === "/register" ||
+        location.pathname === "/admin/register"
+      ) {
+        const customer: CustomerResponse = await getInfo();
+
+        setUser(customer);
+      }
+      return true;
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Đăng ký thất bại");
+      }
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ---------- LOGOUT ---------- */
   const logout = async () => {
     setUser(null);
@@ -144,6 +184,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             loading,
             error,
             login,
+            register,
             logout,
             isAuthenticated,
           }}

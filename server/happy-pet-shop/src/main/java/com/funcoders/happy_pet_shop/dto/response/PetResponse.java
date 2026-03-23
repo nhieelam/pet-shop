@@ -33,6 +33,8 @@ public class PetResponse {
 
     Boolean vaccinated;
 
+    String imageUrl;
+
     Boolean available;
 
     Boolean sold;

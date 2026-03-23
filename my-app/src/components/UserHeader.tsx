@@ -74,6 +74,15 @@ export default function UserHeader() {
                   🦴 Sản phẩm
                 </Link>
 
+                <Link
+                    to="/user/pets"
+                    className={`${navItem} ${
+                        isActive("/user/pets") ? activeItem : "hover:bg-white/20"
+                    }`}
+                >
+                  🐕 Thú cưng
+                </Link>
+
                 {/*<Link*/}
                 {/*    to="/user/services"*/}
                 {/*    className={`${navItem} ${*/}
@@ -144,6 +153,16 @@ export default function UserHeader() {
                       }`}
                   >
                     🦴 Sản phẩm
+                  </Link>
+
+                  <Link
+                      to="/user/pets"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block ${navItem} ${
+                          isActive("/user/pets") ? activeItem : "hover:bg-white/20"
+                      }`}
+                  >
+                    🐕 Thú cưng
                   </Link>
 
                   {/*<Link*/}

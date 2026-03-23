@@ -39,4 +39,7 @@ public class PetCreationRequest {
 
     @NotNull(message = "INVALID_PET_VACCINATED_STATUS")
     Boolean vaccinated;
+
+    @Size(max = 500, message = "INVALID_PET_IMAGE_LENGTH")
+    String imageUrl;
 }

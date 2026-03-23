@@ -1,23 +1,24 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { validateForm } from "../validation";
 import type { RegisterFormData, RegisterFormErrors } from "../types";
 import type { UseRegisterFormReturn } from "../types";
-import { register } from "@/services/authService";
-import { storeAuthToken, storeUserName } from "@/utils/storageUtils";
-import { UserRole } from "@/enum/user";
+import { useAuth } from "@/context/authContext";
 
 const initialFormData: RegisterFormData = {
-  userName: "",
+  firstName: "",
+  lastName: "",
+  email: "",
   phone: "",
   password: "",
   confirmPassword: "",
-  address : "",
+  address: "",
 };
-
 
 export function useRegisterForm(): UseRegisterFormReturn {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { register: registerUser } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -56,27 +57,34 @@ export function useRegisterForm(): UseRegisterFormReturn {
       setErrors({});
 
       try {
-        const registerData = {
-          username: formData.userName,
-          phone: formData.phone,
+        await registerUser({
+          firstName: formData.firstName.trim() || undefined,
+          lastName: formData.lastName.trim() || undefined,
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
           password: formData.password,
-          address: formData.address || undefined,
-          role: UserRole.CUSTOMER,
-        };
+          address: formData.address.trim() || undefined,
+        });
 
-        const response = await register(registerData);
-
-        storeAuthToken(response.token);
-        storeUserName(formData.userName);
-
-        navigate("/user/products", { replace: true });
+        if (location.pathname.includes("/admin")) {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/user/products", { replace: true });
+        }
       } catch (error: unknown) {
         console.error("Registration error:", error);
+        if (error instanceof Error) {
+          setErrors({
+            general: error.message || "Đăng ký thất bại, vui lòng thử lại",
+          });
+        } else {
+          setErrors({ general: "Đăng ký thất bại. Vui lòng thử lại." });
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [formData, navigate]
+    [formData, navigate, location.pathname, registerUser]
   );
 
   return {

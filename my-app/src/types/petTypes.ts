@@ -6,6 +6,7 @@ export interface PetCreationRequest {
   gender: string;
   price: number;
   vaccinated: boolean;
+  imageUrl?: string;
 }
 
 export interface PetUpdateRequest {
@@ -16,6 +17,7 @@ export interface PetUpdateRequest {
   gender?: string;
   price?: number;
   vaccinated?: boolean;
+  imageUrl?: string;
   available?: boolean;
 }
 
@@ -28,6 +30,7 @@ export interface PetResponse {
   gender: string;
   price: number;
   vaccinated: boolean;
+  imageUrl?: string;
   available?: boolean;
   sold?: boolean;
   createdAt: string;

@@ -2,6 +2,8 @@ import { apiClient } from "../utils/apiClient";
 import type {
     InvoiceResponse,
     InvoiceCreationRequest,
+    ReviewRequest,
+    ReviewResponse,
 } from "../types/invoiceTypes";
 import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
@@ -16,6 +18,20 @@ export const createInvoice = async (
     const apiRes = res.data;
     if (!apiRes.success || apiRes.data == null) {
         throw new Error(apiRes.message ?? "Create invoice failed");
+    }
+    return apiRes.data;
+};
+
+export const createInvoiceReview = async (
+    request: ReviewRequest
+): Promise<ReviewResponse> => {
+    const res = await apiClient.post<ApiResponse<ReviewResponse>>(
+        API_CONFIG.ENDPOINTS.INVOICE.REVIEW,
+        request
+    );
+    const apiRes = res.data;
+    if (!apiRes.success || apiRes.data == null) {
+        throw new Error(apiRes.message ?? "Create invoice review failed");
     }
     return apiRes.data;
 };
