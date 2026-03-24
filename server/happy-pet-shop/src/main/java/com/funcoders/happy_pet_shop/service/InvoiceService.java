@@ -311,6 +311,13 @@ public class InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND)));
     }
 
+    @Transactional(readOnly = true)
+    public List<InvoiceResponse> getInvoiceByCustomer_Id(UUID id) {
+        List<Invoice> invoices = invoiceRepository.findByCustomer_Id(id);
+
+        return invoices.stream().map(invoiceMapper::toResponse).toList();
+    }
+
     @Transactional()
     public void deleteInvoiceById(UUID id) {
         Invoice invoice = invoiceRepository.findById(id)

@@ -50,5 +50,7 @@ public class ProductUpdateRequest {
     LocalDate expiryDate;
 
     String imageUrl;
+
+    boolean available;
 }
 

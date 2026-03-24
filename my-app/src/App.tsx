@@ -6,11 +6,16 @@ import ServicesPage from "./pages/user/ServicesPage/ServicesPage";
 import DetailedProductPage from "./pages/user/DetailedProductPage/DetailedProductPage";
 import ReviewPage from "./pages/user/ReviewPage/ReviewPage";
 import PetsPage from "./pages/user/PetsPage/PetsPage";
+import PaidInvoicesPage from "./pages/user/PaidInvoicesPage/PaidInvoicesPage";
+import InvoiceDetailPage from "./pages/user/PaidInvoicesPage/InvoiceDetailPage";
 import ListProductsPage from "./pages/admin/ListProductsPage/ListProductsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage/ManageOrdersPage";
 import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/ManageProductCategoryPage";
 import ManageServicesPage from "./pages/admin/ManageServicesPage/ManageServicesPage";
 import PurchasePage from "./pages/admin/PurchasePage/PurchasePage.tsx";
+import AddPurchasePage from "./pages/admin/PurchasePage/AddPurchasePage.tsx";
+import PromotionManagementPage from "./pages/admin/PromotionPage/PromotionManagementPage.tsx";
+import AddPromotionPage from "./pages/admin/PromotionPage/AddPromotionPage.tsx";
 import AdminDashBoard from "./pages/admin/DashBoardPage/AdminDashBoard";
 import RegisterPage from "./pages/user/RegisterPage/RegisterPage";
 import UserLayout from "./layouts/UserLayout";
@@ -53,7 +58,8 @@ const App: React.FC = () => {
                   element={<DetailedProductPage />}
               />
               <Route path="review" element={<ReviewPage />} />
- 
+              <Route path="invoices/:invoiceId" element={<InvoiceDetailPage />} />
+              <Route path="invoices" element={<PaidInvoicesPage />} />
             </Route>
 
             <Route path="/admin" element={<AdminLayout />}>
@@ -73,7 +79,10 @@ const App: React.FC = () => {
                   path="manageServices"
                   element={<ManageServicesPage />}
               />
+              <Route path="purchases/add" element={<AddPurchasePage />} />
               <Route path="purchases" element={<PurchasePage />} />
+              <Route path="promotions/add" element={<AddPromotionPage />} />
+              <Route path="promotions" element={<PromotionManagementPage />} />
             </Route>
           </Routes>
         </AuthProvider>
