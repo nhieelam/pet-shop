@@ -102,14 +102,24 @@ export default function UserHeader() {
                 </Link>
 
                 {user ? (
-                    <Link
+                    <>
+                      <Link
+                          to="/user/invoices"
+                          className={`${navItem} ${
+                              isActive("/user/invoices") ? activeItem : "hover:bg-white/20"
+                          }`}
+                      >
+                        🧾 Hóa đơn
+                      </Link>
+                      <Link
                         to="/user/profile"
                         className={`${navItem} ${
                             isActive("/user/profile") ? activeItem : "hover:bg-white/20"
                         }`}
-                    >
-                      🐶 Tài khoản
-                    </Link>
+                      >
+                        🐶 Tài khoản
+                      </Link>
+                    </>
                 ) : (
                     <Link
                         to="/login"
@@ -185,15 +195,36 @@ export default function UserHeader() {
                     🛒 Giỏ hàng
                   </Link>
 
-                  <Link
-                      to="/user/profile"
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`block ${navItem} ${
-                          isActive("/user/profile") ? activeItem : "hover:bg-white/20"
-                      }`}
-                  >
-                    🐶 Tài khoản
-                  </Link>
+                  {user ? (
+                      <>
+                        <Link
+                            to="/user/invoices"
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`block ${navItem} ${
+                                isActive("/user/invoices") ? activeItem : "hover:bg-white/20"
+                            }`}
+                        >
+                          🧾 Hóa đơn
+                        </Link>
+                        <Link
+                            to="/user/profile"
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`block ${navItem} ${
+                                isActive("/user/profile") ? activeItem : "hover:bg-white/20"
+                            }`}
+                        >
+                          🐶 Tài khoản
+                        </Link>
+                      </>
+                  ) : (
+                      <Link
+                          to="/login"
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`block ${navItem} hover:bg-white/20`}
+                      >
+                        🔑 Đăng nhập
+                      </Link>
+                  )}
 
                 </div>
             )}

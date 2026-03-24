@@ -118,14 +118,15 @@ export function useReview(): UseReviewReturn {
     setPlacingOrder(true);
     setError(null);
     try {
-      await createInvoice({
+      const invoice = await createInvoice({
         customerId: user.id,
         shippingAddress: shippingAddress.trim(),
         paymentMethod,
         invoiceDetails,
       });
+
       sessionStorage.removeItem("checkoutItems");
-      navigate("/user/profile");
+      navigate(`/user/invoices/${invoice.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Đặt hàng thất bại.");
     } finally {

@@ -138,5 +138,6 @@ export function usePurchase() {
     handleDeletePurchase,
     clearFilters,
     fetchPurchases,
+    showToast,
   };
 }

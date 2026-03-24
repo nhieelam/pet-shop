@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Thú cưng", href: "/admin/pets" },
   { label: "Phiếu nhập", href: "/admin/purchases" },
   { label: "Hóa đơn", href: "/admin/manageOrders" },
+  { label: "Khuyến mãi", href: "/admin/promotions" },
   { label: "Danh mục", href: "/admin/manageProductCategory" },
   { label: "dịch vụ", href: "/admin/manageServices" },
 ];

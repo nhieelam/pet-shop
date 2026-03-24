@@ -1,6 +1,7 @@
 "use client";
 
 import {useState} from "react";
+import {Link} from "react-router-dom";
 import {usePurchase} from "./usePurchase";
 import type {PurchaseDetailResponse, PurchaseResponse} from "../../../types/purchaseTypes";
 
@@ -205,6 +206,12 @@ export default function PurchasePage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <Link
+                    to="/admin/purchases/add"
+                    className="flex items-center gap-2 bg-white text-emerald-700 px-4 py-2 rounded-xl text-sm font-semibold shadow hover:bg-emerald-50 transition-all"
+                >
+                  + Add purchase
+                </Link>
                 <div
                     className="hidden sm:flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
                   <span>📦</span>
@@ -446,7 +453,6 @@ export default function PurchasePage() {
             </div>
           </main>
 
-          {/* Delete Modal */}
           {deleteModalOpen && purchaseToDelete && (
               <div className="fixed inset-0 z-50 overflow-y-auto">
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden/>

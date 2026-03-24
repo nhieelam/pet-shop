@@ -1,4 +1,6 @@
-import type {FC} from "react";
+import {type FC, useEffect, useState} from "react";
+import {getAllInvoices} from "@/services";
+import type {InvoiceResponse} from "@/types/invoiceTypes.ts";
 
 const stats = [
   {
@@ -23,13 +25,19 @@ const stats = [
   },
 ];
 
-const recentOrders = [
-  { id: "#ORD001", customer: "Nguyễn Văn A", total: "₫1,200,000", status: "Hoàn thành" },
-  { id: "#ORD002", customer: "Trần Thị B", total: "₫850,000", status: "Đang xử lý" },
-  { id: "#ORD003", customer: "Lê Văn C", total: "₫2,500,000", status: "Đã hủy" },
-];
 
 const AdminDashboard: FC = () => {
+  const [recentOrders, setRecentOrders] = useState<InvoiceResponse[]>([]);
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      const invoices = await getAllInvoices();
+      setRecentOrders(invoices);
+    }
+
+    fetchInvoices();
+  }, []);
+
   return (
       <div className="p-8 bg-slate-100 min-h-screen">
         {/* Header */}
@@ -77,28 +85,43 @@ const AdminDashboard: FC = () => {
               </tr>
               </thead>
               <tbody>
-              {recentOrders.map((order, index) => (
+              {recentOrders.map((order) => (
                   <tr
-                      key={index}
+                      key={order.id}
                       className="border-b hover:bg-gray-50 transition"
                   >
+                    {/* Mã đơn */}
                     <td className="py-4 font-medium text-indigo-600">
                       {order.id}
                     </td>
-                    <td className="py-4">{order.customer}</td>
-                    <td className="py-4">{order.total}</td>
+
+                    {/* Khách hàng */}
                     <td className="py-4">
-                    <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            order.status === "Hoàn thành"
-                                ? "bg-green-100 text-green-600"
-                                : order.status === "Đang xử lý"
-                                    ? "bg-yellow-100 text-yellow-600"
-                                    : "bg-red-100 text-red-600"
-                        }`}
-                    >
-                      {order.status}
-                    </span>
+                      {order.customerName ?? "Khách lẻ"}
+                    </td>
+
+                    {/* Tổng tiền */}
+                    <td className="py-4">
+                      {order.realAmount.toLocaleString("vi-VN")} ₫
+                    </td>
+
+                    {/* Trạng thái */}
+                    <td className="py-4">
+                      <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              order.status === "COMPLETED"
+                                  ? "bg-green-100 text-green-600"
+                                  : order.status === "PENDING"
+                                      ? "bg-yellow-100 text-yellow-600"
+                                      : "bg-red-100 text-red-600"
+                          }`}
+                      >
+                        {order.status === "COMPLETED"
+                            ? "Hoàn thành"
+                            : order.status === "PENDING"
+                                ? "Đang xử lý"
+                                : "Đã huỷ"}
+                      </span>
                     </td>
                   </tr>
               ))}

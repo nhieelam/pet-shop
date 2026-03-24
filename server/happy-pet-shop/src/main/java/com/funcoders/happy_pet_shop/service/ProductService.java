@@ -74,13 +74,14 @@ public class ProductService {
         Product productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
+        productMapper.updateProduct(productEntity, request);
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorType.INVALID_CATEGORY));
 
         productEntity.setCategory(category);
 
-        productMapper.updateProduct(productEntity, request);
-
+        System.out.println(productEntity.isAvailable());
         return productMapper.toResponse(productRepository.save(productEntity));
     }
 

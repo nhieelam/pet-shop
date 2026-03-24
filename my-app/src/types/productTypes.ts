@@ -39,4 +39,5 @@ export interface ProductUpdateRequest {
     origin?: string;
     expiryDate?: string;
     imageUrl?: string;
+    available?: boolean;
 }

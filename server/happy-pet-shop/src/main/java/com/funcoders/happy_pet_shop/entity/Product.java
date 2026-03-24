@@ -68,6 +68,7 @@ public class Product {
 
     @PrePersist
     protected void onCreate() {
+        available = true;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -57,3 +57,12 @@ export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
 export const deleteInvoice = async (id: string): Promise<void> => {
     await apiClient.delete(API_CONFIG.ENDPOINTS.INVOICE.DELETE(id));
 };
+
+export const getInvoicesByCustomerId = async (
+    customerId: string
+): Promise<InvoiceResponse[]> => {
+    const res = await apiClient.get<ApiResponse<InvoiceResponse[]>>(
+        API_CONFIG.ENDPOINTS.INVOICE.GET_BY_CUSTOMER(customerId)
+    );
+    return res.data?.data ?? [];
+};
