@@ -9,9 +9,12 @@ import com.funcoders.happy_pet_shop.entity.Role;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
+import com.funcoders.happy_pet_shop.mapper.CartMapper;
 import com.funcoders.happy_pet_shop.mapper.CustomerMapper;
+import com.funcoders.happy_pet_shop.mapper.InvoiceMapper;
 import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
+import com.funcoders.happy_pet_shop.repository.InvoiceRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import lombok.AccessLevel;
@@ -35,6 +38,9 @@ import java.util.UUID;
 public class CustomerService {
     CustomerRepository customerRepository;
     CustomerMapper customerMapper;
+    InvoiceRepository invoiceRepository;
+    InvoiceMapper invoiceMapper;
+    CartMapper cartMapper;
 
     UserRepository userRepository;
     UserMapper userMapper;
@@ -98,7 +104,15 @@ public class CustomerService {
         Customer customer = customerRepository.findByUser_Username(username)
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-        return customerMapper.toResponse(customer);
+        return CustomerResponse.builder()
+                .id(customer.getId())
+                .points(customer.getPoints())
+                .user(userMapper.toResponse(customer.getUser()))
+                .cart(customer.getCart() != null ? cartMapper.toResponse(customer.getCart()) : null)
+                .invoices(invoiceRepository.findAllByCustomer_Id(customer.getId()).stream()
+                        .map(invoiceMapper::toResponse)
+                        .toList())
+                .build();
     }
 
     @Transactional

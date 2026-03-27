@@ -120,8 +120,7 @@ export function useCart() {
       image: item.product?.imageUrl ?? "",
       isSelected: true,
     }));
-    sessionStorage.setItem("checkoutItems", JSON.stringify(payload));
-    navigate("/user/review");
+    navigate("/user/review", { state: { checkoutItems: payload } });
   }, [items, selection, navigate]);
 
   const allSelected = useMemo(

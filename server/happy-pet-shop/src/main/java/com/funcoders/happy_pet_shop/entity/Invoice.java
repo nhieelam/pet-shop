@@ -34,28 +34,23 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
-    // ===== NGƯỜI XỬ LÝ (offline) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id")
     Staff staff;
 
-    // ===== NGƯỜI MUA =====
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     Customer customer;
 
-    // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====
     @Column(length = 255)
     String shippingAddress;
 
-    // ===== GIÁ TIỀN =====
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal totalAmount = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal realAmount = BigDecimal.ZERO;
 
-    // ===== THANH TOÁN =====
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     PaymentMethod paymentMethod;
@@ -64,11 +59,9 @@ public class Invoice {
     @Column(nullable = false, length = 20)
     PaymentStatus status = PaymentStatus.PENDING;
 
-    // ===== THỜI GIAN =====
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
 
-    // ===== CHI TIẾT HÓA ĐƠN =====
     @OneToMany(
             mappedBy = "invoice",
             cascade = CascadeType.ALL,
@@ -76,7 +69,6 @@ public class Invoice {
     )
     Set<InvoiceDetail> invoiceDetails = new HashSet<>();
 
-    // ===== LIFECYCLE =====
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

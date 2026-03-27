@@ -9,7 +9,7 @@ import OverviewTab from "./components/overview";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"overview" | "addresses" | "invoices">("overview");
-  const { user, loading } = useProfile();
+  const { customer, loading } = useProfile();
 
   if (loading) {
     return (
@@ -19,7 +19,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
+  if (!customer?.user) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <p className="text-gray-600">Vui lòng đăng nhập để xem hồ sơ.</p>

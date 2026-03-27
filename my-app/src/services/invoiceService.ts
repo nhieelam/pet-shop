@@ -91,3 +91,17 @@ export const deleteInvoice = async (id: string): Promise<void> => {
     const data = await response.json();
     return data;
 };
+
+// export const createInvoiceReview = async (request: ReviewRequest): Promise<ReviewResponse> => {
+//     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.CREATE_REVIEW}`;
+//     const response = await fetch(url, {
+//         method: "POST",
+//         headers: authHeaders(),
+//         body: JSON.stringify(request),
+//     });
+//     if (!response.ok) {
+//         throw new Error("Không thể tạo review");
+//     }
+//     const data = await response.json();
+//     return data;
+// };

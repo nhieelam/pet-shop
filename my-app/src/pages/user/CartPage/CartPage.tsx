@@ -54,14 +54,14 @@ export default function CartPage() {
           </div>
         )}
 
-        {/* Loading overlay */}
+
         {loading && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg px-6 py-4 shadow-lg">Đang cập nhật...</div>
           </div>
         )}
 
-        {/* Empty Cart State (when logged in but no items) */}
+
         {isAuthenticated && items.length === 0 && !loading ? (
           <div className="text-center py-20 bg-white rounded-xl border-2 border-dashed border-gray-300">
             <div className="text-6xl mb-4">🛍️</div>
@@ -76,9 +76,9 @@ export default function CartPage() {
           </div>
         ) : isAuthenticated && items.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items Section */}
+
             <div className="lg:col-span-2 space-y-4">
-              {/* Select All Bar */}
+
               <SelectAllBar
                 items={items}
                 selection={selection}

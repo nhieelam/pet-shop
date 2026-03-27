@@ -5,7 +5,7 @@ export type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc"
 export interface Invoice {
   id: string;
   date: string;
-  status: "Paid" | "Pending" | "Cancelled";
+  status: string;
   totalAmount: number;
   items: number;
 }

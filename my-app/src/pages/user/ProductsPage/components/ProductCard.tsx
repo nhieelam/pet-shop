@@ -61,20 +61,7 @@ export default function ProductCard({
     }
   };
 
-  const handlePayment = () => {
-    if (availableAmount === 0) return;
-    const checkoutItem = {
-      id,
-      productId: id,
-      name,
-      price,
-      quantity: 1,
-      image,
-      isSelected: true,
-    };
-    sessionStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
-    navigate("/payment?source=product");
-  };
+
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
@@ -140,19 +127,7 @@ export default function ProductCard({
               >
                 {cartLoading ? "..." : "🛒"}
               </button>
-              <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handlePayment();
-                  }}
-                  disabled={availableAmount === 0}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-3 rounded-lg transition disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                  aria-label={`Thanh toán cho ${name}`}
-                  title="Thanh toán ngay"
-              >
-                💳
-              </button>
+
             </div>
           </div>
         </div>

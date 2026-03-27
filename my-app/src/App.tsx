@@ -10,11 +10,12 @@ import CartPage from "./pages/user/CartPage/CartPage";
 import ProfilePage from "./pages/user/ProfilePage/ProfilePage";
 import ProductsPage from "./pages/user/ProductsPage/ProductsPage";
 import DetailedProductPage from "./pages/user/DetailedProductPage/DetailedProductPage";
+import ReviewPage from "./pages/user/ReviewPage/ReviewPage";
 
 import PaidInvoicesPage from "./pages/user/PaidInvoicesPage/PaidInvoicesPage";
 import InvoiceDetailPage from "./pages/user/PaidInvoicesPage/InvoiceDetailPage";
 
-import PetPage from "./pages/user/PetPage/PetPage";
+import PetsPage from "./pages/user/PetsPage/PetsPage";
 
 import { AuthProvider } from "./context/authContext";
 
@@ -41,7 +42,7 @@ const App: React.FC = () => {
               <Route path="cart" element={<CartPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="products" element={<ProductsPage />} />
-              <Route path="pets" element={<PetPage />} />
+              <Route path="pets" element={<PetsPage />} />
               <Route
                   path="detailedProduct/:id"
                   element={<DetailedProductPage />}
@@ -49,6 +50,7 @@ const App: React.FC = () => {
 
               <Route path="invoices/:invoiceId" element={<InvoiceDetailPage />} />
               <Route path="invoices" element={<PaidInvoicesPage />} />
+              <Route path="review" element={<ReviewPage />} />
             </Route>
 
           </Routes>

@@ -5,13 +5,13 @@ import * as userService from "../../../../services/userService";
 import type {UserResponse, UserUpdateRequest} from "../../../../types/userTypes.ts";
 
 export function useProfile() {
-  const {user, setUser, loading, logout: authLogout} = useAuth();
+  const {customer, setCustomer, loading, logout: authLogout} = useAuth();
 
   const refetch = useCallback(async () => {
     const customer = await customerService.getInfo();
-    setUser(customer);
+    setCustomer(customer.data);
     return customer;
-  }, [setUser]);
+  }, [setCustomer]);
 
   const updateProfile = useCallback(
       async (userId: string, request: UserUpdateRequest): Promise<UserResponse> => {
@@ -27,7 +27,7 @@ export function useProfile() {
   }, [authLogout]);
 
   return {
-    user,
+    customer,
     loading,
     refetch,
     updateProfile,

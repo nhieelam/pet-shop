@@ -1,116 +1,80 @@
 "use client";
+
+import { useMemo, useState, useCallback } from "react";
 import { useInvoiceHistory } from "../hooks/useInvoiceHistory";
-import type { Invoice, SortOption } from "../hooks/useInvoiceHistory"; 
-import Pagination from "./Pagination"; 
-import StatusBadge from "./StatusBadge"; 
+import type { Invoice, SortOption } from "../hooks/useInvoiceHistory";
+import { useProfile } from "../hooks/useProfile";
+import type { InvoiceData } from "@/types/invoiceTypes";
+import Pagination from "./Pagination";
+import StatusBadge from "./StatusBadge";
+import InvoiceDetailModal from "./InvoiceDetailModal";
 
-const mockInvoices: Invoice[] = [
-  {
-    id: "INV-2025-001",
-    date: "2025-01-05",
-    status: "Paid",
-    totalAmount: 750000,
-    items: 3,
-  },
+function mapInvoiceDataToRows(invoices: InvoiceData[]): Invoice[] {
+  return invoices.map((inv) => ({
+    id: inv.id,
+    date: inv.createdAt,
+    status: getInvoiceStatus(inv),
+    totalAmount: Number(inv.realAmount ?? inv.totalAmount ?? 0),
+    items: inv.invoiceDetails?.length ?? 0,
+  }));
+}
 
-  {
-    id: "INV-2025-002",
-    date: "2025-01-03",
-    status: "Paid",
-    totalAmount: 450000,
-    items: 2,
-  },
-
-  {
-    id: "INV-2025-003",
-    date: "2025-01-01",
-    status: "Pending",
-    totalAmount: 280000,
-    items: 1,
-  },
-
-  {
-    id: "INV-2024-048",
-    date: "2024-12-28",
-    status: "Paid",
-    totalAmount: 320000,
-    items: 2,
-  },
-
-  {
-    id: "INV-2024-047",
-    date: "2024-12-25",
-    status: "Paid",
-    totalAmount: 550000,
-    items: 4,
-  },
-
-  {
-    id: "INV-2024-046",
-    date: "2024-12-20",
-    status: "Cancelled",
-    totalAmount: 180000,
-    items: 1,
-  },
-
-  {
-    id: "INV-2024-045",
-    date: "2024-12-15",
-    status: "Paid",
-    totalAmount: 420000,
-    items: 2,
-  },
-
-  {
-    id: "INV-2024-044",
-    date: "2024-12-10",
-    status: "Paid",
-    totalAmount: 890000,
-    items: 5,
-  },
-
-  {
-
-    id: "INV-2024-043",
-    date: "2024-12-05",
-    status: "Paid",
-    totalAmount: 310000,
-    items: 2,
-  },
-
-  {
-    id: "INV-2024-042",
-    date: "2024-11-30",
-    status: "Paid",
-    totalAmount: 625000,
-    items: 3,
-  },
-
-];
-
+function getInvoiceStatus(inv: InvoiceData): string {
+  const ext = inv as InvoiceData & { status?: string; paymentStatus?: string };
+  return ext.status ?? ext.paymentStatus ?? "PENDING";
+}
 
 export default function InvoiceHistory() {
-  const { 
-    currentInvoices, 
-    currentPage, 
-    totalPages, 
-    sortBy, 
-    setSortBy, 
-    goToPage, 
-    startIndex, 
-    totalCount 
-  } = useInvoiceHistory(mockInvoices);
+  const { customer } = useProfile();
+  const [detailInvoiceId, setDetailInvoiceId] = useState<string | null>(null);
+
+  const detailInvoice = useMemo((): InvoiceData | null => {
+    if (!detailInvoiceId || !customer?.invoices?.length) return null;
+    return customer.invoices.find((inv) => inv.id === detailInvoiceId) ?? null;
+  }, [customer?.invoices, detailInvoiceId]);
+
+  const openDetail = useCallback((invoiceId: string) => {
+    setDetailInvoiceId(invoiceId);
+  }, []);
+
+  const closeDetail = useCallback(() => {
+    setDetailInvoiceId(null);
+  }, []);
+
+  const rows = useMemo(
+    () => mapInvoiceDataToRows(customer?.invoices ?? []),
+    [customer?.invoices]
+  );
+
+  const {
+    currentInvoices,
+    currentPage,
+    totalPages,
+    sortBy,
+    setSortBy,
+    goToPage,
+    startIndex,
+    totalCount,
+  } = useInvoiceHistory(rows);
 
   const fmtMoney = (n: number) => `₫${n.toLocaleString("vi-VN")}`;
   const fmtDate = (d: string) => new Date(d).toLocaleDateString("vi-VN");
 
   return (
     <div className="space-y-6">
+      <InvoiceDetailModal
+        invoice={detailInvoice}
+        open={detailInvoiceId !== null && detailInvoice !== null}
+        onClose={closeDetail}
+      />
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         <label className="text-sm font-semibold text-gray-700">Sắp xếp theo:</label>
         <select
           value={sortBy}
-          onChange={(e) => { setSortBy(e.target.value as SortOption); goToPage(1); }}
+          onChange={(e) => {
+            setSortBy(e.target.value as SortOption);
+            goToPage(1);
+          }}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
         >
           <option value="date-desc">Ngày mới nhất</option>
@@ -124,8 +88,10 @@ export default function InvoiceHistory() {
         <table className="w-full">
           <thead className="bg-gray-100 border-b border-gray-200">
             <tr>
-              {["Mã hóa đơn", "Ngày", "Số mục", "Tổng tiền", "Trạng thái", "Hành động"].map(h => (
-                <th key={h} className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{h}</th>
+              {["Mã hóa đơn", "Ngày", "Số mục", "Tổng tiền", "Trạng thái", "Hành động"].map((h) => (
+                <th key={h} className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -137,9 +103,16 @@ export default function InvoiceHistory() {
                 <td className="px-6 py-4 text-sm text-gray-600">{invoice.items} sản phẩm</td>
                 <td className="px-6 py-4 text-sm font-semibold text-blue-600">{fmtMoney(invoice.totalAmount)}</td>
                 <td className="px-6 py-4 text-sm">
-                  <StatusBadge status={invoice.status} /></td>
+                  <StatusBadge status={invoice.status} />
+                </td>
                 <td className="px-6 py-4 text-center text-sm">
-                  <button className="text-blue-600 hover:text-blue-800 font-semibold">Xem chi tiết</button>
+                  <button
+                    type="button"
+                    onClick={() => openDetail(invoice.id)}
+                    className="text-blue-600 hover:text-blue-800 font-semibold"
+                  >
+                    Xem chi tiết
+                  </button>
                 </td>
               </tr>
             ))}
@@ -158,13 +131,19 @@ export default function InvoiceHistory() {
               <StatusBadge status={invoice.status} />
             </div>
             <div className="space-y-2 mb-4 text-sm text-gray-600">
-              <p><span className="font-semibold text-gray-700">Số mục:</span> {invoice.items}</p>
+              <p>
+                <span className="font-semibold text-gray-700">Số mục:</span> {invoice.items}
+              </p>
               <p>
                 <span className="font-semibold text-gray-700">Tổng tiền:</span>
                 <span className="text-lg font-bold text-blue-600 ml-2">{fmtMoney(invoice.totalAmount)}</span>
               </p>
             </div>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">
+            <button
+              type="button"
+              onClick={() => openDetail(invoice.id)}
+              className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg"
+            >
               Xem chi tiết
             </button>
           </div>
@@ -179,7 +158,7 @@ export default function InvoiceHistory() {
         <div className="flex flex-col items-center gap-4">
           <Pagination current={currentPage} total={totalPages} onChange={goToPage} />
           <p className="text-sm text-gray-600">
-             Hiển thị {startIndex + 1}–{startIndex + currentInvoices.length} trong {totalCount} hóa đơn
+            Hiển thị {startIndex + 1}–{startIndex + currentInvoices.length} trong {totalCount} hóa đơn
           </p>
         </div>
       )}

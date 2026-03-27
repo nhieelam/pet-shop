@@ -4,10 +4,9 @@ import com.funcoders.happy_pet_shop.constant.DiscountType;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ReviewDetailRequest;
-import com.funcoders.happy_pet_shop.dto.request.ReviewRequest;
+
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
 import com.funcoders.happy_pet_shop.dto.response.ReviewDetailResponse;
-import com.funcoders.happy_pet_shop.dto.response.ReviewResponse;
 import com.funcoders.happy_pet_shop.entity.*;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
@@ -45,21 +44,11 @@ public class InvoiceService {
     @Transactional
     public InvoiceResponse createInvoice(InvoiceCreationRequest request) {
 
-        // ===== 1. Find customer =====
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 
-        // ===== 2. Find staff (nullable for online checkout) =====
-        Staff staff = null;
-        if (request.getStaffId() != null) {
-            staff = staffRepository.findById(request.getStaffId())
-                    .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-        }
-
-        // ===== 3. Create invoice =====
         Invoice invoice = Invoice.builder()
                 .customer(customer)
-                .staff(staff)
                 .paymentMethod(request.getPaymentMethod())
                 .shippingAddress(request.getShippingAddress())
                 .invoiceDetails(new HashSet<>())
@@ -70,7 +59,6 @@ public class InvoiceService {
         BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal realAmount = BigDecimal.ZERO;
 
-        // ===== 4. Load products =====
         Set<UUID> productIds = request.getInvoiceDetails()
                 .stream()
                 .map(InvoiceDetailCreationRequest::getProductId)
@@ -198,104 +186,6 @@ public class InvoiceService {
 
         InvoiceResponse response = invoiceMapper.toResponse(saved);
         return response;
-    }
-
-    @Transactional(readOnly = true)
-    public ReviewResponse createReview(ReviewRequest request) {
-        // ===== 1. Find customer =====
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-
-        String customerName = customer.getUser().getFirstName() + " " + customer.getUser().getLastName();
-        if (customerName.isBlank()) {
-            customerName = customer.getUser().getUsername();
-        }
-
-        // ===== 2. Load products =====
-        Set<UUID> productIds = request.getDetails().stream()
-                .map(ReviewDetailRequest::getProductId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        List<Product> products = productRepository.findAllById(productIds);
-        Map<UUID, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
-
-        // ===== 3. Load promotions =====
-        Map<UUID, PromotionDetail> bestPromotionByProduct = new HashMap<>();
-        if (!productIds.isEmpty()) {
-            List<PromotionDetail> promotionDetails =
-                    promotionDetailRepository.findActivePromotionDetails(productIds, LocalDate.now());
-
-            bestPromotionByProduct = promotionDetails.stream()
-                    .collect(Collectors.toMap(
-                            pd -> pd.getProduct().getId(),
-                            pd -> pd,
-                            (pd1, pd2) -> {
-                                BigDecimal d1 = calculateDiscountAmount(
-                                        pd1,
-                                        pd1.getProduct().getPrice()
-                                );
-                                BigDecimal d2 = calculateDiscountAmount(
-                                        pd2,
-                                        pd2.getProduct().getPrice()
-                                );
-                                return d1.compareTo(d2) >= 0 ? pd1 : pd2;
-                            }
-                    ));
-        }
-
-        // ===== 4. Build review details and calculate totals =====
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal realAmount = BigDecimal.ZERO;
-        Set<ReviewDetailResponse> reviewDetails = new LinkedHashSet<>();
-
-        for (ReviewDetailRequest detailRequest : request.getDetails()) {
-            if (detailRequest.getProductId() == null) {
-                throw new AppException(ErrorType.INVALID_INVOICE_DETAIL);
-            }
-
-            Product product = productMap.get(detailRequest.getProductId());
-            if (product == null) {
-                throw new AppException(ErrorType.PRODUCT_NOT_FOUND);
-            }
-            if (!product.isAvailable()) {
-                throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
-            }
-            if (product.getQuantity() < detailRequest.getQuantity()) {
-                throw new AppException(ErrorType.PRODUCT_NOT_AVAILABLE);
-            }
-
-            BigDecimal unitPrice = product.getPrice();
-            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
-            totalAmount = totalAmount.add(lineTotal);
-
-            PromotionDetail promotionDetail = bestPromotionByProduct.get(product.getId());
-            BigDecimal discount = BigDecimal.ZERO;
-            if (promotionDetail != null) {
-                discount = calculateDiscountAmount(promotionDetail, product.getPrice())
-                        .multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
-            }
-            realAmount = realAmount.add(lineTotal.subtract(discount));
-
-            reviewDetails.add(ReviewDetailResponse.builder()
-                    .productId(product.getId())
-                    .productName(product.getName())
-                    .imageUrl(product.getImageUrl())
-                    .unitPrice(unitPrice)
-                    .quantity(detailRequest.getQuantity())
-                    .totalPrice(lineTotal)
-                    .discountAmount(discount)
-                    .build());
-        }
-
-        return ReviewResponse.builder()
-                .customerName(customerName)
-                .shippingAddress(request.getShippingAddress())
-                .totalAmount(totalAmount)
-                .realAmount(realAmount)
-                .reviewDetails(reviewDetails)
-                .build();
     }
 
     @Transactional(readOnly = true)
