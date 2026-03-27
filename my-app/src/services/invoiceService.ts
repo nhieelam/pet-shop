@@ -35,7 +35,7 @@ export const createInvoice = async (
     return data;
 };
 
-export const getAllInvoices = async (): Promise<InvoiceResponse[]> => {
+export const getAllInvoices = async (): Promise<InvoiceResponse> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_ALL}`;
     const response = await fetch(url, {
         method: "GET",

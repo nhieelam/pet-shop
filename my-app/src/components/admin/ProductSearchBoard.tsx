@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { ProductResponse } from "../../types/productTypes";
+import type { ProductData } from "../../types/productTypes";
 
-export function matchesProduct(p: ProductResponse, q: string) {
+export function matchesProduct(p: ProductData, q: string) {
   if (!q.trim()) return true;
   const s = q.toLowerCase();
   const hay = [
@@ -33,9 +33,9 @@ function formatMoney(n: number) {
 type Props = {
   open: boolean;
   onClose: () => void;
-  products: ProductResponse[];
+  products: ProductData[];
   loading: boolean;
-  onPick: (p: ProductResponse) => void;
+  onPick: (p: ProductData) => void;
   title?: string;
   headerClassName?: string;
 };

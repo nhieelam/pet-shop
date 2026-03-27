@@ -47,6 +47,7 @@ export interface InvoiceData {
   customerName: string;
   totalAmount: number;
   realAmount: number;
+  status: PaymentStatus;
   invoiceDetails: InvoiceDetail[];
   paymentMethod: PaymentMethod;
   shippingAddress: string;

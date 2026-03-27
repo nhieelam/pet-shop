@@ -1,7 +1,7 @@
 "use client";
 
 import type {CartItemResponse} from "../../../../types/cartTypes";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 
 interface CartItemRowProps {
   item: CartItemResponse;
@@ -28,6 +28,12 @@ export default function CartItemRow({
   const image = product?.imageUrl ?? "";
   const lineTotal = price * item.quantity;
   const [quantity, setQuantity] = useState(item.quantity);
+  const updateQuantityRef = useRef(updateQuantity);
+  updateQuantityRef.current = updateQuantity;
+
+  useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -36,16 +42,14 @@ export default function CartItemRow({
     }).format(value);
   };
 
-  // function wait and call Api
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!product?.id) return;
-
-      updateQuantity(product.id, quantity);
+      if (quantity === item.quantity) return;
+      updateQuantityRef.current(product.id, quantity);
     }, 500);
-
     return () => clearTimeout(timer);
-  }, [quantity, product?.id]);
+  }, [quantity, product?.id, item.quantity]);
 
   return (
       <div

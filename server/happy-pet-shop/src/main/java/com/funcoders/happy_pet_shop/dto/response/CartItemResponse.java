@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,5 +15,6 @@ import java.util.UUID;
 public class CartItemResponse {
     UUID id;
     ProductResponse product;
+    PetResponse pet;
     int quantity;
 }

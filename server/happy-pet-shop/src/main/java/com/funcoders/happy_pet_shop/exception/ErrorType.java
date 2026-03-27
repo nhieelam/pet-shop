@@ -72,6 +72,7 @@ public enum ErrorType {
     CART_ITEM_ALREADY_REMOVED("Sản phẩm đã bị xóa khỏi giỏ hàng", 5108, HttpStatus.BAD_REQUEST),
     CART_ITEM_INVALID_PRODUCT_ID("ID sản phẩm không hợp lệ", 5109, HttpStatus.BAD_REQUEST),
     CART_ITEM_INVALID_CART_ID("ID giỏ hàng không hợp lệ", 5110, HttpStatus.BAD_REQUEST),
+    CART_ITEM_PRODUCT_OR_PET_EXCLUSIVE("Chỉ được gửi productId hoặc petId, không cả hai", 5111, HttpStatus.BAD_REQUEST),
 
     // ===== INVOICE / ORDER =====
     INVOICE_NOT_FOUND("Hóa đơn không tồn tại", 6001, HttpStatus.NOT_FOUND),

@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useProfile } from "./hooks/useProfile";
 import ProfileHeader from "./components/ProfileHeader";
-import AddressList from "./components/AddressList";
 import InvoiceHistory from "./components/InvoiceHistory";
 import OverviewTab from "./components/overview";
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "addresses" | "invoices">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "invoices">("overview");
   const { customer, loading } = useProfile();
 
   if (loading) {
@@ -52,17 +51,6 @@ export default function ProfilePage() {
               Tổng quan
             </button>
             <button
-              onClick={() => setActiveTab("addresses")}
-              className={`py-4 px-2 font-semibold transition border-b-2 ${
-                activeTab === "addresses"
-                  ? "text-blue-600 border-blue-600"
-                  : "text-gray-600 border-transparent hover:text-gray-800"
-              }`}
-              aria-selected={activeTab === "addresses"}
-            >
-              Địa chỉ
-            </button>
-            <button
               onClick={() => setActiveTab("invoices")}
               className={`py-4 px-2 font-semibold transition border-b-2 ${
                 activeTab === "invoices"
@@ -78,10 +66,8 @@ export default function ProfilePage() {
 
         <div className="mt-8">
           {activeTab === "overview" && (
-            <OverviewTab />
+            <OverviewTab user={customer.user} customer={customer} />
           )}
-
-          {activeTab === "addresses" && <AddressList />}
 
           {activeTab === "invoices" && <InvoiceHistory />}
         </div>

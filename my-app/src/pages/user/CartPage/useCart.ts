@@ -4,10 +4,11 @@ import { useAuth } from "@/context/authContext";
 import { getInfo } from "@/services/customerService";
 import {
   addCartItemToCart,
+  addPetToCart,
   deleteCartItem,
 } from "@/services/cartService";
 import type { CartItemResponse, CartResponse } from "@/types/cartTypes";
-import type { CustomerData, CustomerResponse } from "@/types/customerTypes";
+import type { CustomerData } from "@/types/customerTypes";
 
 function mergeCartIntoCustomer(
   customer: CustomerData,
@@ -20,7 +21,11 @@ function mergeCartIntoCustomer(
 }
 
 export function getProductId(item: CartItemResponse): string {
-  return item.product.id;
+  return item.product!.id;
+}
+
+export function getPetId(item: CartItemResponse): string {
+  return item.pet!.id;
 }
 
 export function useCart() {
@@ -33,6 +38,15 @@ export function useCart() {
   const items: CartItemResponse[] = (
     customer?.cart?.cartItems ?? []
   ).filter((item) => item.quantity > 0);
+
+  const productItems = useMemo(
+    () => items.filter((i) => i.product?.id),
+    [items]
+  );
+  const petItems = useMemo(
+    () => items.filter((i) => i.pet?.id),
+    [items]
+  );
 
   const refreshCart = useCallback(async () => {
     try {
@@ -67,13 +81,40 @@ export function useCart() {
       setError("");
       try {
         if (newQuantity <= 0) {
-          const line = items.find((i) => i.product.id === productId);
+          const line = items.find((i) => i.product?.id === productId);
           if (!line) return;
           const cartRes = await deleteCartItem(line.id);
           setCustomer(mergeCartIntoCustomer(customer, cartRes));
         } else {
           const cartRes = await addCartItemToCart(customer.id, {
             productId,
+            quantity: newQuantity,
+          });
+          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+        }
+      } catch (e) {
+        setError("Cập nhật thất bại");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [customer, setCustomer, items]
+  );
+
+  const updatePetQuantity = useCallback(
+    async (petId: string, newQuantity: number) => {
+      if (!customer) return;
+      setLoading(true);
+      setError("");
+      try {
+        if (newQuantity <= 0) {
+          const line = items.find((i) => i.pet?.id === petId);
+          if (!line) return;
+          const cartRes = await deleteCartItem(line.id);
+          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+        } else {
+          const cartRes = await addPetToCart(customer.id, {
+            petId,
             quantity: newQuantity,
           });
           setCustomer(mergeCartIntoCustomer(customer, cartRes));
@@ -111,15 +152,28 @@ export function useCart() {
       return;
     }
     setError("");
-    const payload = selected.map((item) => ({
-      id: item.id,
-      productId: getProductId(item),
-      name: item.product?.name ?? "Sản phẩm",
-      price: item.product?.price ?? 0,
-      quantity: item.quantity,
-      image: item.product?.imageUrl ?? "",
-      isSelected: true,
-    }));
+    const payload = selected.map((item) => {
+      if (item.pet?.id) {
+        return {
+          id: item.id,
+          petId: item.pet.id,
+          name: item.pet.name ?? "Thú cưng",
+          price: item.pet.price ?? 0,
+          quantity: item.quantity,
+          image: item.pet.image ?? "",
+          isSelected: true,
+        };
+      }
+      return {
+        id: item.id,
+        productId: getProductId(item),
+        name: item.product?.name ?? "Sản phẩm",
+        price: item.product?.price ?? 0,
+        quantity: item.quantity,
+        image: item.product?.imageUrl ?? "",
+        isSelected: true,
+      };
+    });
     navigate("/user/review", { state: { checkoutItems: payload } });
   }, [items, selection, navigate]);
 
@@ -130,6 +184,8 @@ export function useCart() {
 
   return {
     items,
+    productItems,
+    petItems,
     selection,
     allSelected,
     loading,
@@ -138,6 +194,7 @@ export function useCart() {
     toggleSelect,
     selectAll,
     updateQuantity,
+    updatePetQuantity,
     removeItem,
     checkout,
     refreshCart,

@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,7 +32,8 @@ public class Cart {
     Customer customer;
 
     @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<CartItem> cartItems;
+    @Builder.Default
+    Set<CartItem> cartItems = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;

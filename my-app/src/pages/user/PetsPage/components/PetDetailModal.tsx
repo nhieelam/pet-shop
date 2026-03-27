@@ -1,11 +1,24 @@
 "use client";
 
-import type { PetData, PetResponse } from "../../../../types/petTypes";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/context/authContext";
+import { addPetToCart } from "@/services/cartService";
+import type { PetData } from "../../../../types/petTypes";
+import type { CustomerData } from "@/types/customerTypes";
+import type { CartResponse } from "@/types/cartTypes";
 
 interface PetDetailModalProps {
   pet: PetData | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+function mergeCartIntoCustomer(customer: CustomerData, cartRes: CartResponse): CustomerData {
+  return {
+    ...customer,
+    cart: cartRes.data,
+  } as CustomerData;
 }
 
 function formatCurrency(value: number): string {
@@ -25,9 +38,33 @@ function formatDate(s: string): string {
 }
 
 export default function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
+  const { customer, setCustomer, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   if (!isOpen || !pet) return null;
 
-  const available = pet.available !== false;
+  const available = pet.available !== false && !pet.sold;
+
+  const handleAddToCart = async () => {
+    if (!customer?.id) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const cartRes = await addPetToCart(customer.id, {
+        petId: pet.id,
+        quantity: 1,
+      });
+      setCustomer(mergeCartIntoCustomer(customer, cartRes));
+      setSuccess("Đã thêm vào giỏ hàng.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không thể thêm vào giỏ hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -115,6 +152,42 @@ export default function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalP
               <p className="text-2xl font-bold text-[#ff8e53]">
                 {formatCurrency(pet.price ?? 0)}
               </p>
+            </div>
+
+            {error && (
+              <div className="rounded-lg bg-red-50 text-red-700 text-sm px-3 py-2">{error}</div>
+            )}
+            {success && (
+              <div className="rounded-lg bg-emerald-50 text-emerald-800 text-sm px-3 py-2">{success}</div>
+            )}
+
+            <div className="pt-2 flex flex-col gap-2">
+              {!isAuthenticated ? (
+                <p className="text-sm text-gray-600">
+                  <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+                    Đăng nhập
+                  </Link>{" "}
+                  để thêm thú cưng vào giỏ hàng.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleAddToCart()}
+                  disabled={!available || loading}
+                  className="w-full py-3 px-4 rounded-xl font-bold text-white bg-[#ff8e53] hover:bg-[#ff7a38] disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {loading ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+                </button>
+              )}
+              {isAuthenticated && (
+                <Link
+                  to="/user/cart"
+                  className="block text-center text-sm text-blue-600 font-semibold hover:underline"
+                  onClick={onClose}
+                >
+                  Xem giỏ hàng
+                </Link>
+              )}
             </div>
           </div>
         </div>

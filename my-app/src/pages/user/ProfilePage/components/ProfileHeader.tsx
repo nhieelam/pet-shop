@@ -4,16 +4,13 @@ import { useState, useEffect } from "react";
 import { useProfile } from "../hooks/useProfile";
 import { User } from "lucide-react";
 
-const DEFAULT_AVATAR =
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop";
-
 function displayName(firstName?: string, lastName?: string, username?: string): string {
   const parts = [firstName, lastName].filter(Boolean);
   return parts.length > 0 ? parts.join(" ") : (username ?? "Khách");
 }
 
 export default function ProfileHeader() {
-  const { user, updateProfile, logout } = useProfile();
+  const { customer, updateProfile, logout } = useProfile();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editFirstName, setEditFirstName] = useState("");
   const [editLastName, setEditLastName] = useState("");
@@ -23,19 +20,19 @@ export default function ProfileHeader() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (user?.user) {
-      const u = user.user;
+    if (customer?.user) {
+      const u = customer.user;
       setEditFirstName(u.firstName ?? "");
       setEditLastName(u.lastName ?? "");
       setEditEmail(u.email ?? "");
       setEditPhone(u.phone ?? "");
       setEditAddress(u.address ?? "");
     }
-  }, [user]);
+  }, [customer]);
 
-  if (!user) return null;
+  if (!customer?.user) return null;
 
-  const u = user.user;
+  const u = customer.user;
   const name = displayName(u.firstName, u.lastName, u.username);
   const joinDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "—";
 
@@ -43,7 +40,7 @@ export default function ProfileHeader() {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateProfile(user.user.id, {
+      await updateProfile(customer.user.id, {
         firstName: editFirstName || undefined,
         lastName: editLastName || undefined,
         email: editEmail || undefined,

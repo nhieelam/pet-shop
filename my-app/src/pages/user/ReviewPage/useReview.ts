@@ -11,7 +11,10 @@ import type {
 
 export interface CheckoutItem {
   id: string;
-  productId: string;
+  /** Set for product lines */
+  productId?: string;
+  /** Set for pet lines */
+  petId?: string;
   name: string;
   price: number;
   quantity: number;
@@ -47,7 +50,11 @@ function parseCheckoutState(state: unknown): CheckoutItem[] {
   if (!state || typeof state !== "object") return [];
   const items = (state as { checkoutItems?: unknown }).checkoutItems;
   if (!Array.isArray(items)) return [];
-  return items.filter((item) => item?.productId && Number(item?.quantity) > 0);
+  return items.filter(
+    (item) =>
+      Number(item?.quantity) > 0 &&
+      ((item?.productId && String(item.productId).length > 0) || (item?.petId && String(item.petId).length > 0))
+  );
 }
 
 export function useReview(): UseReviewReturn {
@@ -80,10 +87,13 @@ export function useReview(): UseReviewReturn {
       return;
     }
 
-    const invoiceDetails: InvoiceDetailCreationRequest[] = checkoutItems.map((item) => ({
-      productId: item.productId,
-      quantity: Number(item.quantity),
-    }));
+    const invoiceDetails: InvoiceDetailCreationRequest[] = checkoutItems.map((item) => {
+      const q = Number(item.quantity);
+      if (item.petId) {
+        return { petId: item.petId, quantity: q };
+      }
+      return { productId: item.productId, quantity: q };
+    });
 
     setPlacingOrder(true);
     setError(null);

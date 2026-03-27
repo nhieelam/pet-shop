@@ -9,6 +9,7 @@ interface CartSummaryProps {
 }
 
 function getPrice(item: CartItemResponse): number {
+  if (item.pet?.id) return item.pet.price ?? 0;
   return item.product?.price ?? 0;
 }
 

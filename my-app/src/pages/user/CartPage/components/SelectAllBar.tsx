@@ -21,7 +21,7 @@ export default function SelectAllBar({
 
   return (
     <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 z-10 shadow-sm">
-      {/* Select All Checkbox */}
+
       <input
         type="checkbox"
         checked={allSelected}
@@ -30,7 +30,6 @@ export default function SelectAllBar({
         aria-label="Chọn tất cả"
       />
 
-      {/* Select All Label */}
       <label
         onClick={() => onSelectAll(!allSelected)}
         className="text-sm font-semibold text-gray-700 cursor-pointer hover:text-gray-900"
@@ -38,7 +37,6 @@ export default function SelectAllBar({
         Chọn tất cả ({items.length})
       </label>
 
-      {/* Selection Summary */}
       {selectedCount > 0 && (
         <div className="ml-auto flex items-center gap-6">
           <span className="text-sm text-gray-600">

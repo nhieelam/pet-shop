@@ -47,6 +47,7 @@ export const API_CONFIG = {
             ADD_POINTS: (id: string) => `/customers/${id}/points`,
             ADD_CART_ITEM: (customerId: string) => `/customers/${customerId}/items`,
             DELETE: (id: string) => `/customers/${id}`,
+            ADD_PET_TO_CART: (customerId: string) => `/customers/${customerId}/items`,
         },
 
         INVOICE: {
@@ -95,7 +96,7 @@ export const API_CONFIG = {
             GET_ALL: "/categories",
             GET_BY_ID: (id: string) => `/categories/${id}`,
             UPDATE: (id: string) => `/categories/${id}`,
-            DELETE: (id: string) => `/categories/${id}`,
+            DELETE_BY_ID: (id: string) => `/categories/${id}`,
         },
 
         INVENTORY: {

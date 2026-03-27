@@ -1,4 +1,4 @@
-import type { CartRequest, CartResponse } from "../types/cartTypes";
+import type { CartRequest, CartResponse, PetCartRequest } from "../types/cartTypes";
 
 import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
@@ -76,6 +76,20 @@ export const addCartItem = async (customerId: string, request: CartRequest): Pro
     });
     if (!response.ok) {
         throw new Error("Không thể thêm sản phẩm vào giỏ hàng");
+    }
+    const data = await response.json();
+    return data as CartResponse;
+};
+
+export const addPetToCart = async (customerId: string, request: PetCartRequest): Promise<CartResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CUSTOMER.ADD_PET_TO_CART(customerId)}`;
+    const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(request),
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể thêm thú cưng vào giỏ hàng");
     }
     const data = await response.json();
     return data as CartResponse;

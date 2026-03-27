@@ -1,7 +1,13 @@
 import type { ProductData } from "./productTypes.ts";
+import type { PetData } from "./petTypes.ts";
 
 export interface CartRequest {
     productId: string;
+    quantity: number;
+}
+
+export interface PetCartRequest {
+    petId: string;
     quantity: number;
 }
 
@@ -23,9 +29,9 @@ export interface CartData {
 
 export interface CartItem {
     id: string;
-    product: ProductData;
+    product: ProductData | null;
+    pet: PetData | null;
     quantity: number;
 }
 
-/** Alias for cart UI (legacy name) */
 export type CartItemResponse = CartItem;

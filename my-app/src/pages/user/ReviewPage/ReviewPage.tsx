@@ -159,7 +159,10 @@ export default function ReviewPage() {
                 {checkoutItems.map((item) => {
                   const lineTotal = item.price * Number(item.quantity);
                   return (
-                    <div key={`${item.id}-${item.productId}`} className="flex gap-4 border-b border-gray-100 pb-4">
+                    <div
+                      key={`${item.id}-${item.productId ?? item.petId ?? "line"}`}
+                      className="flex gap-4 border-b border-gray-100 pb-4"
+                    >
                       <img
                         src={item.image || "https://placehold.co/100x100?text=Pet"}
                         alt={item.name}

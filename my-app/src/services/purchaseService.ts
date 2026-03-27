@@ -2,6 +2,7 @@
 import type {
     PurchaseDetailResponse,
     PurchaseCreationRequest,
+    PurchaseResponse,
 } from "../types/purchaseTypes";
 import { API_CONFIG } from "../config/apiConfig";
 
@@ -23,7 +24,16 @@ export const createPurchase = async (
     return data;
 };
 
-export const getAllPurchases = async (): Promise<PurchaseDetailResponse[]> => {
+function unwrapListPayload(json: unknown): PurchaseResponse[] {
+    if (Array.isArray(json)) return json as PurchaseResponse[];
+    if (json && typeof json === "object" && "data" in json) {
+        const inner = (json as { data?: unknown }).data;
+        if (Array.isArray(inner)) return inner as PurchaseResponse[];
+    }
+    return [];
+}
+
+export const getAllPurchases = async (): Promise<PurchaseResponse[]> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PURCHASE.GET_ALL}`;
     const response = await fetch(url, {
         method: "GET",
@@ -35,7 +45,7 @@ export const getAllPurchases = async (): Promise<PurchaseDetailResponse[]> => {
         throw new Error("Không thể lấy danh sách purchase");
     }
     const data = await response.json();
-    return data;
+    return unwrapListPayload(data);
 };
 
 export const getPurchaseById = async (id: string): Promise<PurchaseDetailResponse> => {

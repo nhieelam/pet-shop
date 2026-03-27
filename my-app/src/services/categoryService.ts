@@ -75,3 +75,15 @@ export const createCategory = async (
   const data = await response.json();
   return data;
 };
+
+export const deleteCategoryById = async (id: string): Promise<CategoryResponse> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORY.DELETE_BY_ID(id)}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Không thể xóa category");
+  }
+  const data = await response.json();
+  return data;
+};
