@@ -107,6 +107,7 @@ export const API_CONFIG = {
             ADD_CART_ITEM_TO_CART: "/cart/items",
             DELETE_CART_ITEM: "/cart/items",
             CREATE_CART_FOR_USER: "/cart",
+            ADD_CART_ITEM: (userId: string) => `/cart/items/${userId}`,
         },
     },
 } as const;

@@ -3,20 +3,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/authContext";
-import { addCartItemToCart } from "@/services/cartService";
-import type { CustomerResponse } from "@/types/customerTypes";
+import { addCartItem } from "@/services/cartService";
+import type { CustomerData } from "@/types/customerTypes";
 import type { CartResponse } from "@/types/cartTypes";
 
-function mergeCartIntoUser(
-  user: CustomerResponse,
+function mergeCartIntoCustomer(
+  customer: CustomerData,
   cartRes: CartResponse
-): CustomerResponse {
+): CustomerData {
   return {
-    ...user,
-    data: {
-      ...user.data,
-      cart: cartRes.data,
-    },
+    ...customer,
+    cart: cartRes.data,
   };
 }
 
@@ -39,21 +36,22 @@ export default function ProductCard({
   availableAmount,
 }: ProductCardProps) {
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const { customer, setCustomer } = useAuth();
   const [cartLoading, setCartLoading] = useState(false);
   const [cartMessage, setCartMessage] = useState<string | null>(null);
 
   const handleAddToCart = async () => {
     if (availableAmount === 0) return;
-    if (!user?.data?.id) {
+    if (!customer?.id) {
       setCartMessage("Vui lòng đăng nhập để thêm vào giỏ hàng");
       return;
     }
     setCartLoading(true);
     setCartMessage(null);
     try {
-      const cartRes = await addCartItemToCart({ productId: id, quantity: 1 });
-      setUser(mergeCartIntoUser(user, cartRes));
+      const cartRes = await addCartItem(customer.id,{ productId: id, quantity: 1 });
+      setCustomer(mergeCartIntoCustomer(customer, cartRes));
+
       setCartMessage("Đã thêm vào giỏ hàng!");
       setTimeout(() => setCartMessage(null), 2000);
     } catch {
@@ -129,7 +127,7 @@ export default function ProductCard({
             ₫{price.toLocaleString("vi-VN")}
           </span>
             <div className="flex gap-2">
-              <button
+            <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();

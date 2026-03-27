@@ -27,11 +27,11 @@ export const getCartItems = async (): Promise<CartResponse> => {
     return data as CartResponse;
 }
 
-export const addCartItemToCart = async (request: CartRequest): Promise<CartResponse> => {
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CART.ADD_CART_ITEM_TO_CART}`;
+export const addCartItemToCart = async (customerId: string, request: CartRequest): Promise<CartResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CUSTOMER.ADD_CART_ITEM(customerId)}`;
     const response = await fetch(url, {
-        method: "PUT",
-        body: JSON.stringify(request),
+        method: "POST",
+        body: JSON.stringify(request ),
         headers: authHeaders(),
     });
     if (!response.ok) {
@@ -62,6 +62,20 @@ export const createCartForUser = async (): Promise<CartResponse> => {
     });
     if (!response.ok) {
         throw new Error("Không thể tạo giỏ hàng");
+    }
+    const data = await response.json();
+    return data as CartResponse;
+};
+
+export const addCartItem = async (customerId: string, request: CartRequest): Promise<CartResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CUSTOMER.ADD_CART_ITEM(customerId)}`;
+    const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(request),
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể thêm sản phẩm vào giỏ hàng");
     }
     const data = await response.json();
     return data as CartResponse;

@@ -1,6 +1,6 @@
+import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {useAuth} from "../../context/authContext.tsx";
-import {useState} from "react";
+import { useAuth } from "@/context/authContext";
 
 interface LoginErrors {
   username?: string;
@@ -8,11 +8,10 @@ interface LoginErrors {
   general?: string;
 }
 
-
 export function useLogin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const {login} = useAuth();
+  const { login } = useAuth();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -36,7 +35,7 @@ export function useLogin() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -45,14 +44,16 @@ export function useLogin() {
     setErrors({});
 
     try {
-      await login({ username, password });
+      await login({
+        username: username.trim(),
+        password,
+      });
 
       if (location.pathname.includes("/admin")) {
         navigate("/admin/dashboard");
       } else {
         navigate("/user/products");
       }
-
     } catch (error: unknown) {
       console.error("Login error:", error);
 
@@ -70,7 +71,7 @@ export function useLogin() {
 
   const clearError = (field: keyof LoginErrors): void => {
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 

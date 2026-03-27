@@ -6,36 +6,28 @@ import {
   type ReactNode,
 } from "react";
 
-import {
-  login as loginService,
-  logout as logoutService,
-  register as registerService,
-  verifyToken,
-} from "../services/authService";
-import type {AuthRequest, IntrospectRequest, RegisterRequest} from "../types/authTypes";
-import type {CustomerResponse} from "../types/customerTypes";
-import {getAuthToken, storeAuthToken} from "../utils/storageUtils.ts";
-import {useLocation} from "react-router-dom";
-import {getInfo} from "../services/customerService.ts";
+import {login as loginService, verifyToken} from "@/services/authService";
 
-/* =========================
-   CONTEXT TYPE
-========================= */
+import type {AuthRequest, IntrospectRequest, LoginRequest} from "@/types/authTypes";
+import type {CustomerData, CustomerResponse} from "@/types/customerTypes";
+import {getAuthToken, storeAuthToken} from "@/utils/storageUtils.ts";
+import {useLocation} from "react-router-dom";
+import {getInfo} from "@/services/customerService.ts"
+import {logout as logoutService} from "@/services/authService.ts";
+
+
 interface AuthContextType {
-  user: CustomerResponse | null;
-  setUser: (user: CustomerResponse | null) => void;
+  customer : CustomerData | null;
+  setCustomer : (customer : CustomerData ) => void;
   loading: boolean;
   error: string | null;
-  login: (credentials: AuthRequest) => Promise<boolean>;
-  register: (payload: RegisterRequest) => Promise<boolean>;
+  login: (credentials: LoginRequest) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// HOOK
 export const useAuth = () => {
   const context = useContext(AuthContext);
 
@@ -46,19 +38,18 @@ export const useAuth = () => {
   return context;
 };
 
-// Create provider for context
 export const AuthProvider = ({children}: { children: ReactNode }) => {
-  const [user, setUser] = useState<CustomerResponse | null>(null);
+  const [customer, setCustomer] = useState<CustomerData | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
 
-// Load user từ localStorage khi reload trang
   useEffect(() => {
     const introspect = async () => {
       try {
         const tokenString = getAuthToken();
+        console.log("tokenString", tokenString);
 
         if (!tokenString) {
           setIsAuthenticated(false);
@@ -73,16 +64,10 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
         if (!res.valid) {
           setIsAuthenticated(false);
-          return;
+
         }
 
         setIsAuthenticated(true);
-
-        if (!location.pathname.includes("/admin") && !location.pathname.includes("/login")) {
-          const customer: CustomerResponse = await getInfo();
-
-          setUser(customer);
-        }
 
       } catch (error) {
         console.error("Token verify failed:", error);
@@ -94,7 +79,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   }, []);
 
 
-  const login = async (credentials: AuthRequest) => {
+  const login = async (credentials: LoginRequest) => {
     setLoading(true);
     setError(null);
 
@@ -103,14 +88,14 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
       setIsAuthenticated(true);
 
-      storeAuthToken(authData.data?.token);
+      storeAuthToken(authData.data.token);
 
       localStorage.setItem("auth_user", JSON.stringify(authData));
 
-      if (location.pathname === "/login") {
-        const customer: CustomerResponse = await getInfo();
+      if (location.pathname === "/login" || location.pathname === "user/login") {
+        const response: CustomerResponse = await getInfo();
 
-        setUser(customer);
+        setCustomer(response.data);
       }
       return true;
     } catch (err: unknown) {
@@ -125,44 +110,8 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     }
   };
 
-  /* ---------- REGISTER ---------- */
-  const register = async (payload: RegisterRequest) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const authData = await registerService(payload);
-
-      setIsAuthenticated(true);
-
-      storeAuthToken(authData.data?.token);
-
-      localStorage.setItem("auth_user", JSON.stringify(authData));
-
-      if (
-        location.pathname === "/register" ||
-        location.pathname === "/admin/register"
-      ) {
-        const customer: CustomerResponse = await getInfo();
-
-        setUser(customer);
-      }
-      return true;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Đăng ký thất bại");
-      }
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ---------- LOGOUT ---------- */
   const logout = async () => {
-    setUser(null);
+    setCustomer(null);
     setError(null);
 
     const tokenString = getAuthToken();
@@ -177,12 +126,11 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   return (
       <AuthContext.Provider
           value={{
-            user,
-            setUser,
+            customer,
+            setCustomer,
             loading,
             error,
             login,
-            register,
             logout,
             isAuthenticated,
           }}

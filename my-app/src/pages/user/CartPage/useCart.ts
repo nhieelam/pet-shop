@@ -7,19 +7,16 @@ import {
   deleteCartItem,
 } from "@/services/cartService";
 import type { CartItemResponse, CartResponse } from "@/types/cartTypes";
-import type { CustomerResponse } from "@/types/customerTypes";
+import type { CustomerData, CustomerResponse } from "@/types/customerTypes";
 
-function mergeCartIntoUser(
-  user: CustomerResponse,
+function mergeCartIntoCustomer(
+  customer: CustomerData,
   cartRes: CartResponse
-): CustomerResponse {
+): CustomerData {
   return {
-    ...user,
-    data: {
-      ...user.data,
-      cart: cartRes.data,
-    },
-  };
+    ...customer,
+    cart: cartRes.data,
+  } as CustomerData;
 }
 
 export function getProductId(item: CartItemResponse): string {
@@ -27,24 +24,24 @@ export function getProductId(item: CartItemResponse): string {
 }
 
 export function useCart() {
-  const { user, setUser, isAuthenticated } = useAuth();
+  const { customer, setCustomer, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const items: CartItemResponse[] = (
-    user?.data?.cart?.cartItems ?? []
+    customer?.cart?.cartItems ?? []
   ).filter((item) => item.quantity > 0);
 
   const refreshCart = useCallback(async () => {
     try {
       const customer = await getInfo();
-      setUser(customer);
+      setCustomer(customer.data);
     } catch (e) {
       setError("Không thể tải giỏ hàng");
     }
-  }, [setUser]);
+  }, [setCustomer]);
 
   const toggleSelect = useCallback((id: string) => {
     setSelection((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -65,7 +62,7 @@ export function useCart() {
 
   const updateQuantity = useCallback(
     async (productId: string, newQuantity: number) => {
-      if (!user) return;
+      if (!customer) return;
       setLoading(true);
       setError("");
       try {
@@ -73,13 +70,13 @@ export function useCart() {
           const line = items.find((i) => i.product.id === productId);
           if (!line) return;
           const cartRes = await deleteCartItem(line.id);
-          setUser(mergeCartIntoUser(user, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes));
         } else {
-          const cartRes = await addCartItemToCart({
+          const cartRes = await addCartItemToCart(customer.id, {
             productId,
             quantity: newQuantity,
           });
-          setUser(mergeCartIntoUser(user, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes));
         }
       } catch (e) {
         setError("Cập nhật thất bại");
@@ -87,24 +84,24 @@ export function useCart() {
         setLoading(false);
       }
     },
-    [user, setUser, items]
+    [customer, setCustomer, items]
   );
 
   const removeItem = useCallback(
     async (cartItemId: string) => {
-      if (!user) return;
+      if (!customer) return;
       setLoading(true);
       setError("");
       try {
         const cartRes = await deleteCartItem(cartItemId);
-        setUser(mergeCartIntoUser(user, cartRes));
+        setCustomer(mergeCartIntoCustomer(customer, cartRes));
       } catch (e) {
         setError("Không thể xóa sản phẩm");
       } finally {
         setLoading(false);
       }
     },
-    [user, setUser]
+    [customer, setCustomer]
   );
 
   const checkout = useCallback(() => {

@@ -24,7 +24,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">🛒 Giỏ Hàng</h1>
           <p className="text-gray-600">
@@ -32,14 +32,14 @@ export default function CartPage() {
           </p>
         </div>
 
-        {/* Error message */}
+
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
         )}
 
-        {/* Not logged in */}
+
         {!isAuthenticated && (
           <div className="text-center py-20 bg-white rounded-xl border-2 border-dashed border-gray-300">
             <div className="text-6xl mb-4">🔐</div>
