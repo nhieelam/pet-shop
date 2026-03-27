@@ -11,7 +11,7 @@ import InvoiceDetailPage from "./pages/user/PaidInvoicesPage/InvoiceDetailPage";
 import ListProductsPage from "./pages/admin/ListProductsPage/ListProductsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage/ManageOrdersPage";
 import ManageProductCategoryPage from "./pages/admin/ManageProductCategoryPage/ManageProductCategoryPage";
-import ManageServicesPage from "./pages/admin/ManageServicesPage/ManageServicesPage";
+
 import PurchasePage from "./pages/admin/PurchasePage/PurchasePage.tsx";
 import AddPurchasePage from "./pages/admin/PurchasePage/AddPurchasePage.tsx";
 import PromotionManagementPage from "./pages/admin/PromotionPage/PromotionManagementPage.tsx";
@@ -74,10 +74,8 @@ const App: React.FC = () => {
                   path="manageProductCategory"
                   element={<ManageProductCategoryPage />}
               />
-              <Route
-                  path="manageServices"
-                  element={<ManageServicesPage />}
-              />
+
+
               <Route path="purchases/add" element={<AddPurchasePage />} />
               <Route path="purchases" element={<PurchasePage />} />
               <Route path="promotions/add" element={<AddPromotionPage />} />

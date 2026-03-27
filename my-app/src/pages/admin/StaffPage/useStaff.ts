@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { StaffResponse, StaffCreationRequest } from "../../../types/staffTypes";
+import type { StaffCreationRequest, StaffData } from "../../../types/staffTypes";
 import * as staffService from "../../../services/staffService";
 import type {UserUpdateRequest} from "../../../types/userTypes.ts";
-import {updateUser} from "../../../services";
+import * as userService from "../../../services/userService";
 
 export type ViewMode = "grid" | "list";
 
 export function useStaff() {
-  const [staffList, setStaffList] = useState<StaffResponse[]>([]);
+  const [staffList, setStaffList] = useState<StaffData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -18,9 +18,9 @@ export function useStaff() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [editingStaff, setEditingStaff] = useState<StaffResponse | null>(null);
-  const [staffToEdit, setStaffToEdit] = useState<StaffResponse | null>(null);
-  const [staffToDelete, setStaffToDelete] = useState<StaffResponse | null>(null);
+  const [editingStaff, setEditingStaff] = useState<StaffData | null>(null);
+  const [staffToEdit, setStaffToEdit] = useState<StaffData | null>(null);
+  const [staffToDelete, setStaffToDelete] = useState<StaffData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const fetchStaff = useCallback(async () => {
@@ -73,12 +73,12 @@ export function useStaff() {
     setFormModalOpen(true);
   }, []);
 
-  const openEditModal = useCallback((staff: StaffResponse) => {
+  const openEditModal = useCallback((staff: StaffData) => {
     setStaffToEdit(staff);
     setEditModalOpen(true);
   }, []);
 
-  const openShiftModal = useCallback((staff: StaffResponse) => {
+  const openShiftModal = useCallback((staff: StaffData) => {
     setEditingStaff(staff);
     setShiftModalOpen(true);
   }, []);
@@ -98,7 +98,7 @@ export function useStaff() {
     setEditingStaff(null);
   }, []);
 
-  const openDeleteModal = useCallback((staff: StaffResponse) => {
+  const openDeleteModal = useCallback((staff: StaffData) => {
     setStaffToDelete(staff);
     setDeleteModalOpen(true);
   }, []);
@@ -127,7 +127,7 @@ export function useStaff() {
     async (id: string, payload: UserUpdateRequest) => {
       try {
         // await .updateStaff(id, payload);
-        await updateUser(id, payload);
+        await userService.updateUser(id, payload);
         showToast("Staff updated successfully!", "success");
         closeEditModal();
         await fetchStaff();

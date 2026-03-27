@@ -3,7 +3,7 @@
 import {useState} from "react";
 import {Link} from "react-router-dom";
 import {usePurchase} from "./usePurchase";
-import type {PurchaseDetail} from "../../../types/purchaseTypes";
+import type {PurchaseLineItem, PurchaseResponse} from "../../../types/purchaseTypes";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
@@ -36,10 +36,10 @@ function PurchaseGridCard({
                             onSelect,
                             onDelete,
                           }: {
-  purchase: PurchaseDetail;
+  purchase: PurchaseResponse;
   isSelected: boolean;
-  onSelect: (p: PurchaseDetail) => void;
-  onDelete: (p: PurchaseDetail) => void;
+  onSelect: (p: PurchaseResponse) => void;
+  onDelete: (p: PurchaseResponse) => void;
 }) {
   const emoji = "📦";
   const status = purchase.status;
@@ -61,8 +61,10 @@ function PurchaseGridCard({
         </div>
         <div className="p-4">
           <p className="text-xs text-slate-500 font-mono mb-1">{purchase.id}</p>
-          <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">{purchase.supplierName}</h3>
-          <p className="text-sm text-slate-600 mb-2">{formatCurrency(purchase.totalAmount ?? 0)}</p>
+          <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">
+            {purchase.supplier?.name ?? "—"}
+          </h3>
+          <p className="text-sm text-slate-600 mb-2">{formatCurrency(Number(purchase.totalAmount ?? 0))}</p>
           <p className="text-xs text-slate-500 mb-3">{formatDate(purchase.createdAt ?? "")}</p>
           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -88,10 +90,10 @@ function PurchaseListRow({
                            onSelect,
                            onDelete,
                          }: {
-    purchase: PurchaseDetail;
+    purchase: PurchaseResponse;
   isSelected: boolean;
-  onSelect: (p: PurchaseDetail) => void;
-  onDelete: (p: PurchaseDetail) => void;
+  onSelect: (p: PurchaseResponse) => void;
+  onDelete: (p: PurchaseResponse) => void;
 }) {
   const emoji = "📦";
   const status = purchase.status;
@@ -112,11 +114,11 @@ function PurchaseListRow({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-500 font-mono truncate">{purchase.id}</p>
-            <h3 className="font-semibold text-slate-800 truncate">{purchase.supplierName}</h3>
+            <h3 className="font-semibold text-slate-800 truncate">{purchase.supplier?.name ?? "—"}</h3>
             <p className="text-sm text-slate-500">{formatDate(purchase.createdAt ?? "")}</p>
           </div>
           <div className="text-right flex-shrink-0">
-            <p className="font-bold text-emerald-600">{formatCurrency(purchase.totalAmount ?? 0)}</p>
+            <p className="font-bold text-emerald-600">{formatCurrency(Number(purchase.totalAmount ?? 0))}</p>
             <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
             {status}
           </span>
@@ -346,18 +348,18 @@ export default function PurchasePage() {
                     {viewMode === "grid"
                         ? filteredPurchases.map((p) => (
                             <PurchaseGridCard
-                                key={p.data.id}
+                                key={p.id}
                                 purchase={p}
-                                isSelected={selectedPurchase?.data.id === p.data.id}
+                                isSelected={selectedPurchase?.id === p.id}
                                 onSelect={openDetailModal}
                                 onDelete={openDeleteModal}
                             />
                         ))
                         : filteredPurchases.map((p) => (
                             <PurchaseListRow
-                                key={p.data.id}
+                                key={p.id}
                                 purchase={p}
-                                isSelected={selectedPurchase?.data.id === p.data.id}
+                                isSelected={selectedPurchase?.id === p.id}
                                 onSelect={openDetailModal}
                                 onDelete={openDeleteModal}
                             />
@@ -394,7 +396,7 @@ export default function PurchasePage() {
                 ) : (
                     <div className="space-y-4 animate-fade-in">
                       <div>
-                        <p className="text-xs text-slate-500 font-mono">{selectedPurchase.data.id}</p>
+                        <p className="text-xs text-slate-500 font-mono">{selectedPurchase.id}</p>
                         <p className="text-sm font-medium text-slate-700 mt-1">
                           Supplier: {selectedPurchase.supplier?.name ?? "—"}
                         </p>
@@ -402,7 +404,9 @@ export default function PurchasePage() {
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <p className="text-slate-500">Total</p>
-                          <p className="font-semibold text-slate-800">{formatCurrency(selectedPurchase.data.totalAmount ?? 0)}</p>
+                          <p className="font-semibold text-slate-800">
+                            {formatCurrency(Number(selectedPurchase.totalAmount ?? 0))}
+                          </p>
                         </div>
                         <div>
                           <p className="text-slate-500">Status</p>
@@ -427,20 +431,25 @@ export default function PurchasePage() {
                           <div>
                             <p className="text-slate-700 font-medium mb-2">Items</p>
                             <ul className="space-y-2 border-t border-slate-200 pt-2">
-                              {selectedPurchase.purchaseDetails.map((d: PurchaseDetail) => (
-                                  <li key={d.id} className="flex justify-between text-sm">
-                            <span>
-                              {d.productName ?? "—"} — Qty: {d.quantity} × {formatCurrency(d.unitPrice ?? 0)}
-                            </span>
-                                    <span className="font-medium">{formatCurrency(d.totalPrice ?? 0)}</span>
+                              {selectedPurchase.purchaseDetails.map((d: PurchaseLineItem) => (
+                                  <li key={d.id} className="flex justify-between text-sm gap-2">
+                                    <span>
+                                      {d.productName ?? "—"} — Qty: {d.quantity} ×{" "}
+                                      {formatCurrency(Number(d.unitPrice ?? 0))}
+                                    </span>
+                                    <span className="font-medium shrink-0">
+                                      {formatCurrency(Number(d.totalPrice ?? 0))}
+                                    </span>
                                   </li>
                                 ))}
                               </ul>
                             </div>
                           )}
-                        </div>
-                      </div>
-                    </main>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </main>
           {deleteModalOpen && purchaseToDelete && (
               <div className="fixed inset-0 z-50 overflow-y-auto">
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden/>
@@ -455,7 +464,7 @@ export default function PurchasePage() {
                       </div>
                       <h3 className="text-xl font-bold text-slate-800 mb-2">Delete purchase?</h3>
                       <p className="text-slate-500 mb-6">
-                        Are you sure you want to delete purchase &quot;{purchaseToDelete.data.id}&quot;? This action cannot
+                        Are you sure you want to delete purchase &quot;{purchaseToDelete.id}&quot;? This action cannot
                         be
                         undone.
                       </p>

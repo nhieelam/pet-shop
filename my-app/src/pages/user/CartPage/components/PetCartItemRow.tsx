@@ -21,7 +21,7 @@ export default function PetCartItemRow({
   const pet = item.pet;
   const price = pet?.price ?? 0;
   const name = pet?.name ?? "Thú cưng";
-  const image = pet?.image ?? "";
+  const image = pet?.imageUrl ?? "";
   const lineTotal = price * item.quantity;
   const [quantity, setQuantity] = useState(item.quantity);
   const updatePetQuantityRef = useRef(updatePetQuantity);
@@ -78,7 +78,7 @@ export default function PetCartItemRow({
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Thú cưng</p>
           <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{name}</h3>
           <p className="text-sm text-gray-600 mt-1">
-            {pet.speciesName && <span>{pet.speciesName} · </span>}
+            {pet.species && <span>{pet.species} · </span>}
             Giá: <span className="font-semibold text-gray-800">{formatCurrency(price)}</span>
           </p>
           <p className="text-sm font-bold text-gray-800 mt-2 sm:hidden">{formatCurrency(lineTotal)}</p>

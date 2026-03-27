@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type {
-  SupplierResponse,
   SupplierCreationRequest,
   SupplierUpdateRequest,
+  SupplierData,
 } from "../../../types/supplierTypes";
 
 import * as supplierService from "../../../services/supplierService";
@@ -12,7 +12,7 @@ import * as supplierService from "../../../services/supplierService";
 export type ViewMode = "grid" | "list";
 
 export function useSupplier() {
-  const [supplierList, setSupplierList] = useState<SupplierResponse[]>([]);
+  const [supplierList, setSupplierList] = useState<SupplierData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +23,8 @@ export function useSupplier() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  const [supplierToEdit, setSupplierToEdit] = useState<SupplierResponse | null>(null);
-  const [supplierToDelete, setSupplierToDelete] = useState<SupplierResponse | null>(null);
+  const [supplierToEdit, setSupplierToEdit] = useState<SupplierData | null>(null);
+  const [supplierToDelete, setSupplierToDelete] = useState<SupplierData | null>(null);
 
   const [toast, setToast] = useState<{
     message: string;
@@ -38,8 +38,8 @@ export function useSupplier() {
     setError(null);
 
     try {
-      const data = await supplierService.getAllSuppliers();
-      setSupplierList(Array.isArray(data) ? data : []);
+      const data = await supplierService.getAllSuppliers() ;
+      setSupplierList(data.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load suppliers");
       setSupplierList([]);
@@ -60,28 +60,17 @@ export function useSupplier() {
     if (search.trim()) {
       const q = search.toLowerCase();
 
-      result = result.filter(
-          (s) =>
-              s.name.toLowerCase().includes(q) ||
-              (s.email ?? "").toLowerCase().includes(q) ||
-              (s.phone ?? "").toLowerCase().includes(q) ||
-              (s.address ?? "").toLowerCase().includes(q)
-      );
+      result = result.filter( (s: SupplierData) =>
+          s.name?.toLowerCase().includes(q) ||
+              s.email?.toLowerCase().includes(q) ||
+              s.phone?.toLowerCase().includes(q) ||
+              s.address?.toLowerCase().includes(q)
+        );
     }
 
-    result.sort((a, b) => a.name.localeCompare(b.name));
-
+    result.sort((a: SupplierData, b: SupplierData) => a.name?.localeCompare(b.name ?? "") ?? 0);
     return result;
   }, [supplierList, search]);
-
-  // ================= STATS =================
-
-  const stats = useMemo(
-      () => ({
-        total: supplierList.length,
-      }),
-      [supplierList]
-  );
 
   // ================= TOAST =================
 
@@ -99,12 +88,12 @@ export function useSupplier() {
 
   const openAddModal = () => setFormModalOpen(true);
 
-  const openEditModal = (supplier: SupplierResponse) => {
+  const openEditModal = (supplier: SupplierData) => {
     setSupplierToEdit(supplier);
     setEditModalOpen(true);
   };
 
-  const openDeleteModal = (supplier: SupplierResponse) => {
+  const openDeleteModal = (supplier: SupplierData) => {
     setSupplierToDelete(supplier);
     setDeleteModalOpen(true);
   };
@@ -189,8 +178,6 @@ export function useSupplier() {
 
     viewMode,
     setViewMode,
-
-    stats,
 
     formModalOpen,
     editModalOpen,

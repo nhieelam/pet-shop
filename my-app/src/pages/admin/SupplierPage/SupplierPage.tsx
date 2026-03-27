@@ -6,6 +6,7 @@ import type {
   SupplierResponse,
   SupplierCreationRequest,
   SupplierUpdateRequest,
+  SupplierData,
 } from "../../../types/supplierTypes";
 
 function SupplierGridCard({
@@ -13,9 +14,9 @@ function SupplierGridCard({
   onEdit,
   onDelete,
 }: {
-  supplier: SupplierResponse;
-  onEdit: (s: SupplierResponse) => void;
-  onDelete: (s: SupplierResponse) => void;
+  supplier: SupplierData;
+  onEdit: (s: SupplierData) => void;
+  onDelete: (s: SupplierData) => void;
 }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all group animate-fade-in">
@@ -60,9 +61,9 @@ function SupplierListRow({
   onEdit,
   onDelete,
 }: {
-  supplier: SupplierResponse;
-  onEdit: (s: SupplierResponse) => void;
-  onDelete: (s: SupplierResponse) => void;
+  supplier: SupplierData;
+  onEdit: (s: SupplierData) => void;
+  onDelete: (s: SupplierData) => void;
 }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 hover:shadow-lg transition-all product-row animate-fade-in">
@@ -115,7 +116,6 @@ export default function SupplierPage() {
     setSearch,
     viewMode,
     setViewMode,
-    stats,
     formModalOpen,
     editModalOpen,
     deleteModalOpen,
@@ -231,7 +231,7 @@ export default function SupplierPage() {
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full text-sm backdrop-blur-sm">
                 <span>🏭</span>
-                <span>{stats.total} Suppliers</span>
+                <span>{filteredSuppliers.length} Suppliers</span>
               </div>
               <button
                 type="button"
@@ -255,7 +255,7 @@ export default function SupplierPage() {
               </div>
               <div>
                 <p className="text-slate-500 text-xs font-medium">Total Suppliers</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
+                <p className="text-2xl font-bold text-slate-800">{filteredSuppliers.length}</p>
               </div>
             </div>
           </div>

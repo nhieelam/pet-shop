@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useStaff } from "./useStaff";
-import type { StaffResponse, StaffCreationRequest } from "../../../types/staffTypes";
+import type { StaffData, StaffCreationRequest } from "../../../types/staffTypes";
 import type {UserUpdateRequest} from "../../../types/userTypes.ts";
 
-function staffDisplayName(s: StaffResponse): string {
+function staffDisplayName(s: StaffData): string {
   const u = s.user;
   if (u?.firstName || u?.lastName) return [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
   return u?.username ?? "—";
@@ -17,10 +17,10 @@ function StaffGridCard({
   onEditShift,
   onDelete,
 }: {
-  staff: StaffResponse;
-  onEdit: (s: StaffResponse) => void;
-  onEditShift: (s: StaffResponse) => void;
-  onDelete: (s: StaffResponse) => void;
+  staff: StaffData;
+  onEdit: (s: StaffData) => void;
+  onEditShift: (s: StaffData) => void;
+  onDelete: (s: StaffData) => void;
 }) {
   const u = staff.user;
   const name = staffDisplayName(staff);
@@ -29,7 +29,7 @@ function StaffGridCard({
       <div className="relative h-24 bg-gradient-to-br from-indigo-100 to-slate-50 flex items-center justify-center">
         <span className="text-4xl">👤</span>
         <span className="absolute top-3 right-3 bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
-          Shift {staff.shift}
+          Shift {staff.shift ?? 1}
         </span>
       </div>
       <div className="p-4">
@@ -74,10 +74,10 @@ function StaffListRow({
   onEditShift,
   onDelete,
 }: {
-  staff: StaffResponse;
-  onEdit: (s: StaffResponse) => void;
-  onEditShift: (s: StaffResponse) => void;
-  onDelete: (s: StaffResponse) => void;
+  staff: StaffData;
+  onEdit: (s: StaffData) => void;
+  onEditShift: (s: StaffData) => void;
+  onDelete: (s: StaffData) => void;
 }) {
   const u = staff.user;
   const name = staffDisplayName(staff);
@@ -91,7 +91,7 @@ function StaffListRow({
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-slate-800 truncate">{name}</h3>
             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-medium">
-              Shift {staff.shift}
+              Shift {staff.shift ?? 1}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-mono truncate">{u?.username ?? "—"}</p>
@@ -248,7 +248,7 @@ export default function StaffPage() {
     }
   };
 
-  const openShiftModalFor = (s: StaffResponse) => {
+  const openShiftModalFor = (s: StaffData) => {
     setShiftValue(s.shift ?? 1);
     openShiftModal(s);
   };
