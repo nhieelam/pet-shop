@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { validateForm } from "../validation";
 import type { RegisterFormData, RegisterFormErrors } from "../types";
-import type { UseRegisterFormReturn } from "../types";
 import { register } from "@/services/authService";
 import { storeAuthToken, storeUserName } from "@/utils/storageUtils";
 import { UserRole } from "@/types/authTypes";
@@ -16,7 +15,7 @@ const initialFormData: RegisterFormData = {
 };
 
 
-export function useRegisterForm(): UseRegisterFormReturn {
+export function useRegisterForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
@@ -57,7 +56,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
 
       try {
         const registerData = {
-          username: formData.userName,
+          userName: formData.userName,
           phone: formData.phone,
           password: formData.password,
           address: formData.address || undefined,
@@ -65,19 +64,19 @@ export function useRegisterForm(): UseRegisterFormReturn {
         };
 
         const response = await register(registerData);
-
-        storeAuthToken(response.token);
-        storeUserName(formData.userName);
-
-        navigate("/user/products", { replace: true });
+        if (response.success) {
+        storeAuthToken(response.data?.token);
+          storeUserName(formData.userName);
+          navigate("/user/products", { replace: true });
+        } else {
+          setErrors({ general: response.message || "Đăng ký thất bại"});
+        }
       } catch (error: unknown) {
         console.error("Registration error:", error);
       } finally {
         setIsLoading(false);
       }
-    },
-    [formData, navigate]
-  );
+  }, [formData, navigate]);
 
   return {
     formData,

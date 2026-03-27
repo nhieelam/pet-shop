@@ -9,6 +9,11 @@ export interface AuthRequest {
   password: string;
 }
 
+export interface LoginRequest {
+  userName: string;
+  password: string;
+}
+
 export interface AuthResponse {
   data: {
     authenticated: boolean;
@@ -43,7 +48,7 @@ export interface RefreshRequest {
 }
 
 export interface RegisterRequest {
-  username: string;
+  userName: string;
   phone: string;
   password: string;
   address?: string;

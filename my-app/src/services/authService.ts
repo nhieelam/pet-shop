@@ -4,13 +4,14 @@ import type {
   AuthResponse,
   IntrospectRequest,
   IntrospectResponse,
+  LoginRequest,
   LogoutRequest,
   RefreshRequest,
   RegisterRequest,
 } from "../types/authTypes";
 import {removeAuthToken, removeUserName} from "../utils/storageUtils";
 
-export const login = async (credentials: AuthRequest): Promise<AuthResponse> => {
+export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
   const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`;
 
   const response = await fetch(url, {

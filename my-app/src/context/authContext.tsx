@@ -12,9 +12,8 @@ import {
   register as registerService,
   verifyToken,
 } from "../services/authService";
-import type {AuthRequest, IntrospectRequest} from "../types/authTypes";
+import type {AuthRequest, IntrospectRequest, RegisterRequest} from "../types/authTypes";
 import type {CustomerResponse} from "../types/customerTypes";
-import type {UserCreationRequest} from "../types/userTypes";
 import {getAuthToken, storeAuthToken} from "../utils/storageUtils.ts";
 import {useLocation} from "react-router-dom";
 import {getInfo} from "../services/customerService.ts";
@@ -28,7 +27,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (credentials: AuthRequest) => Promise<boolean>;
-  register: (payload: UserCreationRequest) => Promise<boolean>;
+  register: (payload: RegisterRequest) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -95,7 +94,6 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   }, []);
 
 
-  /* ---------- LOGIN ---------- */
   const login = async (credentials: AuthRequest) => {
     setLoading(true);
     setError(null);
@@ -105,7 +103,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
       setIsAuthenticated(true);
 
-      storeAuthToken(authData.token);
+      storeAuthToken(authData.data?.token);
 
       localStorage.setItem("auth_user", JSON.stringify(authData));
 
@@ -128,7 +126,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   };
 
   /* ---------- REGISTER ---------- */
-  const register = async (payload: UserCreationRequest) => {
+  const register = async (payload: RegisterRequest) => {
     setLoading(true);
     setError(null);
 
@@ -137,7 +135,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
       setIsAuthenticated(true);
 
-      storeAuthToken(authData.token);
+      storeAuthToken(authData.data?.token);
 
       localStorage.setItem("auth_user", JSON.stringify(authData));
 

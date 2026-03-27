@@ -8,18 +8,8 @@ interface LoginErrors {
   general?: string;
 }
 
-interface UseLoginReturn {
-  username: string;
-  password: string;
-  errors: LoginErrors;
-  isLoading: boolean;
-  setUsername: (value: string) => void;
-  setPassword: (value: string) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  clearError: (field: keyof LoginErrors) => void;
-}
 
-export function useLogin(): UseLoginReturn {
+export function useLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const {login} = useAuth();
@@ -57,7 +47,6 @@ export function useLogin(): UseLoginReturn {
     try {
       await login({ username, password });
 
-      // 🔥 Kiểm tra nếu đang ở đường dẫn admin
       if (location.pathname.includes("/admin")) {
         navigate("/admin/dashboard");
       } else {
