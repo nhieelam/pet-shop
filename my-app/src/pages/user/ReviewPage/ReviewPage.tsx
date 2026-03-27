@@ -1,8 +1,7 @@
 "use client";
 
 import { Link } from "react-router-dom";
-import { useReview, type CheckoutPaymentOption } from "./useReview";
-import type { InvoiceReviewLine } from "@/types/invoiceTypes";
+import { useReview } from "./useReview";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
@@ -49,7 +48,7 @@ export default function ReviewPage() {
               <div className="text-gray-500">Đang tải thông tin đơn hàng...</div>
             ) : review?.reviewDetails?.length ? (
               <div className="space-y-4">
-                {review.reviewDetails.map((item: InvoiceReviewLine) => (
+                {review.reviewDetails.map((item) => (
                   <div key={`${item.productId}-${item.quantity}`} className="flex gap-4 border-b border-gray-100 pb-4">
                     <img
                       src={item.imageUrl || "https://placehold.co/100x100?text=Pet"}
@@ -80,9 +79,7 @@ export default function ReviewPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Phương thức thanh toán</label>
               <select
                 value={paymentMethod}
-                onChange={(e) =>
-                  setPaymentMethod(e.target.value as CheckoutPaymentOption)
-                }
+                onChange={(e) => setPaymentMethod(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
               >
                 <option value="COD">Thanh toán khi nhận hàng (COD)</option>

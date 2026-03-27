@@ -1,23 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/authContext";
-import { createInvoice, createInvoiceReview } from "@/services/invoiceService";
+import { useAuth } from "../../../context/authContext";
+import { createInvoice, createInvoiceReview } from "../../../services/invoiceService";
 import type {
   InvoiceDetailCreationRequest,
-  InvoiceReviewData,
   PaymentMethod,
+  ReviewDetailRequest,
   ReviewResponse,
-} from "@/types/invoiceTypes";
-
-/** UI options; API uses PaymentMethod — map COD → Cash */
-export type CheckoutPaymentOption = "COD" | "QR_Scanning";
-
-function toApiPaymentMethod(option: CheckoutPaymentOption): PaymentMethod {
-  return option === "COD" ? "Cash" : "QR_Scanning";
-}
-
-const ONLINE_STAFF_ID =
-  (import.meta.env.VITE_ONLINE_STAFF_ID as string | undefined) ?? "";
+} from "../../../types/invoiceTypes";
 
 interface CheckoutItem {
   id: string;
@@ -37,8 +27,8 @@ export interface UseReviewReturn {
   shippingAddress: string;
   newAddress: string;
   useDefaultAddress: boolean;
-  paymentMethod: CheckoutPaymentOption;
-  setPaymentMethod: (value: CheckoutPaymentOption) => void;
+  paymentMethod: PaymentMethod;
+  setPaymentMethod: (value: PaymentMethod) => void;
   setUseDefaultAddress: (value: boolean) => void;
   setNewAddress: (value: string) => void;
   refreshReview: () => Promise<void>;
@@ -49,15 +39,9 @@ function readCheckoutItems(): CheckoutItem[] {
   try {
     const raw = sessionStorage.getItem("checkoutItems");
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
+    const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (item): item is CheckoutItem =>
-        typeof item === "object" &&
-        item !== null &&
-        "productId" in item &&
-        Number((item as CheckoutItem).quantity) > 0
-    );
+    return parsed.filter((item) => item?.productId && Number(item?.quantity) > 0);
   } catch {
     return [];
   }
@@ -70,18 +54,17 @@ export function useReview(): UseReviewReturn {
   const [loading, setLoading] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [review, setReview] = useState<InvoiceReviewData | null>(null);
-  const [paymentMethod, setPaymentMethod] =
-    useState<CheckoutPaymentOption>("COD");
+  const [review, setReview] = useState<ReviewResponse | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [useDefaultAddress, setUseDefaultAddress] = useState(true);
   const [newAddress, setNewAddress] = useState("");
 
-  const defaultAddress = user?.data?.user?.address ?? "";
+  const defaultAddress = user?.user?.address ?? "";
   const checkoutItems = useMemo(() => readCheckoutItems(), []);
   const shippingAddress = useDefaultAddress ? defaultAddress : newAddress;
 
-  const buildInvoiceDetails = useCallback(
-    (): InvoiceDetailCreationRequest[] =>
+  const buildReviewDetails = useCallback(
+    (): ReviewDetailRequest[] =>
       checkoutItems.map((item) => ({
         productId: item.productId,
         quantity: Number(item.quantity),
@@ -89,10 +72,8 @@ export function useReview(): UseReviewReturn {
     [checkoutItems]
   );
 
-  const customerId = user?.data?.id;
-
   const refreshReview = useCallback(async () => {
-    if (!customerId) return;
+    if (!user?.id) return;
     if (checkoutItems.length === 0) {
       setError("Không có sản phẩm được chọn để thanh toán.");
       return;
@@ -106,9 +87,9 @@ export function useReview(): UseReviewReturn {
     setError(null);
     try {
       const res = await createInvoiceReview({
-        customerId,
+        customerId: user.id,
         shippingAddress: shippingAddress.trim(),
-        invoiceDetails: buildInvoiceDetails(),
+        details: buildReviewDetails(),
       });
       setReview(res);
     } catch (e) {
@@ -116,10 +97,10 @@ export function useReview(): UseReviewReturn {
     } finally {
       setLoading(false);
     }
-  }, [customerId, checkoutItems, shippingAddress, buildInvoiceDetails]);
+  }, [user?.id, checkoutItems, shippingAddress, buildReviewDetails]);
 
   const placeOrder = useCallback(async () => {
-    if (!customerId) return;
+    if (!user?.id) return;
     if (!shippingAddress.trim()) {
       setError("Vui lòng nhập địa chỉ giao hàng.");
       return;
@@ -129,37 +110,29 @@ export function useReview(): UseReviewReturn {
       return;
     }
 
-    const invoiceDetails: InvoiceDetailCreationRequest[] =
-      checkoutItems.map((item) => ({
-        productId: item.productId,
-        quantity: Number(item.quantity),
-      }));
+    const invoiceDetails: InvoiceDetailCreationRequest[] = checkoutItems.map((item) => ({
+      productId: item.productId,
+      quantity: Number(item.quantity),
+    }));
 
     setPlacingOrder(true);
     setError(null);
     try {
       const invoice = await createInvoice({
-        staffId: ONLINE_STAFF_ID,
-        customerId,
+        customerId: user.id,
         shippingAddress: shippingAddress.trim(),
-        paymentMethod: toApiPaymentMethod(paymentMethod),
+        paymentMethod,
         invoiceDetails,
       });
 
       sessionStorage.removeItem("checkoutItems");
-      navigate(`/user/invoices/${invoice.data.id}`);
+      navigate(`/user/invoices/${invoice.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Đặt hàng thất bại.");
     } finally {
       setPlacingOrder(false);
     }
-  }, [
-    customerId,
-    shippingAddress,
-    checkoutItems,
-    paymentMethod,
-    navigate,
-  ]);
+  }, [user?.id, shippingAddress, checkoutItems, paymentMethod, navigate]);
 
   useEffect(() => {
     if (!isAuthenticated) {

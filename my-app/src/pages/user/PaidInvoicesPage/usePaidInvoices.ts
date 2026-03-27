@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../../../context/authContext";
-import { getInvoicesByCustomerId } from "../../../services/invoiceService";
-import type { InvoiceResponse } from "../../../types/invoiceTypes";
+import { useAuth } from "@/context/authContext";
+import { getInvoicesByCustomerId } from "@/services/invoiceService";
+import type { InvoiceData } from "@/types/invoiceTypes";
 
 export function usePaidInvoices() {
   const { user, isAuthenticated } = useAuth();
-  const [paidInvoices, setPaidInvoices] = useState<InvoiceResponse[]>([]);
+  const [paidInvoices, setPaidInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const customerId = user?.data?.id;
+
   const fetchPaid = useCallback(async () => {
-    if (!user?.id) {
+    if (!customerId) {
       setPaidInvoices([]);
       setLoading(false);
       return;
@@ -18,26 +20,24 @@ export function usePaidInvoices() {
     setLoading(true);
     setError(null);
     try {
-      const list = await getInvoicesByCustomerId(user.id);
-      // setPaidInvoices(list.filter((inv) => isPaidStatus(inv.status)));
-      setPaidInvoices(list);
-      console.log(paidInvoices);
+      const list = await getInvoicesByCustomerId(customerId);
+      setPaidInvoices(list.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Không tải được hóa đơn");
       setPaidInvoices([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [customerId]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
+    if (!isAuthenticated || !customerId) {
       setPaidInvoices([]);
       setLoading(false);
       return;
     }
     void fetchPaid();
-  }, [isAuthenticated, user?.id, fetchPaid]);
+  }, [isAuthenticated, customerId, fetchPaid]);
 
   return {
     paidInvoices,

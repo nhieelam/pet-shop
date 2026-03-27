@@ -1,8 +1,6 @@
 import type {
     InvoiceResponse,
     InvoiceCreationRequest,
-    InvoiceReviewRequest,
-    InvoiceReviewData,
 } from "../types/invoiceTypes";
 
 import { API_CONFIG } from "../config/apiConfig";
@@ -19,41 +17,15 @@ function authHeaders(): Record<string, string> {
     return headers;
 }
 
-function unwrapPayload<T>(payload: unknown): T {
-    if (
-        payload &&
-        typeof payload === "object" &&
-        "data" in payload &&
-        (payload as { data: unknown }).data !== undefined
-    ) {
-        return (payload as { data: T }).data;
-    }
-    return payload as T;
-}
-
-export const createInvoiceReview = async (
-    request: InvoiceReviewRequest
-): Promise<InvoiceReviewData> => {
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.REVIEW}`;
-    const response = await fetch(url, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(request),
-    });
-    if (!response.ok) {
-        throw new Error("Không thể tải xem trước đơn hàng");
-    }
-    const json: unknown = await response.json();
-    return unwrapPayload<InvoiceReviewData>(json);
-};
-
 export const createInvoice = async (
     request: InvoiceCreationRequest
 ): Promise<InvoiceResponse> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.CREATE}`;
     const response = await fetch(url, {
         method: "POST",
-        headers: authHeaders(),
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify(request),
     });
     if (!response.ok) {
@@ -88,6 +60,21 @@ export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
     });
     if (!response.ok) {
         throw new Error("Không thể lấy invoice");
+    }
+    const data = await response.json();
+    return data;
+};
+
+export const getInvoicesByCustomerId = async (
+    customerId: string
+): Promise<InvoiceResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_BY_CUSTOMER(customerId)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách hóa đơn của khách hàng");
     }
     const data = await response.json();
     return data;

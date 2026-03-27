@@ -3,13 +3,13 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { usePaidInvoices } from "./usePaidInvoices";
-import type { InvoiceResponse } from "../../../types/invoiceTypes";
+import type { InvoiceData } from "../../../types/invoiceTypes";
 import { useInvoiceHistory } from "../ProfilePage/hooks/useInvoiceHistory";
 import type { Invoice, SortOption } from "../ProfilePage/hooks/useInvoiceHistory";
 import Pagination from "../ProfilePage/components/Pagination";
 import StatusBadge from "../ProfilePage/components/StatusBadge";
 
-function mapToRows(invoices: InvoiceResponse[]): Invoice[] {
+function mapToRows(invoices: InvoiceData[]): Invoice[] {
   return invoices.map((inv) => ({
     id: inv.id,
     date: inv.createdAt,
@@ -53,7 +53,7 @@ export default function PaidInvoicesPage() {
 
   const statusById = useMemo(() => {
     const m = new Map<string, string>();
-    paidInvoices.forEach((inv) => m.set(inv.id, inv.status ?? ""));
+    paidInvoices.forEach((inv) => m.set(inv.id, "PAID"));
     return m;
   }, [paidInvoices]);
 
