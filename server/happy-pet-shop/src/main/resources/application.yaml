@@ -3,7 +3,7 @@ spring:
         name: happy-pet-shop
 
     datasource:
-        url: "jdbc:postgresql://localhost:5432/happy-pet-shop"
+        url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
         username: postgres
         password: postgres
     jpa:
