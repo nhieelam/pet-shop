@@ -1,4 +1,4 @@
-package com.sgu.happycashierscreen;
+package com.sgu.happycashierscreen.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;

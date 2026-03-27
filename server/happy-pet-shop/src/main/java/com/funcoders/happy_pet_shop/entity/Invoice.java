@@ -81,23 +81,9 @@ public class Invoice {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.status = PaymentStatus.PENDING;
-        recalculateTotalAmount();
 
         if (realAmount == null || realAmount.compareTo(BigDecimal.ZERO) == 0) {
             this.realAmount = this.totalAmount;
         }
-    }
-
-    // ===== BUSINESS LOGIC =====
-    public void recalculateTotalAmount() {
-        if (invoiceDetails == null || invoiceDetails.isEmpty()) {
-            this.totalAmount = BigDecimal.ZERO;
-            return;
-        }
-
-        this.totalAmount = invoiceDetails.stream()
-                .map(InvoiceDetail::getTotalPrice)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

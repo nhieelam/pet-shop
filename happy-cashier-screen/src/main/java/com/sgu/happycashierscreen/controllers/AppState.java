@@ -1,4 +1,8 @@
-package com.sgu.happycashierscreen;
+package com.sgu.happycashierscreen.controllers;
+
+import com.sgu.happycashierscreen.dto.response.StaffResponse;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,18 +11,12 @@ import java.util.List;
  * Shared app state for staff user and sales data.
  */
 public class AppState {
-    private static String staffUser = "";
+    @Getter
+    @Setter
+    private static StaffResponse staffUser = null;
     private static final List<SaleRecord> salesHistory = new ArrayList<>();
 
-    public static void setStaffUser(String user) {
-        staffUser = user != null ? user : "";
-    }
-
-    public static String getStaffUser() {
-        return staffUser;
-    }
-
-    public static void rememberUser(String user) {
+    public static void rememberUser(StaffResponse user) {
         // Could persist to prefs/file
         staffUser = user;
     }

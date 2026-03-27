@@ -61,6 +61,12 @@ public class InvoiceController {
         return new ApiResponse<>(responses, "Get invoices successfully");
     }
 
+    @GetMapping("/staff/{id}")
+    public ApiResponse<List<InvoiceResponse>> getInvoiceByStaffId(@PathVariable UUID id) {
+        List<InvoiceResponse> responses = invoiceService.getInvoiceByStaff_Id(id);
+        return new ApiResponse<>(responses, "Get invoices successfully");
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteInvoice(
             @PathVariable UUID id

@@ -1,4 +1,4 @@
-package com.sgu.happycashierscreen;
+package com.sgu.happycashierscreen.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
