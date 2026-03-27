@@ -34,8 +34,6 @@ public class UserService {
     public UserResponse createUser(UserCreationRequest request) {
 
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUsername(userEntity.getPhone());
-
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         System.out.println(userEntity.getPassword());
 

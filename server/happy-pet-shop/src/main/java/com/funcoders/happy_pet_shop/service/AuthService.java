@@ -191,83 +191,37 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(UserCreationRequest request) {
-        // find customer's role
+        if (userRepository.existsByUsername(request.getUserName())) {
+            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
+        }
+
         Role userRole = roleRepository.findById(UserRole.USER_ROLE)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
-        // create user entity
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUsername(userEntity.getPhone());
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         userEntity.setRoles(Set.of(userRole));
 
-        // create cart
         Cart cart = new Cart();
 
-        // create customer entity
         Customer customer = Customer.builder()
                 .user(userEntity)
                 .points(BigDecimal.ZERO)
                 .cart(cart)
                 .build();
 
-        // set customer to cart
         cart.setCustomer(customer);
 
-        // save customer
-        Customer savedCustomer = customerRepository.save(customer);
+        customerRepository.save(customer);
 
-        // create token
         String token = generateToken(userEntity);
 
-        // return register response
         AuthResponse response = AuthResponse.builder()
                 .token(token)
                 .authenticated(true)
                 .build();
 
         return response;
-
-//        String username = req.getUsername().trim();
-//        if (userRepository.existsByUsername(username)) {
-//            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
-//        }
-//
-//        Role role = roleRepository.findByRoleName(req.getRole())
-//                .orElseThrow(() -> new AppException(ErrorType.ROLE_NOT_FOUND));
-//
-//
-//        User user = User.builder()
-//                .username(username)
-//                .password(passwordEncoder.encode(req.getPassword()))
-//                .phone(req.getPhone())
-//                .address(req.getAddress())
-//                .roles(Set.of(role))
-//                .status(UserStatus.ACTIVATED)
-//                .build();
-//
-//        User savedUser;
-//        if (UserRole.USER_ROLE.equals(role.getRoleName())) {
-//            Cart cart = new Cart();
-//            Customer customer = Customer.builder()
-//                    .user(user)
-//                    .points(BigDecimal.ZERO)
-//                    .cart(cart)
-//                    .build();
-//            cart.setCustomer(customer);
-//            Customer savedCustomer = customerRepository.save(customer);
-//            savedUser = savedCustomer.getUser();
-//        } else if (UserRole.STAFF_ROLE.equals(role.getRoleName())) {
-//            Staff staff = Staff.builder()
-//                    .user(user)
-//                    .build();
-//            Staff savedStaff = staffRepository.save(staff);
-//            savedUser = savedStaff.getUser();
-//        } else {
-//            savedUser = userRepository.save(user);
-//        }
-//
-//        return toUserResponse(savedUser);
     }
 
     private UserResponse toUserResponse(User user) {

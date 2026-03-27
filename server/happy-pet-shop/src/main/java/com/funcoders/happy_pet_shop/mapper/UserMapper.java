@@ -10,6 +10,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "username", source = "userName")
     @Mapping(target = "roles", ignore = true)
     User toEntity(UserCreationRequest request);
 

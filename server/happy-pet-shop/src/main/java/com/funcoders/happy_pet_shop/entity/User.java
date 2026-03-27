@@ -41,7 +41,7 @@ public class User {
     @Column(unique = true, length = 100)
     String email;
 
-    @Column(length = 10, nullable = false)
+    @Column(length = 20, nullable = false)
     String phone;
 
     @Column(length = 255)

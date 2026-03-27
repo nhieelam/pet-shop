@@ -10,7 +10,7 @@ import CartPage from "./pages/user/CartPage/CartPage";
 import ProfilePage from "./pages/user/ProfilePage/ProfilePage";
 import ProductsPage from "./pages/user/ProductsPage/ProductsPage";
 import DetailedProductPage from "./pages/user/DetailedProductPage/DetailedProductPage";
-import ReviewPage from "./pages/user/ReviewPage/ReviewPage";
+
 import PaidInvoicesPage from "./pages/user/PaidInvoicesPage/PaidInvoicesPage";
 import InvoiceDetailPage from "./pages/user/PaidInvoicesPage/InvoiceDetailPage";
 
@@ -46,7 +46,7 @@ const App: React.FC = () => {
                   path="detailedProduct/:id"
                   element={<DetailedProductPage />}
               />
-              <Route path="review" element={<ReviewPage />} />
+
               <Route path="invoices/:invoiceId" element={<InvoiceDetailPage />} />
               <Route path="invoices" element={<PaidInvoicesPage />} />
             </Route>

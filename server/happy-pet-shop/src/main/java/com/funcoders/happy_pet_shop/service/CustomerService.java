@@ -49,7 +49,6 @@ public class CustomerService {
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         User userEntity = userMapper.toEntity(request);
-        userEntity.setUsername(userEntity.getPhone());
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         userEntity.setRoles(Set.of(userRole));
 

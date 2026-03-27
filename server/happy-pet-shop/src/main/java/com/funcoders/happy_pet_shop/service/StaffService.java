@@ -60,7 +60,6 @@ public class StaffService {
 
         // map request into entity, set username, role and encode password
         User userEntity = userMapper.toEntity(userCreationRequest);
-        userEntity.setUsername(userEntity.getPhone());
         userEntity.setPassword(passwordEncoder.encode(userCreationRequest.getPassword()));
         userEntity.setRoles(Set.of(staffRole, customerRole));
 
