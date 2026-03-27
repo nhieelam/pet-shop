@@ -24,7 +24,6 @@ public class InvoiceCreationRequest {
     @NotNull(message = "INVALID_CUSTOMER")
     UUID customerId;
 
-    @NotBlank(message = "INVALID_SHIPPING_ADDRESS")
     @Size(max = 255)
     String shippingAddress;
 
