@@ -3,9 +3,6 @@ import { useAuth } from "../../../context/authContext";
 import { getInvoicesByCustomerId } from "../../../services/invoiceService";
 import type { InvoiceResponse } from "../../../types/invoiceTypes";
 
-// const isPaidStatus = (status: string | undefined) =>
-//   (status ?? "").toUpperCase() === "PAID";
-
 export function usePaidInvoices() {
   const { user, isAuthenticated } = useAuth();
   const [paidInvoices, setPaidInvoices] = useState<InvoiceResponse[]>([]);
