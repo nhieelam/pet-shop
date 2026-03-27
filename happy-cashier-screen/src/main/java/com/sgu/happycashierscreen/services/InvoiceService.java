@@ -31,6 +31,7 @@ public final class InvoiceService {
      */
     public static ReviewResponse createReview(ReviewRequest request) throws IOException, InterruptedException {
         String body = OBJECT_MAPPER.writeValueAsString(request);
+        System.out.println("body: " + body);
         String json = ApiClient.post(URLUtil.INVOICE.REVIEW, body, true);
         ApiResponse<ReviewResponse> api = OBJECT_MAPPER.readValue(
                 json,

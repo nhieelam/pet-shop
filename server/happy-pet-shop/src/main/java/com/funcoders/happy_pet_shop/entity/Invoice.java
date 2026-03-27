@@ -41,7 +41,7 @@ public class Invoice {
 
     // ===== NGƯỜI MUA =====
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     Customer customer;
 
     // ===== ĐỊA CHỈ GIAO HÀNG (snapshot) =====

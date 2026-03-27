@@ -55,7 +55,18 @@
                 </padding>
                 <Label text="🛒 Current Order" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <Separator/>
-                <ScrollPane fx:id="cartScrollPane" fitToWidth="true" prefHeight="300" style="-fx-background-color: transparent;">
+                <VBox spacing="8">
+                    <Label text="Invoice / customer" style="-fx-font-weight: bold; -fx-text-fill: rgb(107, 114, 128);"/>
+                    <Label text="Customer ID (UUID)" style="-fx-font-size: 11px; -fx-text-fill: rgb(107, 114, 128);"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="customerIdField" promptText="Optional — UUID or use … to find by username" prefHeight="32" HBox.hgrow="ALWAYS"/>
+                        <Button mnemonicParsing="false" onAction="#openCustomerPicker" prefHeight="32" prefWidth="40" text="…"/>
+                    </HBox>
+                    <Label text="Shipping address" style="-fx-font-size: 11px; -fx-text-fill: rgb(107, 114, 128);"/>
+                    <TextArea fx:id="shippingAddressField" promptText="Optional — delivery / pickup address" wrapText="true" prefRowCount="3" prefHeight="72"/>
+                </VBox>
+                <Separator/>
+                <ScrollPane fx:id="cartScrollPane" fitToWidth="true" prefHeight="240" style="-fx-background-color: transparent;">
                     <VBox fx:id="cartItemsVBox" spacing="8"/>
                 </ScrollPane>
                 <Separator/>
@@ -63,17 +74,12 @@
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="Subtotal:" style="-fx-text-fill: rgb(107, 114, 128);"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="subtotalLabel" text="0.00"/>
+                        <Label fx:id="subtotalLabel" text="\$0.00"/>
                     </HBox>
-<!--                    <HBox alignment="CENTER_LEFT" spacing="10">-->
-<!--                        <Label text="Tax (8%):" style="-fx-text-fill: rgb(107, 114, 128);"/>-->
-<!--                        <Region HBox.hgrow="ALWAYS"/>-->
-<!--                        <Label fx:id="taxLabel" text="0.00"/>-->
-<!--                    </HBox>-->
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="Total:" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="totalLabel" text="0.00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: rgb(234, 88, 12);"/>
+                        <Label fx:id="totalLabel" text="\$0.00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: rgb(234, 88, 12);"/>
                     </HBox>
                 </VBox>
                 <HBox spacing="10" alignment="CENTER">

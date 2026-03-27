@@ -203,12 +203,18 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public ReviewResponse createReview(ReviewRequest request) {
         // ===== 1. Find customer =====
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
+        String customerName = "";
 
-        String customerName = customer.getUser().getFirstName() + " " + customer.getUser().getLastName();
-        if (customerName.isBlank()) {
-            customerName = customer.getUser().getUsername();
+        Customer customer = null;
+
+        if (Objects.nonNull(request.getCustomerId()))
+            customer = customerRepository.findById(request.getCustomerId()).orElse(null);
+
+        if (customer != null) {
+            customerName = customer.getUser().getFirstName() + " " + customer.getUser().getLastName();
+            if (customerName.isBlank()) {
+                customerName = customer.getUser().getUsername();
+            }
         }
 
         // ===== 2. Load products =====
