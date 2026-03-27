@@ -4,7 +4,6 @@ import com.funcoders.happy_pet_shop.dto.request.*;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.AuthResponse;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
-import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 import com.funcoders.happy_pet_shop.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;

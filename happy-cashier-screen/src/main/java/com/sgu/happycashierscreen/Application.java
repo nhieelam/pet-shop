@@ -1,5 +1,6 @@
 package com.sgu.happycashierscreen;
 
+import com.sgu.happycashierscreen.controllers.AppNavigator;
 import javafx.stage.Stage;
 
 import java.io.IOException;

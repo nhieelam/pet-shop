@@ -313,7 +313,14 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public List<InvoiceResponse> getInvoiceByCustomer_Id(UUID id) {
-        List<Invoice> invoices = invoiceRepository.findByCustomer_Id(id);
+        List<Invoice> invoices = invoiceRepository.findAllByCustomer_Id(id);
+
+        return invoices.stream().map(invoiceMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<InvoiceResponse> getInvoiceByStaff_Id(UUID id) {
+        List<Invoice> invoices = invoiceRepository.findAllByStaff_Id(id);
 
         return invoices.stream().map(invoiceMapper::toResponse).toList();
     }

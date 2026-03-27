@@ -1,7 +1,7 @@
 import { UserRole } from "../enum/user";
 
 export interface AuthRequest {
-  userName: string;
+  username: string;
   password: string;
 }
 

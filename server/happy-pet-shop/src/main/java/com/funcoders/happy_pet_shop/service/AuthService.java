@@ -6,12 +6,10 @@ import com.funcoders.happy_pet_shop.dto.response.UserResponse;
 
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
 import com.funcoders.happy_pet_shop.constant.UserRole;
-import com.funcoders.happy_pet_shop.constant.UserStatus;
 import com.funcoders.happy_pet_shop.entity.Cart;
 import com.funcoders.happy_pet_shop.entity.Customer;
 import com.funcoders.happy_pet_shop.entity.InvalidatedToken;
 import com.funcoders.happy_pet_shop.entity.Role;
-import com.funcoders.happy_pet_shop.entity.Staff;
 import com.funcoders.happy_pet_shop.entity.User;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
@@ -20,7 +18,6 @@ import com.funcoders.happy_pet_shop.mapper.UserMapper;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.InvalidatedTokenRepository;
 import com.funcoders.happy_pet_shop.repository.RoleRepository;
-import com.funcoders.happy_pet_shop.repository.StaffRepository;
 import com.funcoders.happy_pet_shop.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -71,7 +68,7 @@ public class AuthService {
     protected long EXPIRATION_TIME;
 
     public AuthResponse authenticate(AuthRequest request) {
-        User user = userRepository.findByUsername(request.getUserName())
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorType.UNAUTHORIZED));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))

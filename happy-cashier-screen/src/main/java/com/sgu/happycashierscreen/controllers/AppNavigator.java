@@ -1,5 +1,6 @@
-package com.sgu.happycashierscreen;
+package com.sgu.happycashierscreen.controllers;
 
+import com.sgu.happycashierscreen.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

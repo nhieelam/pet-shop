@@ -3,17 +3,17 @@ import {useAuth} from "../../context/authContext.tsx";
 import {useState} from "react";
 
 interface LoginErrors {
-  userName?: string;
+  username?: string;
   password?: string;
   general?: string;
 }
 
 interface UseLoginReturn {
-  userName: string;
+  username: string;
   password: string;
   errors: LoginErrors;
   isLoading: boolean;
-  setUserName: (value: string) => void;
+  setUsername: (value: string) => void;
   setPassword: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   clearError: (field: keyof LoginErrors) => void;
@@ -24,7 +24,7 @@ export function useLogin(): UseLoginReturn {
   const location = useLocation();
   const {login} = useAuth();
 
-  const [userName, setUserName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -32,8 +32,8 @@ export function useLogin(): UseLoginReturn {
   const validateForm = (): boolean => {
     const newErrors: LoginErrors = {};
 
-    if (!userName.trim()) {
-      newErrors.userName = "Tên đăng nhập không được để trống";
+    if (!username.trim()) {
+      newErrors.username = "Tên đăng nhập không được để trống";
     }
 
     if (!password) {
@@ -55,7 +55,7 @@ export function useLogin(): UseLoginReturn {
     setErrors({});
 
     try {
-      await login({ userName, password });
+      await login({ username, password });
 
       // 🔥 Kiểm tra nếu đang ở đường dẫn admin
       if (location.pathname.includes("/admin")) {
@@ -86,11 +86,11 @@ export function useLogin(): UseLoginReturn {
   };
 
   return {
-    userName,
+    username,
     password,
     errors,
     isLoading,
-    setUserName,
+    setUsername,
     setPassword,
     handleSubmit,
     clearError,

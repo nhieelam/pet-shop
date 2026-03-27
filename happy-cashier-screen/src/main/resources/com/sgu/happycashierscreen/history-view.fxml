@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.sgu.happycashierscreen.HistoryController"
+            fx:controller="com.sgu.happycashierscreen.controllers.HistoryController"
             prefHeight="650" prefWidth="1000">
     <top>
         <HBox styleClass="cashier-header" alignment="CENTER_LEFT" spacing="15">

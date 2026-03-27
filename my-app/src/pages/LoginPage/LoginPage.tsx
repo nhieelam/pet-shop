@@ -7,11 +7,11 @@ import {Link, useLocation} from "react-router-dom";
 
 export default function LoginPage() {
   const {
-    userName,
+    username,
     password,
     errors,
     isLoading,
-    setUserName,
+    setUsername,
     setPassword,
     handleSubmit,
     clearError,
@@ -76,29 +76,29 @@ export default function LoginPage() {
                   </div>
               )}
 
-              {/* Username */}
+              {/* username */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Username
+                  username
                 </label>
 
                 <input
                     type="text"
-                    value={userName}
+                    value={username}
                     onChange={(e) => {
-                      setUserName(e.target.value);
-                      clearError("userName");
+                      setUsername(e.target.value);
+                      clearError("username");
                     }}
                     placeholder="Nhập username"
                     className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition ${
-                        errors.userName
+                        errors.username
                             ? "border-red-500 focus:ring-red-400"
                             : "border-slate-200 focus:ring-emerald-400"
                     }`}
                 />
 
-                {errors.userName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.userName}</p>
+                {errors.username && (
+                    <p className="text-red-500 text-xs mt-1">{errors.username}</p>
                 )}
               </div>
 

@@ -6,7 +6,7 @@
 <?import javafx.scene.text.*?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.sgu.happycashierscreen.LoginController"
+           fx:controller="com.sgu.happycashierscreen.controllers.LoginController"
            prefHeight="500" prefWidth="450"
            styleClass="login-root">
     <VBox alignment="CENTER" spacing="20" prefWidth="400">
