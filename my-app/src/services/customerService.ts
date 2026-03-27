@@ -1,5 +1,5 @@
 import type { UserCreationRequest } from "../types/userTypes";
-import type { CustomerResponse} from "../types/customerTypes";
+import type { CustomerData, CustomerResponse } from "../types/customerTypes";
 import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
 
@@ -27,7 +27,16 @@ export const createCustomer = async (
 /** @deprecated Use createCustomer */
 export const register = createCustomer;
 
-export const getAllCustomers = async (): Promise<CustomerResponse[]> => {
+function unwrapCustomerList(json: unknown): CustomerData[] {
+    if (Array.isArray(json)) return json as CustomerData[];
+    if (json && typeof json === "object" && "data" in json) {
+        const inner = (json as { data?: unknown }).data;
+        if (Array.isArray(inner)) return inner as CustomerData[];
+    }
+    return [];
+}
+
+export const getAllCustomers = async (): Promise<CustomerData[]> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CUSTOMER.GET_ALL}`;
 
     const response = await fetch(
@@ -43,7 +52,7 @@ export const getAllCustomers = async (): Promise<CustomerResponse[]> => {
         throw new Error("Không thể lấy danh sách customer");
     }
     const data = await response.json();
-    return data;
+    return unwrapCustomerList(data);
 };
 
 export const getCustomerById = async (id: string): Promise<CustomerResponse> => {

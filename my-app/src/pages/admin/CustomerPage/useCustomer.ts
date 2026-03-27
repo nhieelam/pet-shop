@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { CustomerResponse } from "../../../types/customerTypes";
-import type {UserCreationRequest, UserUpdateRequest} from "../../../types/userTypes";
+import type { CustomerData } from "../../../types/customerTypes";
+import type { UserCreationRequest, UserUpdateRequest } from "../../../types/userTypes";
 import * as customerService from "../../../services/customerService";
-import {updateUser} from "../../../services";
+import * as userService from "../../../services/userService";
 
 export type ViewMode = "grid" | "list";
 
 export function useCustomer() {
-  const [customers, setCustomers] = useState<CustomerResponse[]>([]);
+  const [customers, setCustomers] = useState<CustomerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -18,9 +18,8 @@ export function useCustomer() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [pointsModalOpen, setPointsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<CustomerResponse | null>(null);
-  const [customerToEdit, setCustomerToEdit] = useState<CustomerResponse | null>(null);
-  const [customerToDelete, setCustomerToDelete] = useState<CustomerResponse | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<CustomerData | null>(null);
+  const [customerToEdit, setCustomerToEdit] = useState<CustomerData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const fetchCustomers = useCallback(async () => {
@@ -28,7 +27,7 @@ export function useCustomer() {
     setError(null);
     try {
       const data = await customerService.getAllCustomers();
-      setCustomers(Array.isArray(data) ? data : []);
+      setCustomers(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load customers");
       setCustomers([]);
@@ -46,22 +45,22 @@ export function useCustomer() {
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
-        (c) =>
-          (c.user?.username ?? "").toLowerCase().includes(q) ||
-          (c.user?.firstName ?? "").toLowerCase().includes(q) ||
-          (c.user?.lastName ?? "").toLowerCase().includes(q) ||
-          (c.user?.email ?? "").toLowerCase().includes(q) ||
-          (c.user?.phone ?? "").toLowerCase().includes(q)
+        (c: CustomerData) =>
+          c.user.username?.toLowerCase().includes(q) ||
+          c.user.firstName?.toLowerCase().includes(q) ||
+          c.user.lastName?.toLowerCase().includes(q) ||
+          c.user.email?.toLowerCase().includes(q) ||
+          c.user.phone?.toLowerCase().includes(q)
       );
     }
-    result.sort((a, b) => (a.user?.username ?? "").localeCompare(b.user?.username ?? ""));
+    result.sort((a: CustomerData, b: CustomerData) => a.user.username?.localeCompare(b.user.username ?? "") ?? 0);
     return result;
   }, [customers, search]);
 
   const stats = useMemo(
     () => ({
       total: customers.length,
-      totalPoints: customers.reduce((sum, c) => sum + (c.points ?? 0), 0),
+      totalPoints: customers.reduce((sum: number, c: CustomerData) => sum + c.points, 0),
     }),
     [customers]
   );
@@ -77,13 +76,13 @@ export function useCustomer() {
     setFormModalOpen(true);
   }, []);
 
-  const openEditModal = useCallback((customer: CustomerResponse) => {
-    setCustomerToEdit(customer);
+  const openEditModal = useCallback((c: CustomerData) => {
+    setEditingCustomer(c);
     setEditModalOpen(true);
   }, []);
 
-  const openPointsModal = useCallback((customer: CustomerResponse) => {
-    setEditingCustomer(customer);
+  const openPointsModal = useCallback((c: CustomerData) => {
+    setEditingCustomer(c);
     setPointsModalOpen(true);
   }, []);
 
@@ -94,7 +93,7 @@ export function useCustomer() {
 
   const closeEditModal = useCallback(() => {
     setEditModalOpen(false);
-    setCustomerToEdit(null);
+    setEditingCustomer(null);
   }, []);
 
   const closePointsModal = useCallback(() => {
@@ -102,14 +101,14 @@ export function useCustomer() {
     setEditingCustomer(null);
   }, []);
 
-  const openDeleteModal = useCallback((customer: CustomerResponse) => {
-    setCustomerToDelete(customer);
+  const openDeleteModal = useCallback((c: CustomerData) => {
+    setEditingCustomer(c);
     setDeleteModalOpen(true);
   }, []);
 
   const closeDeleteModal = useCallback(() => {
     setDeleteModalOpen(false);
-    setCustomerToDelete(null);
+    setEditingCustomer(null);
   }, []);
 
   const handleCreateCustomer = useCallback(
@@ -130,7 +129,7 @@ export function useCustomer() {
   const handleUpdateCustomer = useCallback(
     async (id: string, payload: UserUpdateRequest) => {
       try {
-        await updateUser(id, payload);
+        await userService.updateUser(id, payload);
         showToast("Customer updated successfully!", "success");
         closeEditModal();
         await fetchCustomers();
@@ -158,16 +157,16 @@ export function useCustomer() {
   );
 
   const handleDeleteCustomer = useCallback(async () => {
-    if (!customerToDelete?.id) return;
+    if (!editingCustomer?.id) return;
     try {
-      await customerService.deleteCustomer(customerToDelete.id);
+      await customerService.deleteCustomer(editingCustomer.id);
       showToast("Customer deleted successfully!", "success");
       closeDeleteModal();
       await fetchCustomers();
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Failed to delete customer", "error");
     }
-  }, [customerToDelete, closeDeleteModal, fetchCustomers, showToast]);
+  }, [editingCustomer, closeDeleteModal, fetchCustomers, showToast]);
 
   return {
     customers: filteredCustomers,
@@ -183,9 +182,7 @@ export function useCustomer() {
     editModalOpen,
     pointsModalOpen,
     deleteModalOpen,
-    editingCustomer,
-    customerToEdit,
-    customerToDelete,
+    editingCustomer,  
     toast,
     openAddModal,
     openEditModal,

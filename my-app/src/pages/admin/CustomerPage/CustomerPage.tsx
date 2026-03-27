@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useCustomer } from "./useCustomer";
-import type { CustomerResponse } from "../../../types/customerTypes";
-import type {UserCreationRequest, UserUpdateRequest} from "../../../types/userTypes";
+import type { CustomerData } from "../../../types/customerTypes";
+import type { UserCreationRequest, UserUpdateRequest } from "../../../types/userTypes";
 
-function customerDisplayName(c: CustomerResponse): string {
+function customerDisplayName(c: CustomerData): string {
   const u = c.user;
   if (u?.firstName || u?.lastName) return [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
-  return u?.username ?? "—";
+  return u.username ?? "—";
 }
 
 function CustomerGridCard({
@@ -17,10 +17,10 @@ function CustomerGridCard({
   onAddPoints,
   onDelete,
 }: {
-  customer: CustomerResponse;
-  onEdit: (c: CustomerResponse) => void;
-  onAddPoints: (c: CustomerResponse) => void;
-  onDelete: (c: CustomerResponse) => void;
+  customer: CustomerData;
+  onEdit: (c: CustomerData) => void;
+  onAddPoints: (c: CustomerData) => void;
+  onDelete: (c: CustomerData) => void;
 }) {
   const u = customer.user;
   const name = customerDisplayName(customer);
@@ -34,9 +34,9 @@ function CustomerGridCard({
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-slate-800 line-clamp-1">{name}</h3>
-        <p className="text-xs text-slate-500 font-mono mb-1">{u?.username ?? "—"}</p>
-        <p className="text-sm text-slate-600 truncate">{u?.email ?? "—"}</p>
-        <p className="text-xs text-slate-500 mt-1">{u?.phone ?? "—"}</p>
+        <p className="text-xs text-slate-500 font-mono mb-1">{u.username ?? "—"}</p>
+        <p className="text-sm text-slate-600 truncate">{u.email ?? "—"}</p>
+        <p className="text-xs text-slate-500 mt-1">{u.phone ?? "—"}</p>
         <div className="flex items-center justify-end gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
@@ -74,10 +74,10 @@ function CustomerListRow({
   onAddPoints,
   onDelete,
 }: {
-  customer: CustomerResponse;
-  onEdit: (c: CustomerResponse) => void;
-  onAddPoints: (c: CustomerResponse) => void;
-  onDelete: (c: CustomerResponse) => void;
+  customer: CustomerData;
+  onEdit: (c: CustomerData) => void;
+  onAddPoints: (c: CustomerData) => void;
+  onDelete: (c: CustomerData) => void;
 }) {
   const u = customer.user;
   const name = customerDisplayName(customer);
@@ -94,8 +94,8 @@ function CustomerListRow({
               {customer.points ?? 0} pts
             </span>
           </div>
-          <p className="text-xs text-slate-500 font-mono truncate">{u?.username ?? "—"}</p>
-          <p className="text-sm text-slate-500 truncate">{u?.email ?? "—"} · {u?.phone ?? "—"}</p>
+          <p className="text-xs text-slate-500 font-mono truncate">{u.username ?? "—"}</p>
+          <p className="text-sm text-slate-500 truncate">{u.email ?? "—"} · {u.phone ?? "—"}</p>
         </div>
         <div className="flex gap-1 flex-shrink-0">
           <button
@@ -144,8 +144,6 @@ export default function CustomerPage() {
     pointsModalOpen,
     deleteModalOpen,
     editingCustomer,
-    customerToEdit,
-    customerToDelete,
     toast,
     openAddModal,
     openEditModal,
@@ -184,18 +182,18 @@ export default function CustomerPage() {
   const [pointsValue, setPointsValue] = useState(0);
 
   useEffect(() => {
-    if (editModalOpen && customerToEdit) {
-      const u = customerToEdit.user;
+    if (editModalOpen && editingCustomer) {
+      const u = editingCustomer.user;
       setEditFormData({
         firstName: u?.firstName ?? "",
         lastName: u?.lastName ?? "",
         email: u?.email ?? "",
         phone: u?.phone ?? "",
         address: u?.address ?? "",
-        points: customerToEdit.points ?? 0,
+        points: editingCustomer.points ?? 0,
       });
     }
-  }, [editModalOpen, customerToEdit]);
+  }, [editModalOpen, editingCustomer]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,7 +216,7 @@ export default function CustomerPage() {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerToEdit?.id) return;
+    if (!editingCustomer?.id) return;
     setEditSubmitting(true);
     try {
       const payload: UserUpdateRequest = {
@@ -228,13 +226,13 @@ export default function CustomerPage() {
         phone: editFormData.phone.trim() || undefined,
         address: editFormData.address.trim() || undefined,
       };
-      await handleUpdateCustomer(customerToEdit.user.id, payload);
+      await handleUpdateCustomer(editingCustomer.id, payload);
     } finally {
       setEditSubmitting(false);
     }
   };
 
-  const openPointsModalFor = (c: CustomerResponse) => {
+  const openPointsModalFor = (c: CustomerData) => {
     setPointsValue(0);
     openPointsModal(c);
   };
@@ -531,7 +529,7 @@ export default function CustomerPage() {
       )}
 
       {/* Edit Customer Modal */}
-      {editModalOpen && customerToEdit && (
+      {editModalOpen && editingCustomer && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeEditModal} aria-hidden />
           <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -548,11 +546,11 @@ export default function CustomerPage() {
               <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
                 <div className="rounded-xl bg-slate-50 p-3 mb-4">
                   <p className="text-xs text-slate-500 font-medium">Username (read-only)</p>
-                  <p className="text-sm font-mono text-slate-800">{customerToEdit.user?.username ?? "—"}</p>
-                  {customerToEdit.user?.status != null && (
+                  <p className="text-sm font-mono text-slate-800">{editingCustomer.user?.username ?? "—"}</p>
+                  {editingCustomer.user?.status != null && (
                     <>
                       <p className="text-xs text-slate-500 font-medium mt-2">Status</p>
-                      <p className="text-sm text-slate-800">{customerToEdit.user.status}</p>
+                      <p className="text-sm text-slate-800">{editingCustomer.user.status}</p>
                     </>
                   )}
                 </div>
@@ -685,7 +683,7 @@ export default function CustomerPage() {
       )}
 
       {/* Delete Modal */}
-      {deleteModalOpen && customerToDelete && (
+      {deleteModalOpen && editingCustomer && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal} aria-hidden />
           <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -696,7 +694,7 @@ export default function CustomerPage() {
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 mb-2">Delete customer?</h3>
                 <p className="text-slate-500 mb-6">
-                  Are you sure you want to remove &quot;{customerDisplayName(customerToDelete)}&quot;? This action cannot be undone.
+                  Are you sure you want to remove &quot;{customerDisplayName(editingCustomer)}&quot;? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <button

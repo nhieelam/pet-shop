@@ -12,6 +12,15 @@ export interface CustomerResponse {
     timestamp: string;
 }
 
+export interface CustomerResponseArray {
+    success: boolean;
+    message: string;
+    data: CustomerData[];
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
 export interface CustomerUpdateRequest {
     user: UserUpdateRequest;
     points: number;

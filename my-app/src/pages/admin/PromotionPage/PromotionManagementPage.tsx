@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePromotions } from "./usePromotions";
-import type { PromotionData,  PromotionDetail,  PromotionResponse } from "../../../types/promotionTypes";
+import type { PromotionData, PromotionDetail } from "../../../types/promotionTypes";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
@@ -360,18 +360,18 @@ export default function PromotionManagementPage() {
                 {viewMode === "grid"
                   ? filteredPromotions.map((p) => (
                       <PromotionGridCard
-                        key={p.data.id}
-                        promotion={p.data}
-                        isSelected={selectedId === p.data.id}
+                        key={p.id}
+                        promotion={p}
+                        isSelected={selectedId === p.id}
                         onSelect={openDetail}
                         onDelete={openDeleteModal}
                       />
                     ))
                   : filteredPromotions.map((p) => (
                       <PromotionListRow
-                        key={p.data.id}
-                        promotion={p.data}
-                        isSelected={selectedId === p.data.id}
+                        key={p.id}
+                        promotion={p}
+                        isSelected={selectedId === p.id}
                         onSelect={openDetail}
                         onDelete={openDeleteModal}
                       />

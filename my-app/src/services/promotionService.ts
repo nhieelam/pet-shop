@@ -1,6 +1,7 @@
 import type {
-    PromotionResponse,
     PromotionCreationRequest,
+    PromotionData,
+    PromotionResponse,
 } from "../types/promotionTypes";
 
 import { API_CONFIG } from "../config/apiConfig";
@@ -23,7 +24,23 @@ export const createPromotion = async (
     return data;
 };
 
-export const getAllPromotions = async (): Promise<PromotionResponse[]> => {
+function unwrapPromotionList(json: unknown): PromotionData[] {
+    if (Array.isArray(json)) return json as PromotionData[];
+    if (json && typeof json === "object" && "data" in json) {
+        const inner = (json as { data?: unknown }).data;
+        if (Array.isArray(inner)) return inner as PromotionData[];
+    }
+    return [];
+}
+
+function unwrapPromotionEntity(json: unknown): PromotionData {
+    if (json && typeof json === "object" && "data" in json && (json as { data: PromotionData }).data) {
+        return (json as { data: PromotionData }).data;
+    }
+    return json as PromotionData;
+}
+
+export const getAllPromotions = async (): Promise<PromotionData[]> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROMOTION.GET_ALL}`;
     const response = await fetch(url, {
         method: "GET",
@@ -35,12 +52,10 @@ export const getAllPromotions = async (): Promise<PromotionResponse[]> => {
         throw new Error("Không thể lấy danh sách promotion");
     }
     const data = await response.json();
-    return data;
+    return unwrapPromotionList(data);
 };
 
-export const getPromotionById = async (
-    id: string
-): Promise<PromotionResponse> => {
+export const getPromotionById = async (id: string): Promise<PromotionData> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROMOTION.GET_BY_ID(id)}`;
     const response = await fetch(url, {
         method: "GET",
@@ -52,7 +67,7 @@ export const getPromotionById = async (
         throw new Error("Không thể lấy promotion");
     }
     const data = await response.json();
-    return data;
+    return unwrapPromotionEntity(data);
 };
 
 export const deletePromotion = async (id: string): Promise<void> => {

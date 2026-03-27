@@ -1,23 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { PromotionResponse } from "../../../types/promotionTypes";
+import type { PromotionData } from "../../../types/promotionTypes";
 import * as promotionService from "../../../services/promotionService";
 
 export type ViewMode = "grid" | "list";
 
 export function usePromotions() {
-  const [promotions, setPromotions] = useState<PromotionResponse[]>([]);
+    const [promotions, setPromotions] = useState<PromotionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [detailPromotion, setDetailPromotion] = useState<PromotionResponse | null>(null);
+  const [detailPromotion, setDetailPromotion] = useState<PromotionData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [promotionToDelete, setPromotionToDelete] = useState<PromotionResponse | null>(null);
+  const [promotionToDelete, setPromotionToDelete] = useState<PromotionData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const fetchPromotions = useCallback(async () => {
@@ -76,7 +76,7 @@ export function usePromotions() {
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const openDetail = useCallback(async (p: PromotionResponse) => {
+  const openDetail = useCallback(async (p: PromotionData) => {
     setSelectedId(p.id);
     setDetailLoading(true);
     setDetailPromotion(null);
@@ -96,7 +96,7 @@ export function usePromotions() {
     setDetailPromotion(null);
   }, []);
 
-  const openDeleteModal = useCallback((p: PromotionResponse) => {
+  const openDeleteModal = useCallback((p: PromotionData) => {
     setPromotionToDelete(p);
     setDeleteModalOpen(true);
   }, []);
