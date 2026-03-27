@@ -1,30 +1,28 @@
-import { useMemo, useCallback } from "react";
-import type { ProductData } from "../../../../types/productTypes";
+import { useState, useMemo, useCallback } from "react";
+import type { PetData } from "@/types/petTypes";
+import { usePriceFilter } from "@/pages/user/ProductsPage/hooks/usePriceFilter";
+import { usePagination } from "@/pages/user/ProductsPage/hooks/usePagination";
+import { useSort } from "@/pages/user/ProductsPage/hooks/useSort";
+import { useSearch } from "@/pages/user/ProductsPage/hooks/useSearch";
+import type { SpeciesData } from "@/types/speciesTypes";
 
-import { useSearch } from "./useSearch";
-import { useCategoryFilter } from "./useCategoryFilter";
-import { usePriceFilter } from "./usePriceFilter";
-import { useSort } from "./useSort";
-import { usePagination } from "./usePagination";
+type SpeciesFilterOption = string[];
 
-interface UseProductManagerOptions {
-  products: ProductData[];
+interface UsePetManagerOptions {
+  pets: PetData[];
+  species: SpeciesData[];
   itemsPerPage?: number;
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 12;
 
-export function useProductManager({
-  products,
+export function usePetManager({
+  pets,
+  species,
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
-}: UseProductManagerOptions) {
+}: UsePetManagerOptions) {
+  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesFilterOption>([]);
   const { searchQuery, handleSearch: baseHandleSearch, resetSearch } = useSearch();
-
-  const {
-    selectedCategories,
-    handleCategoryChange: baseHandleCategoryChange,
-    resetCategoryFilter,
-  } = useCategoryFilter();
 
   const {
     minPrice,
@@ -32,27 +30,27 @@ export function useProductManager({
     handlePriceFilterChange: baseHandlePriceFilterChange,
     resetPriceFilter,
   } = usePriceFilter();
-  
+
   const { sortBy, handleSort: baseHandleSort, resetSort } = useSort();
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products];
+  const filteredAndSortedPets = useMemo(() => {
+    let filtered = [...pets].filter((pet) => pet.available && !pet.sold);
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(query)
+      filtered = filtered.filter((pet) =>
+        pet.name.toLowerCase().includes(query)
       );
     }
 
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((product) =>
-        selectedCategories.includes(product.categoryName)
+    if (selectedSpecies.length > 0) {
+      filtered = filtered.filter((pet) =>
+        selectedSpecies.includes(pet.speciesName)
       );
     }
 
     filtered = filtered.filter(
-      (product) => product.price >= minPrice && product.price <= maxPrice
+      (pet) => pet.price >= minPrice && pet.price <= maxPrice
     );
 
     filtered.sort((a, b) => {
@@ -71,18 +69,18 @@ export function useProductManager({
     });
 
     return filtered;
-  }, [products, searchQuery, selectedCategories, minPrice, maxPrice, sortBy]);
+  }, [pets, searchQuery, selectedSpecies, minPrice, maxPrice, sortBy]);
 
   const {
     currentPage,
-    paginatedItems: paginatedProducts,
+    paginatedItems: paginatedPets,
     totalItems,
     totalPages,
     startIndex,
     endIndex,
     handlePageChange,
     resetPage,
-  } = usePagination(filteredAndSortedProducts, itemsPerPage);
+  } = usePagination(filteredAndSortedPets, itemsPerPage);
 
   const handleSearch = useCallback(
     (query: string) => {
@@ -92,13 +90,10 @@ export function useProductManager({
     [baseHandleSearch, resetPage]
   );
 
-  const handleCategoryChange = useCallback(
-    (categories: string[]) => {
-      baseHandleCategoryChange(categories);
-      resetPage();
-    },
-    [baseHandleCategoryChange, resetPage]
-  );
+  const handleSpeciesChange = useCallback((species: string[]) => {
+    setSelectedSpecies(species);
+    resetPage();
+  }, [resetPage]);
 
   const handlePriceFilterChange = useCallback(
     (min: number, max: number) => {
@@ -117,34 +112,32 @@ export function useProductManager({
   );
 
   const resetFilters = useCallback(() => {
-    resetSearch();
-    resetCategoryFilter();
+    setSelectedSpecies([]);
     resetPriceFilter();
     resetSort();
     resetPage();
-  }, [
-    resetSearch,
-    resetCategoryFilter,
-    resetPriceFilter,
-    resetSort,
-    resetPage,
-  ]);
+  }, [resetPriceFilter, resetSort, resetPage]);
+
+  const speciesList = useMemo(
+    () => species.map((s) => s.name).filter(Boolean),
+    [species]
+  );
 
   return {
-    searchQuery,
     minPrice,
     maxPrice,
     sortBy,
     currentPage,
-    selectedCategories,
-    filteredAndSortedProducts,
-    paginatedProducts,
+    selectedSpecies,
+    speciesList,
+    filteredAndSortedPets,
+    paginatedPets,
     totalItems,
     totalPages,
     startIndex,
     endIndex,
-    handleCategoryChange,
     handleSearch,
+    handleSpeciesChange,
     handlePriceFilterChange,
     handleSort,
     handlePageChange,

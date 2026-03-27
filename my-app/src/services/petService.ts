@@ -1,81 +1,126 @@
-import { apiClient } from "../utils/apiClient";
+
 import type {
     PetResponse,
+    PetResponseArray,
     PetCreationRequest,
     PetUpdateRequest,
 } from "../types/petTypes";
-import type { ApiResponse } from "../types/apiResponse";
+
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createPet = async (
     request: PetCreationRequest
 ): Promise<PetResponse> => {
-    const res = await apiClient.post<ApiResponse<PetResponse>>(
-        API_CONFIG.ENDPOINTS.PET.CREATE,
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create pet failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.CREATE}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể tạo pet");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
-export const getAllPets = async (): Promise<PetResponse[]> => {
-    const res = await apiClient.get<ApiResponse<PetResponse[]>>(
-        API_CONFIG.ENDPOINTS.PET.GET_ALL
-    );
-    return res.data?.data ?? [];
+export const getAllPets = async (): Promise<PetResponseArray> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.GET_ALL}`;
+    const response = await fetch(
+        url,
+        {
+            method: "GET",
+            headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách pet");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const getPetById = async (id: string): Promise<PetResponse> => {
-    const res = await apiClient.get<ApiResponse<PetResponse>>(
-        API_CONFIG.ENDPOINTS.PET.GET_BY_ID(id)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get pet failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.GET_BY_ID(id)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy thông tin pet");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const getAllPetsPaginated = async (
     page: number,
     size: number
 ): Promise<PetResponse[]> => {
-    const res = await apiClient.get<ApiResponse<PetResponse[]>>(
-        API_CONFIG.ENDPOINTS.PET.PAGINATE,
-        { params: { page, size } }
-    );
-    return res.data?.data ?? [];
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.PAGINATE}`;
+    const response = await fetch(
+        url,
+        {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ page, size }),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách pet");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const updatePet = async (
     id: string,
     request: PetUpdateRequest
 ): Promise<PetResponse> => {
-    const res = await apiClient.put<ApiResponse<PetResponse>>(
-        API_CONFIG.ENDPOINTS.PET.UPDATE(id),
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Update pet failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.UPDATE(id)}`;
+    const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể cập nhật pet");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const markAsSold = async (id: string): Promise<PetResponse> => {
-    const res = await apiClient.patch<ApiResponse<PetResponse>>(
-        API_CONFIG.ENDPOINTS.PET.MARK_SOLD(id)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Mark as sold failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.MARK_SOLD(id)}`;
+    const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể đánh dấu pet đã bán");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const deletePet = async (id: string): Promise<void> => {
-    await apiClient.delete(API_CONFIG.ENDPOINTS.PET.DELETE(id));
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PET.DELETE(id)}`;
+    const response = await fetch(url, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Không thể xóa pet");
+    }
+    const data = await response.json();
+    return data;
 };

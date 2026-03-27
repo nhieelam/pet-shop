@@ -1,21 +1,31 @@
-import type { InventoryResponse } from "./inventoryTypes";
-import type {ProductResponse} from "./productTypes.ts";
-
-export interface CartItemResponse {
-    id: string;
-    inventory?: InventoryResponse;
-    quantity: number;
-    product?: ProductResponse;
-}
-
-export interface CartResponse {
-    id: string;
-    cartItems: CartItemResponse[];
-    createdAt: string;
-    updatedAt: string;
-}
+import type { ProductData } from "./productTypes.ts";
 
 export interface CartRequest {
     productId: string;
     quantity: number;
 }
+
+export interface CartResponse {
+    success: boolean;
+    message: string;
+    data: CartData;
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
+export interface CartData {
+    id: string;
+    cartItems: CartItem[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CartItem {
+    id: string;
+    product: ProductData;
+    quantity: number;
+}
+
+/** Alias for cart UI (legacy name) */
+export type CartItemResponse = CartItem;

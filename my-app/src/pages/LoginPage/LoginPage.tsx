@@ -28,12 +28,10 @@ export default function LoginPage() {
       <div
           className="min-h-screen bg-gradient-to-br from-emerald-100 via-sky-100 to-indigo-100 flex items-center justify-center px-4 relative overflow-hidden">
 
-        {/* Paw decoration */}
         <div className="absolute text-7xl opacity-10 top-10 left-10">🐾</div>
         <div className="absolute text-7xl opacity-10 bottom-20 right-20">🐾</div>
         <div className="absolute text-6xl opacity-10 top-1/2 left-1/4">🐾</div>
 
-        {/* Loader overlay */}
         {isLoading && (
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
               <Loader/>
@@ -47,7 +45,6 @@ export default function LoginPage() {
         >
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
 
-            {/* Header */}
             <div className="text-center mb-8">
 
               <div className="flex justify-center mb-4 text-5xl">

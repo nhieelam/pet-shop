@@ -101,6 +101,13 @@ export const API_CONFIG = {
         INVENTORY: {
             GET: "/inventories",
         },
+
+        CART: {
+            GET_CART_ITEMS: "/cart",
+            ADD_CART_ITEM_TO_CART: "/cart/items",
+            DELETE_CART_ITEM: "/cart/items",
+            CREATE_CART_FOR_USER: "/cart",
+        },
     },
 } as const;
 

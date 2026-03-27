@@ -1,85 +1,132 @@
-import { apiClient } from "../utils/apiClient";
 import type {
     UserResponse,
     UserCreationRequest,
     UserUpdateRequest,
     ChangePasswordRequest,
 } from "../types/userTypes";
-import type { ApiResponse } from "../types/apiResponse";
 import { API_CONFIG } from "../config/apiConfig";
+import { getAuthToken } from "../utils/storageUtils";
 
 export const createUser = async (
     request: UserCreationRequest
 ): Promise<UserResponse> => {
-    const res = await apiClient.post<ApiResponse<UserResponse>>(
-        API_CONFIG.ENDPOINTS.USER.CREATE,
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create user failed");
-    }
-    return apiRes.data;
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.CREATE}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {  
+        throw new Error("Không thể tạo user");  
+    }  
+      
+    const data = await response.json();
+    return data;
 };
 
 export const getAllUsers = async (): Promise<UserResponse[]> => {
-    const res = await apiClient.get<ApiResponse<UserResponse[]>>(
-        API_CONFIG.ENDPOINTS.USER.GET_ALL
-    );
-    return res.data?.data ?? [];
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.GET_ALL}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách user");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const getUserById = async (id: string): Promise<UserResponse> => {
-    const res = await apiClient.get<ApiResponse<UserResponse>>(
-        API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get user failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy user");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const getInfo = async (): Promise<UserResponse> => {
-    const res = await apiClient.get<ApiResponse<UserResponse>>(
-        API_CONFIG.ENDPOINTS.USER.GET_INFO
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get info failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.GET_INFO}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy info user");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const updateUser = async (
     id: string,
     request: UserUpdateRequest
 ): Promise<UserResponse> => {
-    const res = await apiClient.put<ApiResponse<UserResponse>>(
-        API_CONFIG.ENDPOINTS.USER.UPDATE(id),
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Update user failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.UPDATE(id)}`;
+    const token = getAuthToken();
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
     }
-    return apiRes.data;
+    const response = await fetch(url, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(request),
+        }
+    );
+    if (!response.ok) {
+        throw new Error("Không thể cập nhật user");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const updatePassword = async (
     id: string,
     request: ChangePasswordRequest
 ): Promise<void> => {
-    const res = await apiClient.post<ApiResponse<unknown>>(
-        API_CONFIG.ENDPOINTS.USER.UPDATE_PASSWORD(id),
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success) {
-        throw new Error(apiRes.message ?? "Update password failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.UPDATE_PASSWORD(id)}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể cập nhật password");
     }
+    const data = await response.json();
+    return data;
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-    await apiClient.delete(API_CONFIG.ENDPOINTS.USER.DELETE(id));
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER.DELETE(id)}`;
+    const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể xóa user");
+    }
+    const data = await response.json();
+    return data;
 };

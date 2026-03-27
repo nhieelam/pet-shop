@@ -1,26 +1,41 @@
 export interface UserCreationRequest {
-    firstName?: string;   // max 50
-    lastName?: string;    // max 50
-    email: string;        // required, email format, max 100
-    phone: string;        // required, (0|+84) + 9 digits
-    address?: string;     // max 255
-    password: string;     // required, >=6, có chữ hoa, chữ thường, số
+    firstName?: string;   
+    lastName?: string;    
+    email: string;        
+    phone: string;        
+    address?: string;     
+    password: string;     
 }
 
 export interface UserResponse {
+    success: boolean;
+    message: string;
+    data: UserData;
+    errorCode: number;
+    status: number;
+    timestamp: string;
+  }
+
+export interface UserResponseArray {
+    success: boolean;
+    message: string;
+    data: UserData[];
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
+export interface UserData {
     id: string;
     username: string;
-
     firstName?: string;
     lastName?: string;
-    email?: string;
-    phone?: string;
+    email: string;
+    phone: string;
     address?: string;
-
     status: string;
-
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface UserUpdateRequest {

@@ -1,15 +1,17 @@
 import type { InventoryResponse } from "../types/inventoryTypes";
-import type { ApiResponse } from "../types/apiResponse";
-import { apiClient } from "../utils/apiClient";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const getInventory = async (): Promise<InventoryResponse> => {
-    const res = await apiClient.get<ApiResponse<InventoryResponse>>(
-        API_CONFIG.ENDPOINTS.INVENTORY.GET
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get inventory failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVENTORY.GET}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy inventory");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data as InventoryResponse;
 };

@@ -1,84 +1,77 @@
-import { apiClient } from "../utils/apiClient";
+
 import type {
   CategoryResponse,
+  CategoryResponseArray,
   CategoryCreationRequest,
   CategoryUpdateRequest,
 } from "../types/categoryTypes";
 import { API_CONFIG } from "../config/apiConfig";
-import type { ApiResponse } from "../types/apiResponse";
+
+export const getCategoryById = async (
+  id: string
+): Promise<CategoryResponse> => {
+const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORY.GET_BY_ID(id)}`;
+const response = await fetch(url, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+if (!response.ok) {
+  throw new Error("Không thể lấy category");
+}
+const data = await response.json();
+return data;
+};
+
+export const updateCategoryById = async (
+  id: string,
+  request: CategoryUpdateRequest
+): Promise<CategoryResponse> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORY.UPDATE(id)}`;
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+if (!response.ok) {
+  throw new Error("Không thể cập nhật category");
+}
+const data = await response.json();
+return data;
+};
+
+export const getAllCategories = async (): Promise<CategoryResponseArray> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORY.GET_ALL}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Không thể lấy danh sách category");
+  }
+  const data = await response.json();
+  return data;
+};
 
 export const createCategory = async (
     request: CategoryCreationRequest
 ): Promise<CategoryResponse> => {
-  const res = await apiClient.post<ApiResponse<CategoryResponse>>(
-      API_CONFIG.ENDPOINTS.CATEGORY.CREATE,
-      request
-  );
-
-  const apiData = res.data;
-
-  if (!apiData.success || apiData.data == null) {
-    throw new Error(apiData.message ?? "Create category failed");
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORY.CREATE}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+  if (!response.ok) {
+    throw new Error("Không thể tạo category");
   }
-
-  return apiData.data;
-};
-
-export const getAllCategories = async (): Promise<CategoryResponse[]> => {
-  const res = await apiClient.get<ApiResponse<CategoryResponse[]>>(
-      API_CONFIG.ENDPOINTS.CATEGORY.GET_ALL,
-      { skipAuth: true }
-  );
-
-  const apiData = res.data;
-
-  if (!apiData.success || apiData.data == null) {
-    throw new Error(apiData.message ?? "Get categories failed");
-  }
-
-  return apiData.data;
-};
-
-export const getCategoryById = async (
-    id: string
-): Promise<CategoryResponse> => {
-  const res = await apiClient.get<ApiResponse<CategoryResponse>>(
-      API_CONFIG.ENDPOINTS.CATEGORY.GET_BY_ID(id)
-  );
-
-  const apiData = res.data;
-
-  if (!apiData.success || apiData.data == null) {
-    throw new Error(apiData.message ?? "Get category failed");
-  }
-
-  return apiData.data;
-};
-
-export const updateCategoryById = async (
-    id: string,
-    request: CategoryUpdateRequest
-): Promise<CategoryResponse> => {
-  const res = await apiClient.put<ApiResponse<CategoryResponse>>(
-      API_CONFIG.ENDPOINTS.CATEGORY.UPDATE(id),
-      request
-  );
-
-  const apiData = res.data;
-
-  if (!apiData.success || apiData.data == null) {
-    throw new Error(apiData.message ?? "Update category failed");
-  }
-
-  return apiData.data;
-};
-
-export const deleteCategoryById = async (id: string): Promise<void> => {
-  const res = await apiClient.delete<ApiResponse<unknown>>(
-    API_CONFIG.ENDPOINTS.CATEGORY.DELETE(id)
-  );
-  const apiData = res.data;
-  if (!apiData.success) {
-    throw new Error(apiData.message ?? "Delete category failed");
-  }
+  const data = await response.json();
+  return data;
 };

@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
+const INITIAL_VISIBLE = 4;
+
 interface CategoryFilterProps {
   categories: string[];
   selectedCategories: string[];
@@ -13,7 +17,12 @@ export default function CategoryFilter({
   onCategoriesChange,
   layout = "sidebar",
 }: CategoryFilterProps) {
-  
+  const [showMore, setShowMore] = useState(false);
+  const visibleCategories = showMore
+    ? categories
+    : categories.slice(0, INITIAL_VISIBLE);
+  const hasMore = categories.length > INITIAL_VISIBLE;
+
   const handleToggleCategory = (category: string) => {
     if (selectedCategories.includes(category)) {
       onCategoriesChange(selectedCategories.filter((cat) => cat !== category));
@@ -65,7 +74,7 @@ export default function CategoryFilter({
         )}
       </div>
       <div className="flex flex-col gap-3">
-        {categories.map((category) => {
+        {visibleCategories.map((category) => {
           const isSelected = selectedCategories.includes(category);
           return (
             <label
@@ -94,6 +103,15 @@ export default function CategoryFilter({
             </label>
           );
         })}
+        {hasMore && (
+          <button
+            type="button"
+            onClick={() => setShowMore(!showMore)}
+            className="text-sm text-[#ff8e53] hover:text-[#ff7a3d] font-medium transition mt-1"
+          >
+            {showMore ? "Thu gọn" : "Xem thêm"}
+          </button>
+        )}
       </div>
     </div>
   );

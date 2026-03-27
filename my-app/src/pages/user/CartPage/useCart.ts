@@ -1,48 +1,48 @@
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/authContext";
-import { getInfo } from "../../../services/customerService";
-import { addOrUpdateCartItem } from "../../../services/cartService";
-import type { CartItemResponse } from "../../../types/cartTypes";
+import { useAuth } from "@/context/authContext";
+import { getInfo } from "@/services/customerService";
+import {
+  addCartItemToCart,
+  deleteCartItem,
+} from "@/services/cartService";
+import type { CartItemResponse, CartResponse } from "@/types/cartTypes";
+import type { CustomerResponse } from "@/types/customerTypes";
+
+function mergeCartIntoUser(
+  user: CustomerResponse,
+  cartRes: CartResponse
+): CustomerResponse {
+  return {
+    ...user,
+    data: {
+      ...user.data,
+      cart: cartRes.data,
+    },
+  };
+}
 
 export function getProductId(item: CartItemResponse): string {
-  return item.product?.id ?? item.inventory?.product?.id ?? item.id;
+  return item.product.id;
 }
 
-export interface UseCartReturn {
-  items: CartItemResponse[];
-  selection: Record<string, boolean>;
-  allSelected: boolean;
-  loading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
-  toggleSelect: (id: string) => void;
-  selectAll: (selectAll: boolean) => void;
-  // incrementQuantity: (id: string) => void;
-  // decrementQuantity: (id: string) => void;
-  updateQuantity: (productId: string, newQuantity: number) => void;
-  removeItem: (id: string) => void;
-  checkout: () => void;
-  refreshCart: () => Promise<void>;
-}
-
-export function useCart(): UseCartReturn {
+export function useCart() {
   const { user, setUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
-  const items: CartItemResponse[] = (user?.cart?.cartItems ?? []).filter(
-    (item) => item.quantity > 0
-  );
+  const items: CartItemResponse[] = (
+    user?.data?.cart?.cartItems ?? []
+  ).filter((item) => item.quantity > 0);
 
   const refreshCart = useCallback(async () => {
     try {
       const customer = await getInfo();
       setUser(customer);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Không thể tải giỏ hàng");
+      setError("Không thể tải giỏ hàng");
     }
   }, [setUser]);
 
@@ -50,68 +50,61 @@ export function useCart(): UseCartReturn {
     setSelection((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
-  const selectAll = useCallback((selectAll: boolean) => {
-    setSelection((prev) => {
-      const next = { ...prev };
-      items.forEach((item) => {
-        next[item.id] = selectAll;
+  const selectAll = useCallback(
+    (selectAllFlag: boolean) => {
+      setSelection((prev) => {
+        const next = { ...prev };
+        items.forEach((item) => {
+          next[item.id] = selectAllFlag;
+        });
+        return next;
       });
-      return next;
-    });
-  }, [items]);
+    },
+    [items]
+  );
 
   const updateQuantity = useCallback(
     async (productId: string, newQuantity: number) => {
-      if (!user?.id) return;
+      if (!user) return;
       setLoading(true);
-      setError(null);
+      setError("");
       try {
-        const updatedCart = await addOrUpdateCartItem(user.id, {
-          productId,
-          quantity: newQuantity,
-        });
-        const cartItemsWithoutZero = (updatedCart.cartItems ?? []).filter(
-          (item) => item.quantity > 0
-        );
-        setUser({
-          ...user,
-          cart: { ...updatedCart, cartItems: cartItemsWithoutZero },
-        });
+        if (newQuantity <= 0) {
+          const line = items.find((i) => i.product.id === productId);
+          if (!line) return;
+          const cartRes = await deleteCartItem(line.id);
+          setUser(mergeCartIntoUser(user, cartRes));
+        } else {
+          const cartRes = await addCartItemToCart({
+            productId,
+            quantity: newQuantity,
+          });
+          setUser(mergeCartIntoUser(user, cartRes));
+        }
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Cập nhật thất bại");
+        setError("Cập nhật thất bại");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, setUser, items]
+  );
+
+  const removeItem = useCallback(
+    async (cartItemId: string) => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const cartRes = await deleteCartItem(cartItemId);
+        setUser(mergeCartIntoUser(user, cartRes));
+      } catch (e) {
+        setError("Không thể xóa sản phẩm");
       } finally {
         setLoading(false);
       }
     },
     [user, setUser]
-  );
-
-  // const incrementQuantity = useCallback(
-  //   (id: string) => {
-  //     const item = items.find((i) => i.id === id);
-  //     if (!item) return;
-  //     updateQuantity(getProductId(item), item.quantity + 1);
-  //   },
-  //   [items, updateQuantity]
-  // );
-  //
-  // const decrementQuantity = useCallback(
-  //   (id: string) => {
-  //     const item = items.find((i) => i.id === id);
-  //     if (!item) return;
-  //     const next = Math.max(0, item.quantity - 1);
-  //     updateQuantity(getProductId(item), next);
-  //   },
-  //   [items, updateQuantity]
-  // );
-
-  const removeItem = useCallback(
-    (id: string) => {
-      const item = items.find((i) => i.id === id);
-      if (!item) return;
-      updateQuantity(getProductId(item), 0);
-    },
-    [items, updateQuantity]
   );
 
   const checkout = useCallback(() => {
@@ -120,15 +113,14 @@ export function useCart(): UseCartReturn {
       setError("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
       return;
     }
-    setError(null);
-    const product = (item: CartItemResponse) => item.product ?? item.inventory?.product;
+    setError("");
     const payload = selected.map((item) => ({
       id: item.id,
       productId: getProductId(item),
-      name: product(item)?.name ?? "Sản phẩm",
-      price: product(item)?.price ?? 0,
+      name: item.product?.name ?? "Sản phẩm",
+      price: item.product?.price ?? 0,
       quantity: item.quantity,
-      image: product(item)?.imageUrl ?? "",
+      image: item.product?.imageUrl ?? "",
       isSelected: true,
     }));
     sessionStorage.setItem("checkoutItems", JSON.stringify(payload));
@@ -149,8 +141,6 @@ export function useCart(): UseCartReturn {
     isAuthenticated,
     toggleSelect,
     selectAll,
-    // incrementQuantity,
-    // decrementQuantity,
     updateQuantity,
     removeItem,
     checkout,

@@ -1,14 +1,25 @@
-import type { UserResponse } from "./userTypes.ts";
 import type { UserUpdateRequest } from "./userTypes.ts";
-import type { CartResponse } from "./cartTypes.ts";
+import type { UserData } from "./userTypes.ts";
+import type { CartData } from "./cartTypes.ts";
+import type { InvoiceData } from "./invoiceTypes.ts";
 
 export interface CustomerResponse {
-    id: string;
-    points: number;
-    user: UserResponse;
-    cart: CartResponse;
+    success: boolean;
+    message: string;
+    data: CustomerData;
+    errorCode: number;
+    status: number;
+    timestamp: string;
 }
 
-export interface CustomerUpdateRequest extends UserUpdateRequest {
-    points?: number;
+export interface CustomerUpdateRequest {
+    user: UserUpdateRequest;
+    points: number;
+}
+export interface CustomerData {
+    id: string;
+    user: UserData;
+    invoices: InvoiceData[];
+    points: number;
+    cart: CartData;
 }

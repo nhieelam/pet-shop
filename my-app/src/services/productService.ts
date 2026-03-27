@@ -1,72 +1,107 @@
-import {apiClient} from "../utils/apiClient";
+
 import type {
   ProductResponse,
   ProductCreationRequest,
   ProductUpdateRequest,
+  ProductResponseArray,
 } from "../types/productTypes";
 import {API_CONFIG} from "../config/apiConfig";
-import type {ApiResponse} from "../types/apiResponse";
-
-export const createProduct = async (
-    credentials: ProductCreationRequest
-): Promise<ProductResponse> => {
-  const res = await apiClient.post<ApiResponse<ProductResponse>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.CREATE,
-      credentials
-  );
-  const api = res.data;
-  if (!api.success || api.data == null) {
-    throw new Error(api.message ?? "Create product failed");
-  }
-  return api.data;
-};
-
-export const getAllProducts = async (): Promise<ProductResponse[]> => {
-  const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL,
-      {skipAuth: true}
-  );
-  return res.data.data ?? [];
-};
 
 export const getProductById = async (productId: string): Promise<ProductResponse> => {
-  const res = await apiClient.get<ApiResponse<ProductResponse>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
-  );
-  const api = res.data;
-  if (!api.success || api.data == null) {
-    throw new Error(api.message ?? "Get product failed");
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Không thể lấy product");
   }
-  return api.data;
+  const data = await response.json();
+  return data;
 };
 
 export const updateProduct = async (
-    productId: string,
-    body: ProductUpdateRequest
+  productId: string,
+  body: ProductUpdateRequest
 ): Promise<ProductResponse> => {
-  const res = await apiClient.put<ApiResponse<ProductResponse>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.UPDATE(productId),
-      body
-  );
-  const api = res.data;
-  if (!api.success || api.data == null) {
-    throw new Error(api.message ?? "Update product failed");
+const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.UPDATE(productId)}`;
+const response = await fetch(url, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error("Không thể cập nhật product");
   }
-  return api.data;
+  const data = await response.json();
+  return data;
 };
 
-export const deleteProduct = async (productId: string): Promise<void> => {
-  await apiClient.delete(API_CONFIG.ENDPOINTS.PRODUCT.DELETE(productId));
+export const deleteProduct = async (productId: string): Promise<ProductResponse> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.DELETE(productId)}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Không thể xóa product");
+  }
+  const data = await response.json();
+  return data;
+};
+
+export const getAllProducts = async (): Promise<ProductResponseArray> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.GET_ALL}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Không thể lấy danh sách product");
+  }
+  const data = await response.json();
+  console.log(data);
+  return data;
+};
+
+export const createProduct = async (
+  credentials: ProductCreationRequest
+): Promise<ProductResponse> => {
+const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.CREATE}`;
+const response = await fetch(url, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(credentials),
+});
+if (!response.ok) {
+  throw new Error("Không thể tạo product");
+}
+const data = await response.json();
+return data;
 };
 
 export const getAllProductsPaginated = async (
     page: number,
     size: number
-): Promise<ProductResponse[]> => {
-  const res = await apiClient.get<ApiResponse<ProductResponse[]>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.PAGINATE,
-      {params: {page, size}}
-  );
-  const api = res.data;
-  return api.data ?? [];
+): Promise<ProductResponseArray> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.PAGINATE}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({page, size}),
+  });
+  if (!response.ok) {
+    throw new Error("Không thể lấy danh sách product");
+  }
+  const data = await response.json();
+  return data;
 };

@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  placeholder?: string;
 }
 
-export default function SearchBar({ onSearch }: SearchBarProps) {
+export default function SearchBar({ onSearch, placeholder = "Tìm kiếm sản phẩm..." }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Tìm kiếm sản phẩm..."
+          placeholder={placeholder}
           className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           aria-label="Tìm kiếm sản phẩm"
         />

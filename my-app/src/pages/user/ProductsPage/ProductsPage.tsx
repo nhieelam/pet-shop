@@ -1,56 +1,29 @@
 "use client";
 
+
 import ProductCard from "./components/ProductCard";
 import CategoryFilter from "./components/CategoryFilter";
-import PriceFilter from "./components/PriceFilter";
-import SearchBar from "./components/SearchBar";
-import Pagination from "./components/Pagination";
+import PriceFilter from "@/components/ui/PriceFilter";
+import SearchBar from "@/components/ui/SearchBar";
+import Pagination from "@/components/ui/Pagination";
 
 import {useProductManager} from "./hooks/useProductManager";
-import {useEffect, useState} from "react";
-import type {ProductResponse} from "@/types/productTypes";
+import {useEffect} from "react";
 import Loader from "@/components/ui/loader";
-import axios from "axios";
-import {getAllProducts} from "@/services/productService";
-import {getAllCategories} from "@/services/categoryService";
+
+import { useProducts } from "./hooks/useProducts";
 
 export default function ProductsPage() {
   const ITEMS_PER_PAGE = 12;
-
-  const [products, setProducts] = useState<ProductResponse[]>([]);
-  const [categories, setCategories] = useState<string[]>(["All"]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { categories, products, loading, error, fetchProducts, fetchCategories } = useProducts();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsData, categoriesData] = await Promise.all([
-          getAllProducts(),
-          getAllCategories(),
-        ]);
-
-        setProducts(productsData);
-        
-        const categoryNames = categoriesData.map((cat) => cat.name);
-        setCategories(["All", ...categoryNames]);
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Lỗi từ server");
-        } else {
-          setError("Lỗi không xác định");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchProducts();
+    fetchCategories();
   }, []);
 
   const {
     selectedCategories,
-    // searchQuery,
     minPrice,
     maxPrice,
     sortBy,
@@ -71,6 +44,8 @@ export default function ProductsPage() {
     itemsPerPage: ITEMS_PER_PAGE,
   });
 
+  
+
   return (
       <div className="min-h-screen bg-[#FFF8F0] font-body">
         {error && (
@@ -80,7 +55,7 @@ export default function ProductsPage() {
                 <span>{error}</span>
 
                 <button
-                    onClick={() => setError(null)}
+                    onClick={fetchProducts}
                     className="ml-4 text-red-700 font-bold"
                 >
                   ✕
@@ -89,20 +64,17 @@ export default function ProductsPage() {
               </div>
             </div>
         )}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="mb-8">
             <SearchBar onSearch={handleSearch}/>
           </div>
 
-
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-
             <div className="lg:col-span-1 space-y-6">
-
               <div className="bg-white rounded-2xl shadow-md p-5">
                 <CategoryFilter
-                    categories={categories}
+                    categories={categories.map((category) => category.name) ?? []}
                     selectedCategories={selectedCategories}
                     onCategoriesChange={handleCategoryChange}
                     layout="sidebar"
@@ -119,14 +91,11 @@ export default function ProductsPage() {
                     currentSort={sortBy}
                 />
               </div>
-
             </div>
 
 
             <div className="lg:col-span-3">
-
               <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-
                 <p className="text-gray-700 text-lg">
                   Tìm thấy{" "}
                   <span className="font-bold text-[#ff8e53]">
@@ -134,14 +103,10 @@ export default function ProductsPage() {
               </span>{" "}
                   sản phẩm
                 </p>
-
               </div>
 
-
               {paginatedProducts.length > 0 ? (
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-
                     {paginatedProducts.map((product) => (
                         <ProductCard
                             key={product.id}
@@ -154,40 +119,26 @@ export default function ProductsPage() {
                             category={product.categoryName}
                         />
                     ))}
-
                   </div>
-
               ) : (
-
-                  /* EMPTY STATE */
-
                   <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-
                     <div className="text-6xl mb-4">🐶</div>
-
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">
                       Không tìm thấy sản phẩm
                     </h2>
-
                     <p className="text-gray-600 mb-6">
                       Không có sản phẩm nào phù hợp với bộ lọc của bạn.
                     </p>
-
                     <button
                         onClick={resetFilters}
                         className="bg-[#ff8e53] hover:bg-[#ff7a3d] text-white font-semibold py-2 px-6 rounded-lg transition"
                     >
                       Xóa tất cả bộ lọc
                     </button>
-
                   </div>
-
               )}
 
-
-              {/* PAGINATION */}
               {totalItems > 0 && (
-
                   <div className="mt-10">
                     <Pagination
                         currentPage={currentPage}
@@ -199,15 +150,12 @@ export default function ProductsPage() {
                         endIndex={endIndex}
                     />
                   </div>
-
               )}
-
             </div>
           </div>
         </div>
 
 
-        {/* LOADING */}
         {loading && (
             <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
               <Loader/>

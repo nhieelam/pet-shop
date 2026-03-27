@@ -1,3 +1,6 @@
+import type { PromotionData } from "./promotionTypes";
+
+
 export type PaymentStatus = string;
 
 export interface PurchaseDetailCreationRequest {
@@ -12,36 +15,40 @@ export interface PurchaseCreationRequest {
     purchaseDetails: PurchaseDetailCreationRequest[];
 }
 
+
+
 export interface PurchaseDetailResponse {
-    id: string;
-    productId: string;
-    productName?: string;
-    unitPrice: number;
-    quantity: number;
-    totalPrice: number;
-}
+    success: boolean,
+    message: string,
+    data: PurchaseDetail,
+    errorCode: number,
+    status: number,
+    timestamp: string
+  }
 
-export interface PurchaseResponseStaff {
-    id: string;
-    user?: { id: string; username?: string };
-    shift: number;
-}
+  export interface PurchaseDetail {
+    id: string,
+    staffId: string,
+    staffName: string,
+    customerId: string,
+    customerName: string,
+    totalAmount: number,
+    realAmount: number,
+    paymentMethod: string,
+    shippingAddress: string,
+    promotion: PromotionData,
+    status: string,
+    createdAt: string,
+    invoiceDetails: InvoiceDetail[]
+  }
 
-export interface PurchaseResponseSupplier {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    status?: string;
-}
+  export interface InvoiceDetail {
+    id: string,
+    productId: string,
+    petId: string,
+    unitPrice: number,
+    quantity: number,
+    totalPrice: number,
+    discountAmount: number
+  }
 
-export interface PurchaseResponse {
-    id: string;
-    staff?: PurchaseResponseStaff;
-    supplier?: PurchaseResponseSupplier;
-    totalAmount: number;
-    status: PaymentStatus;
-    purchaseDetails?: PurchaseDetailResponse[];
-    createdAt: string;
-}

@@ -6,7 +6,6 @@ export interface PetCreationRequest {
   gender: string;
   price: number;
   vaccinated: boolean;
-  imageUrl?: string;
 }
 
 export interface PetUpdateRequest {
@@ -17,22 +16,41 @@ export interface PetUpdateRequest {
   gender?: string;
   price?: number;
   vaccinated?: boolean;
-  imageUrl?: string;
   available?: boolean;
 }
 
-export interface PetResponse {
+export interface PetResponse{
+  success: boolean;
+  message: string;
+  data: PetData;
+  errorCode: number;
+  status: number;
+  timestamp: string;
+}
+
+export interface PetResponseArray {
+  success: boolean;
+  message: string;
+  data: PetData[];
+  errorCode: number;
+  status: number;
+  timestamp: string;
+}
+
+export interface PetData {
   id: string;
   name: string;
-  species: string;
+  description: string;
+  image: string;
+  speciesName: string;
+  speciesId: string;
   breed: string;
   birth: string;
   gender: string;
   price: number;
   vaccinated: boolean;
-  imageUrl?: string;
-  available?: boolean;
-  sold?: boolean;
+  available: boolean;
+  sold: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -2,9 +2,23 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../../context/authContext";
-import { getInfo } from "../../../../services/customerService";
-import { addOrUpdateCartItem } from "../../../../services/cartService";
+import { useAuth } from "@/context/authContext";
+import { addCartItemToCart } from "@/services/cartService";
+import type { CustomerResponse } from "@/types/customerTypes";
+import type { CartResponse } from "@/types/cartTypes";
+
+function mergeCartIntoUser(
+  user: CustomerResponse,
+  cartRes: CartResponse
+): CustomerResponse {
+  return {
+    ...user,
+    data: {
+      ...user.data,
+      cart: cartRes.data,
+    },
+  };
+}
 
 interface ProductCardProps {
   id: string;
@@ -31,15 +45,15 @@ export default function ProductCard({
 
   const handleAddToCart = async () => {
     if (availableAmount === 0) return;
-    if (!user?.id) {
+    if (!user?.data?.id) {
       setCartMessage("Vui lòng đăng nhập để thêm vào giỏ hàng");
       return;
     }
     setCartLoading(true);
     setCartMessage(null);
     try {
-      await addOrUpdateCartItem(user.id, { productId: id, quantity: 1 });
-      await getInfo().then(setUser);
+      const cartRes = await addCartItemToCart({ productId: id, quantity: 1 });
+      setUser(mergeCartIntoUser(user, cartRes));
       setCartMessage("Đã thêm vào giỏ hàng!");
       setTimeout(() => setCartMessage(null), 2000);
     } catch {
@@ -66,7 +80,7 @@ export default function ProductCard({
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
-      <Link to={`user/detailedProduct/${id}`} className="block">
+      <Link to={`/user/detailedProduct/${id}`} className="block">
         <div className="relative h-64 bg-gray-200 overflow-hidden cursor-pointer flex items-center justify-center">
           {image ? (
             <img

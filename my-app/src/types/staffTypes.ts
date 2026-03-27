@@ -1,4 +1,4 @@
-import type { UserCreationRequest, UserResponse, UserUpdateRequest } from "./userTypes.ts";
+import type { UserCreationRequest, UserData } from "./userTypes.ts";
 
 export interface StaffCreationRequest {
     shift: number;
@@ -6,11 +6,25 @@ export interface StaffCreationRequest {
 }
 
 export interface StaffResponse {
-    id: string;
-    user: UserResponse;
-    shift: number;
+    success: boolean;
+    message: string;
+    data: StaffData;
+    errorCode: number;
+    status: number;
+    timestamp: string;
 }
 
-export interface StaffUpdateRequest extends UserUpdateRequest {
-    shift?: number;
+export interface StaffResponseArray {
+    success: boolean;
+    message: string;
+    data: StaffData[];
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
+export interface StaffData {
+    id: string;
+    user: UserData;
+    shift: number;
 }

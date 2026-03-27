@@ -1,91 +1,99 @@
-import { apiClient } from "../utils/apiClient";
-import type { StaffResponse, StaffCreationRequest } from "../types/staffTypes";
-import type { ApiResponse } from "../types/apiResponse";
+import type { StaffResponse, StaffCreationRequest, StaffResponseArray } from "../types/staffTypes";
 import { API_CONFIG } from "../config/apiConfig";
 
 export const createStaff = async (
     request: StaffCreationRequest
 ): Promise<StaffResponse> => {
-    const res = await apiClient.post<ApiResponse<StaffResponse>>(
-        API_CONFIG.ENDPOINTS.STAFF.CREATE,
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create staff failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.CREATE}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể tạo staff");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
-export const getAllStaff = async (): Promise<StaffResponse[]> => {
-    const res = await apiClient.get<ApiResponse<StaffResponse[]>>(
-        API_CONFIG.ENDPOINTS.STAFF.GET_ALL
-    );
-    return res.data?.data ?? [];
+export const getAllStaff = async (): Promise<StaffResponseArray> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.GET_ALL}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách staff");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const getStaffById = async (id: string): Promise<StaffResponse> => {
-    const res = await apiClient.get<ApiResponse<StaffResponse>>(
-        API_CONFIG.ENDPOINTS.STAFF.GET_BY_ID(id)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get staff failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.GET_BY_ID(id)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy staff");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
-
-// export const getInfo = async (): Promise<StaffResponse> => {
-//   const res = await apiClient.get<ApiResponse<StaffResponse>>(
-//       API_CONFIG.ENDPOINTS.STAFF.GET_INFO
-//   );
-//   const apiRes = res.data;
-//   if (!apiRes.success || apiRes.data == null) {
-//     throw new Error(apiRes.message ?? "Get info failed");
-//   }
-//   return apiRes.data;
-// };
-
-// export const updateStaff = async (
-//     id: string,
-//     request: StaffUpdateRequest
-// ): Promise<StaffResponse> => {
-//     const res = await apiClient.put<ApiResponse<StaffResponse>>(
-//         API_CONFIG.ENDPOINTS.STAFF.UPDATE(id),
-//         request
-//     );
-//     const apiRes = res.data;
-//     if (!apiRes.success || apiRes.data == null) {
-//         throw new Error(apiRes.message ?? "Update staff failed");
-//     }
-//     return apiRes.data;
-// };
 
 export const updateStaffShift = async (
     id: string,
     shift: number
 ): Promise<StaffResponse> => {
-    const res = await apiClient.put<ApiResponse<StaffResponse>>(
-        API_CONFIG.ENDPOINTS.STAFF.UPDATE_SHIFT(id, shift)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Update shift failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.UPDATE_SHIFT(id, shift)}`;
+    const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể cập nhật shift");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
+
 };
 
 export const deleteStaff = async (id: string): Promise<void> => {
-    await apiClient.delete(API_CONFIG.ENDPOINTS.STAFF.DELETE(id));
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.DELETE(id)}`;
+    const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể xóa staff");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const getInfo = async (): Promise<StaffResponse> => {
-    const res = await apiClient.get<ApiResponse<StaffResponse>>(
-        API_CONFIG.ENDPOINTS.STAFF.GET_INFO
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get info failed");
-    }
-    return apiRes.data;
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.GET_INFO}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy info staff");
+    }   
+    const data = await response.json();
+    return data;
 };

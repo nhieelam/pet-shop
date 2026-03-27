@@ -9,7 +9,25 @@ export interface CategoryUpdateRequest {
 }
 
 export interface CategoryResponse {
+    success: boolean;
+    message: string;
+    data: CategoryData;
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
+export interface CategoryResponseArray {
+    success: boolean;
+    message: string;
+    data: CategoryData[];
+    errorCode: number;
+    status: number;
+    timestamp: string;
+}
+
+export interface CategoryData {
     id: string;
     name: string;
-    description?: string;
+    description: string;
 }

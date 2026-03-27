@@ -1,7 +1,7 @@
-import type { PromotionResponse } from "./promotionTypes";
+import type { PromotionData } from "./promotionTypes";
 
-export type PaymentMethod = string;
-export type PaymentStatus = string;
+export type PaymentMethod = "QR_Scanning" | "Cash" | "Bank_Transfer";
+export type PaymentStatus = "PENDING" | "PAID" | "CANCELLED";
 
 export interface InvoiceDetailCreationRequest {
     productId?: string;
@@ -10,64 +10,73 @@ export interface InvoiceDetailCreationRequest {
 }
 
 export interface InvoiceCreationRequest {
-    staffId?: string;
+    staffId: string;
     customerId: string;
     shippingAddress: string;
     paymentMethod: PaymentMethod;
     invoiceDetails: InvoiceDetailCreationRequest[];
 }
 
-export interface ReviewDetailRequest {
-    productId: string;
-    quantity: number;
-}
-
-export interface ReviewRequest {
-    customerId: string;
-    shippingAddress: string;
-    details: ReviewDetailRequest[];
-}
-
-export interface ReviewDetailResponse {
+/** Line item returned from POST /invoices/review */
+export interface InvoiceReviewLine {
     productId: string;
     productName: string;
-    imageUrl?: string;
-    unitPrice: number;
     quantity: number;
-    totalPrice: number;
-    discountAmount: number;
-}
-
-export interface ReviewResponse {
-    customerName: string;
-    shippingAddress: string;
-    totalAmount: number;
-    realAmount: number;
-    reviewDetails: ReviewDetailResponse[];
-}
-
-export interface InvoiceDetailResponse {
-    id: string;
-    productId?: string;
-    petId?: string;
     unitPrice: number;
-    quantity: number;
     totalPrice: number;
     discountAmount?: number;
+    imageUrl?: string;
 }
 
-export interface InvoiceResponse {
-    id: string;
-    staffId?: string;
-    staffName?: string;
-    customerId: string;
-    customerName?: string;
+/** Preview totals + lines for checkout review */
+export interface InvoiceReviewData {
+    reviewDetails: InvoiceReviewLine[];
     totalAmount: number;
     realAmount: number;
-    paymentMethod: PaymentMethod;
+}
+
+export interface InvoiceReviewRequest {
+    customerId: string;
     shippingAddress: string;
-    promotion?: PromotionResponse;
-    status: PaymentStatus;
-    createdAt: string;
-    invoiceDetails?: InvoiceDetailResponse[];
+    invoiceDetails: InvoiceDetailCreationRequest[];
+}
+
+/** @deprecated Use InvoiceReviewData */
+export type ReviewResponse = InvoiceReviewData;
+
+/** @deprecated Use InvoiceDetailCreationRequest */
+export type ReviewDetailRequest = InvoiceDetailCreationRequest;
+
+export interface InvoiceResponse {
+  success: boolean;
+  message: string;
+  data: InvoiceData;
+  errorCode: number;
+  status: number;
+  timestamp: string;
+}
+
+export interface InvoiceResponseArray {
+  success: boolean;
+  message: string;
+  data: InvoiceData[];
+  errorCode: number;
+  status: number;
+  timestamp: string;
+}
+
+
+export interface InvoiceData {
+  id: string;
+  staffId: string;
+  staffName: string;
+  customerId: string;
+  customerName: string;
+  totalAmount: number;
+  realAmount: number;
+  paymentMethod: PaymentMethod;
+  shippingAddress: string;
+  promotion: PromotionData | null;
+  createdAt: string;
+  updatedAt: string;
 }

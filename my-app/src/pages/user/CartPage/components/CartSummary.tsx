@@ -9,7 +9,7 @@ interface CartSummaryProps {
 }
 
 function getPrice(item: CartItemResponse): number {
-  return item.product?.price ?? item.inventory?.product?.price ?? 0;
+  return item.product?.price ?? 0;
 }
 
 export default function CartSummary({ items, selection, onCheckout }: CartSummaryProps) {

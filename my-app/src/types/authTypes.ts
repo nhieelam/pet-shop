@@ -1,15 +1,25 @@
-import { UserRole } from "../enum/user";
 
+export enum UserRole {
+  CUSTOMER = "USER",
+  STAFF = "STAFF",
+  ADMIN = "ADMIN",
+}
 export interface AuthRequest {
-  username: string;
+  userName: string;
   password: string;
 }
 
 export interface AuthResponse {
-  authenticated: boolean;
-  token: string;
+  data: {
+    authenticated: boolean;
+    token: string;
+  };
+  errorCode: number;
+  message: string;
+  status: number;
+  success: boolean;
+  timestamp: string;
 }
-
 export interface LoginError {
   message: string;
   status?: number;

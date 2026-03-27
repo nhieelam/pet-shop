@@ -12,7 +12,7 @@ interface CartItemRowProps {
 }
 
 function getProduct(item: CartItemResponse) {
-  return item.product ?? item.inventory?.product;
+  return item.product;
 }
 
 export default function CartItemRow({

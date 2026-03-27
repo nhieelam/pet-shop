@@ -19,22 +19,6 @@ interface CheckoutItem {
   isSelected: boolean;
 }
 
-export interface UseReviewReturn {
-  loading: boolean;
-  placingOrder: boolean;
-  error: string | null;
-  review: ReviewResponse | null;
-  shippingAddress: string;
-  newAddress: string;
-  useDefaultAddress: boolean;
-  paymentMethod: PaymentMethod;
-  setPaymentMethod: (value: PaymentMethod) => void;
-  setUseDefaultAddress: (value: boolean) => void;
-  setNewAddress: (value: string) => void;
-  refreshReview: () => Promise<void>;
-  placeOrder: () => Promise<void>;
-}
-
 function readCheckoutItems(): CheckoutItem[] {
   try {
     const raw = sessionStorage.getItem("checkoutItems");
@@ -47,7 +31,7 @@ function readCheckoutItems(): CheckoutItem[] {
   }
 }
 
-export function useReview(): UseReviewReturn {
+export function useReview() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 

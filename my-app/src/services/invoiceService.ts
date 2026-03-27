@@ -1,68 +1,106 @@
-import { apiClient } from "../utils/apiClient";
 import type {
     InvoiceResponse,
     InvoiceCreationRequest,
-    ReviewRequest,
-    ReviewResponse,
+    InvoiceReviewRequest,
+    InvoiceReviewData,
 } from "../types/invoiceTypes";
-import type { ApiResponse } from "../types/apiResponse";
+
 import { API_CONFIG } from "../config/apiConfig";
+import { getAuthToken } from "../utils/storageUtils";
+
+function authHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    const token = getAuthToken();
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
+function unwrapPayload<T>(payload: unknown): T {
+    if (
+        payload &&
+        typeof payload === "object" &&
+        "data" in payload &&
+        (payload as { data: unknown }).data !== undefined
+    ) {
+        return (payload as { data: T }).data;
+    }
+    return payload as T;
+}
+
+export const createInvoiceReview = async (
+    request: InvoiceReviewRequest
+): Promise<InvoiceReviewData> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.REVIEW}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể tải xem trước đơn hàng");
+    }
+    const json: unknown = await response.json();
+    return unwrapPayload<InvoiceReviewData>(json);
+};
 
 export const createInvoice = async (
     request: InvoiceCreationRequest
 ): Promise<InvoiceResponse> => {
-    const res = await apiClient.post<ApiResponse<InvoiceResponse>>(
-        API_CONFIG.ENDPOINTS.INVOICE.CREATE,
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create invoice failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.CREATE}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể tạo invoice");
     }
-    return apiRes.data;
-};
-
-export const createInvoiceReview = async (
-    request: ReviewRequest
-): Promise<ReviewResponse> => {
-    const res = await apiClient.post<ApiResponse<ReviewResponse>>(
-        API_CONFIG.ENDPOINTS.INVOICE.REVIEW,
-        request
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Create invoice review failed");
-    }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const getAllInvoices = async (): Promise<InvoiceResponse[]> => {
-    const res = await apiClient.get<ApiResponse<InvoiceResponse[]>>(
-        API_CONFIG.ENDPOINTS.INVOICE.GET_ALL
-    );
-    return res.data?.data ?? [];
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_ALL}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy danh sách invoice");
+    }
+    const data = await response.json();
+    return data;
 };
 
 export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
-    const res = await apiClient.get<ApiResponse<InvoiceResponse>>(
-        API_CONFIG.ENDPOINTS.INVOICE.GET_BY_ID(id)
-    );
-    const apiRes = res.data;
-    if (!apiRes.success || apiRes.data == null) {
-        throw new Error(apiRes.message ?? "Get invoice failed");
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_BY_ID(id)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy invoice");
     }
-    return apiRes.data;
+    const data = await response.json();
+    return data;
 };
 
 export const deleteInvoice = async (id: string): Promise<void> => {
-    await apiClient.delete(API_CONFIG.ENDPOINTS.INVOICE.DELETE(id));
-};
-
-export const getInvoicesByCustomerId = async (
-    customerId: string
-): Promise<InvoiceResponse[]> => {
-    const res = await apiClient.get<ApiResponse<InvoiceResponse[]>>(
-        API_CONFIG.ENDPOINTS.INVOICE.GET_BY_CUSTOMER(customerId)
-    );
-    return res.data?.data ?? [];
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.DELETE(id)}`;
+    const response = await fetch(url, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Không thể xóa invoice");
+    }
+    const data = await response.json();
+    return data;
 };
