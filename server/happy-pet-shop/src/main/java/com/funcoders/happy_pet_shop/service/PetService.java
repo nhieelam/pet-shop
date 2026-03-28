@@ -66,7 +66,7 @@ public class PetService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public PetResponse updatePet(UUID id, PetUpdateRequest request) {
 
         Pet petEntity = petRepository.findById(id)
@@ -80,7 +80,7 @@ public class PetService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deletePet(UUID id) {
 
         if (!petRepository.existsById(id)) {
@@ -91,12 +91,13 @@ public class PetService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void markAsSold(UUID id) {
 
         Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         pet.markAsSold();
+        petRepository.save(pet);
     }
 }

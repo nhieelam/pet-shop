@@ -35,40 +35,6 @@ public class CartService {
     CartRepository cartRepository;
     CartMapper cartMapper;
 
-    @Transactional(readOnly = true)
-    public CartResponse getCartByCustomerId(UUID customerId) {
-
-        Cart cart = cartRepository.findByCustomer_Id(customerId)
-                .orElseThrow(() -> new AppException(ErrorType.CART_NOT_FOUND));
-
-        return cartMapper.toResponse(cart);
-    }
-
-    @Transactional(readOnly = true)
-    public CartResponse getCartById(UUID cartId) {
-
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new AppException(ErrorType.CART_NOT_FOUND));
-
-        return cartMapper.toResponse(cart);
-    }
-
-    @Transactional
-    public CartResponse getOrCreateCart(UUID customerId) {
-
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
-
-        Cart cart = cartRepository.findByCustomer(customer)
-                .orElseGet(() -> cartRepository.save(
-                        Cart.builder()
-                                .customer(customer)
-                                .build()
-                ));
-
-        return cartMapper.toResponse(cart);
-    }
-
     @Transactional
     public CartResponse addProduct(UUID customerId, CartRequest request) {
         Cart cart = cartRepository.findByCustomer_Id(customerId)

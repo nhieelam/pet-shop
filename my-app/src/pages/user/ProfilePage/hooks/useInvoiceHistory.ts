@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
-
-export type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
+import type { SortOption } from "../../../../type/type";
 
 export interface Invoice {
   id: string;

@@ -7,7 +7,7 @@ import type { UserCreationRequest, UserUpdateRequest } from "../../../types/user
 
 function customerDisplayName(c: CustomerData): string {
   const u = c.user;
-  if (u?.firstName || u?.lastName) return [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
+  if (u?.firstname || u?.lastname) return [u.firstname, u.lastname].filter(Boolean).join(" ").trim();
   return u.username ?? "—";
 }
 
@@ -164,6 +164,7 @@ export default function CustomerPage() {
   const [pointsSubmitting, setPointsSubmitting] = useState(false);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
   const [formData, setFormData] = useState({
+    userName: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -172,6 +173,7 @@ export default function CustomerPage() {
     password: "",
   });
   const [editFormData, setEditFormData] = useState({
+    userName: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -185,8 +187,9 @@ export default function CustomerPage() {
     if (editModalOpen && editingCustomer) {
       const u = editingCustomer.user;
       setEditFormData({
-        firstName: u?.firstName ?? "",
-        lastName: u?.lastName ?? "",
+        userName: u?.username ?? "",
+        firstName: u?.firstname ?? "",
+        lastName: u?.lastname ?? "",
         email: u?.email ?? "",
         phone: u?.phone ?? "",
         address: u?.address ?? "",
@@ -202,13 +205,14 @@ export default function CustomerPage() {
       const payload: UserCreationRequest = {
         firstName: formData.firstName.trim() || undefined,
         lastName: formData.lastName.trim() || undefined,
+        userName: formData.userName.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         address: formData.address.trim() || undefined,
         password: formData.password,
       };
       await handleCreateCustomer(payload);
-      setFormData({ firstName: "", lastName: "", email: "", phone: "", address: "", password: "" });
+      setFormData({ userName: "", firstName: "", lastName: "", email: "", phone: "", address: "", password: "" });
     } finally {
       setFormSubmitting(false);
     }

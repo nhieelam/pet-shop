@@ -4,12 +4,12 @@ import { getInvoicesByCustomerId } from "@/services/invoiceService";
 import type { InvoiceData } from "@/types/invoiceTypes";
 
 export function usePaidInvoices() {
-  const { user, isAuthenticated } = useAuth();
+  const { customer, isAuthenticated } = useAuth();
   const [paidInvoices, setPaidInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const customerId = user?.data?.id;
+  const customerId = customer?.id;
 
   const fetchPaid = useCallback(async () => {
     if (!customerId) {

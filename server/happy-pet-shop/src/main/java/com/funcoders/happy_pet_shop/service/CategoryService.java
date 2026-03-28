@@ -36,9 +36,11 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream().map(
-                categoryMapper::toResponse
-        ).toList();
+        return categoryRepository.findAll()
+                .stream()
+                .map(
+                    categoryMapper::toResponse
+                ).toList();
     }
 
     @Transactional(readOnly = true)

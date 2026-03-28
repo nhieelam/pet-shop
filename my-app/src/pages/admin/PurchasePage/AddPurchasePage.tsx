@@ -7,9 +7,9 @@ import { getAllStaff } from "../../../services/staffService";
 import { getAllSuppliers } from "../../../services/supplierService";
 import { getAllProducts } from "../../../services/productService";
 import type { PurchaseDetailCreationRequest } from "../../../types/purchaseTypes";
-import type { StaffResponse } from "../../../types/staffTypes";
-import type { SupplierResponse } from "../../../types/supplierTypes";
-import type { ProductData, ProductResponse } from "../../../types/productTypes";
+import type { StaffData} from "../../../types/staffTypes";
+import type { SupplierData } from "../../../types/supplierTypes";
+import type { ProductData } from "../../../types/productTypes";
 import ProductSearchBoard from "../../../components/admin/ProductSearchBoard";
 
 type LineDraft = {
@@ -18,11 +18,11 @@ type LineDraft = {
   unitPrice: string;
 };
 
-function staffLabel(s: StaffResponse): string {
-  const u = s.data.user;
+function staffLabel(s: StaffData): string {
+  const u = s.user;
   if (!u) return "";
-  const name = [u.lastName, u.firstName].filter(Boolean).join(" ").trim();
-  return name || u.username;
+  const name = [u.lastname, u.firstname].filter(Boolean).join(" ").trim();
+  return name || (u.username ?? "—");
 }
 
 function emptyLine(): LineDraft {
@@ -33,10 +33,10 @@ function productLabel(p: ProductData) {
   return p.name;
 }
 
-function matchesSupplier(sup: SupplierResponse, q: string) {
+function matchesSupplier(sup: SupplierData, q: string) {
   if (!q.trim()) return true;
   const s = q.toLowerCase();
-  const hay = [sup.data.name, sup.data.email, sup.data.phone, sup.data.address, sup.data.id, sup.data.status]
+  const hay = [sup.name, sup.email, sup.phone, sup.address, sup.id, sup.status]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -52,9 +52,9 @@ function SupplierSearchBoard({
 }: {
   open: boolean;
   onClose: () => void;
-  suppliers: SupplierResponse[];
+  suppliers: SupplierData[];
   loading: boolean;
-  onPick: (s: SupplierResponse) => void;
+  onPick: (s: SupplierData) => void;
 }) {
   const [query, setQuery] = useState("");
 
@@ -110,7 +110,7 @@ function SupplierSearchBoard({
           ) : (
             <ul className="space-y-1">
               {filtered.map((s) => (
-                <li key={s.data.id}>
+                <li key={s.id}>
                   <button
                     type="button"
                     onClick={() => {
@@ -119,12 +119,12 @@ function SupplierSearchBoard({
                     }}
                     className="w-full text-left px-3 py-3 rounded-xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/60 transition-all"
                   >
-                    <p className="font-semibold text-slate-800">{s.data.name}</p>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">{s.data.id}</p>
-                    {s.data.phone && <p className="text-sm text-slate-600 mt-1">📞 {s.data.phone}</p>}
-                    {s.data.email && <p className="text-sm text-slate-600">{s.data.email}</p>}
-                    {s.data.address && (
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.data.address}</p>
+                    <p className="font-semibold text-slate-800">{s.name}</p>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">{s.id}</p>
+                    {s.phone && <p className="text-sm text-slate-600 mt-1">📞 {s.phone}</p>}
+                    {s.email && <p className="text-sm text-slate-600">{s.email}</p>}
+                    {s.address && (
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.address}</p>
                     )}
                   </button>
                 </li>
@@ -139,8 +139,8 @@ function SupplierSearchBoard({
 
 export default function AddPurchasePage() {
   const navigate = useNavigate();
-  const [staffList, setStaffList] = useState<StaffResponse[]>([]);
-  const [supplierList, setSupplierList] = useState<SupplierResponse[]>([]);
+  const [staffList, setStaffList] = useState<StaffData[]>([]);
+  const [supplierList, setSupplierList] = useState<SupplierData[]>([]);
   const [productList, setProductList] = useState<ProductData[]>([]);
   const [refsLoading, setRefsLoading] = useState(true);
   const [staffId, setStaffId] = useState("");
@@ -176,12 +176,12 @@ export default function AddPurchasePage() {
   }, [loadRefs]);
 
   const selectedSupplier = useMemo(
-    () => supplierList.find((s) => s.data.id === supplierId) ?? null,
+    () => supplierList.find((s) => s.id === supplierId) ?? null,
     [supplierList, supplierId]
   );
 
   const supplierSummary = selectedSupplier
-    ? `${selectedSupplier.data.name}${selectedSupplier.data.phone ? ` · ${selectedSupplier.data.phone}` : ""}`
+    ? `${selectedSupplier.name}${selectedSupplier.phone ? ` · ${selectedSupplier.phone}` : ""}`
     : "";
 
   const productById = useMemo(() => {
@@ -307,7 +307,7 @@ export default function AddPurchasePage() {
             >
               <option value="">— Select staff —</option>
               {staffList.map((s) => (
-                <option key={s.data.id} value={s.data.id}>
+                <option key={s.id} value={s.id}>
                   {staffLabel(s)}
                 </option>
               ))}
@@ -328,7 +328,7 @@ export default function AddPurchasePage() {
                   )}
                 </div>
                 {selectedSupplier && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono truncate">{selectedSupplier.data.id}</p>
+                  <p className="text-xs text-slate-500 mt-1 font-mono truncate">{selectedSupplier.id}</p>
                 )}
               </div>
               <button
@@ -455,9 +455,9 @@ export default function AddPurchasePage() {
         onClose={() => setSupplierBoardOpen(false)}
         suppliers={supplierList}
         loading={refsLoading}
-        onPick={(s) => setSupplierId(s.data.id)}
+        onPick={(s) => setSupplierId(s.id)}
       />
-
+ 
       <ProductSearchBoard
         open={productLineForPicker !== null}
         onClose={() => setProductLineForPicker(null)}

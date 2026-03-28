@@ -24,7 +24,7 @@ public class UserUpdateRequest {
     @Email(message = "INVALID_EMAIL_FORMAT")
     @Size(max = 100, message = "INVALID_EMAIL_LENGTH")
     private String email;
-
+ 
     @Pattern(
             regexp = "^(0|\\+84)[0-9]{9}$",
             message = "INVALID_PHONE_FORMAT"

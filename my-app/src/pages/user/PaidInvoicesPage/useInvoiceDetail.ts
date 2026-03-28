@@ -4,7 +4,7 @@ import { getInvoiceById } from "../../../services/invoiceService";
 import type { InvoiceResponse } from "../../../types/invoiceTypes";
 
 export function useInvoiceDetail(invoiceId: string | undefined) {
-  const { user, isAuthenticated } = useAuth();
+  const { customer, isAuthenticated } = useAuth();
   const [invoice, setInvoice] = useState<InvoiceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export function useInvoiceDetail(invoiceId: string | undefined) {
       setLoading(false);
       return;
     }
-    if (!user?.id) {
+    if (!customer?.id) {
       setInvoice(null);
       setLoading(false);
       return;
@@ -26,11 +26,6 @@ export function useInvoiceDetail(invoiceId: string | undefined) {
     setError(null);
     try {
       const data = await getInvoiceById(invoiceId);
-      if (data.customerId !== user.id) {
-        setInvoice(null);
-        setError("Bạn không có quyền xem hóa đơn này.");
-        return;
-      }
       setInvoice(data);
     } catch (e) {
       setInvoice(null);
@@ -38,17 +33,17 @@ export function useInvoiceDetail(invoiceId: string | undefined) {
     } finally {
       setLoading(false);
     }
-  }, [invoiceId, user?.id]);
+  }, [invoiceId, customer?.id]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
+    if (!isAuthenticated || !customer?.id) {
       setInvoice(null);
       setLoading(false);
       setError(null);
       return;
     }
     void load();
-  }, [isAuthenticated, user?.id, load]);
+  }, [isAuthenticated, customer?.id, load]);
 
   return {
     invoice,
@@ -56,6 +51,5 @@ export function useInvoiceDetail(invoiceId: string | undefined) {
     error,
     refetch: load,
     isAuthenticated,
-    customerId: user?.id,
   };
 }
