@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.controller;
 
+import com.funcoders.happy_pet_shop.dto.request.ChangeInvoiceStatusRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
@@ -55,6 +56,15 @@ public class InvoiceController {
     public ApiResponse<List<InvoiceResponse>> getInvoiceByStaffId(@PathVariable UUID id) {
         List<InvoiceResponse> responses = invoiceService.getInvoiceByStaff_Id(id);
         return new ApiResponse<>(responses, "Get invoices successfully");
+    }
+
+    @PatchMapping("/{id}/status")
+    public ApiResponse<InvoiceResponse> changeInvoiceStatus(
+            @PathVariable UUID id,
+            @Valid @RequestBody ChangeInvoiceStatusRequest request
+    ) {
+        InvoiceResponse response = invoiceService.changeInvoiceStatus(id, request);
+        return new ApiResponse<>(response, "Update invoice status successfully");
     }
 
     @DeleteMapping("/{id}")

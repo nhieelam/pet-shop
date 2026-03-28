@@ -1,4 +1,4 @@
-export type DiscountType = "PERCENT" | "FIXED";
+import type { DiscountType } from "../type/type";
 
 export interface PromotionDetailCreationRequest {
     productId: string;

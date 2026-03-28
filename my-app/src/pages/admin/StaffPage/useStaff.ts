@@ -28,7 +28,7 @@ export function useStaff() {
     setError(null);
     try {
       const data = await staffService.getAllStaff();
-      setStaffList(Array.isArray(data) ? data : []);
+      setStaffList(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load staff");
       setStaffList([]);
@@ -48,8 +48,8 @@ export function useStaff() {
       result = result.filter(
         (s) =>
           (s.user?.username ?? "").toLowerCase().includes(q) ||
-          (s.user?.firstName ?? "").toLowerCase().includes(q) ||
-          (s.user?.lastName ?? "").toLowerCase().includes(q) ||
+          (s.user?.firstname ?? "").toLowerCase().includes(q) ||
+          (s.user?.lastname ?? "").toLowerCase().includes(q) ||
           (s.user?.email ?? "").toLowerCase().includes(q) ||
           (s.user?.phone ?? "").toLowerCase().includes(q)
       );

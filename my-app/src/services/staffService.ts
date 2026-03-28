@@ -1,5 +1,14 @@
-import type { StaffResponse, StaffCreationRequest, StaffResponseArray } from "../types/staffTypes";
+import type { StaffData, StaffResponse, StaffCreationRequest } from "../types/staffTypes";
 import { API_CONFIG } from "../config/apiConfig";
+
+function unwrapStaffList(json: unknown): StaffData[] {
+    if (Array.isArray(json)) return json as StaffData[];
+    if (json && typeof json === "object" && "data" in json) {
+        const inner = (json as { data?: unknown }).data;
+        if (Array.isArray(inner)) return inner as StaffData[];
+    }
+    return [];
+}
 
 export const createStaff = async (
     request: StaffCreationRequest
@@ -19,7 +28,7 @@ export const createStaff = async (
     return data;
 };
 
-export const getAllStaff = async (): Promise<StaffResponseArray> => {
+export const getAllStaff = async (): Promise<StaffData[]> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.GET_ALL}`;
     const response = await fetch(url, {
         method: "GET",
@@ -31,7 +40,7 @@ export const getAllStaff = async (): Promise<StaffResponseArray> => {
         throw new Error("Không thể lấy danh sách staff");
     }
     const data = await response.json();
-    return data;
+    return unwrapStaffList(data);
 };
 
 export const getStaffById = async (id: string): Promise<StaffResponse> => {

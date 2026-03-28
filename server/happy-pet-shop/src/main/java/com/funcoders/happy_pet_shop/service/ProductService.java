@@ -33,7 +33,7 @@ public class ProductService {
     CategoryRepository categoryRepository;
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse createProduct(ProductCreationRequest request) {
         Product productEntity = productMapper.toEntity(request);
 
@@ -67,7 +67,7 @@ public class ProductService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse updateProduct(UUID id, ProductUpdateRequest request) {
 //        SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().map(grantedAuthority -> {return grantedAuthority.toString();});
 
@@ -86,7 +86,7 @@ public class ProductService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
             throw new AppException(ErrorType.NOT_FOUND);

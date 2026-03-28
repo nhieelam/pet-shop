@@ -4,7 +4,7 @@ import { validateForm } from "../validation";
 import type { RegisterFormData, RegisterFormErrors } from "../types";
 import { register } from "@/services/authService";
 import { storeAuthToken, storeUserName } from "@/utils/storageUtils";
-import { UserRole } from "@/types/authTypes";
+import { UserRole } from "@/type/type";
 
 const initialFormData: RegisterFormData = {
   userName: "",

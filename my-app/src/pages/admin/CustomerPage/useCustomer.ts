@@ -19,7 +19,6 @@ export function useCustomer() {
   const [pointsModalOpen, setPointsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CustomerData | null>(null);
-  const [customerToEdit, setCustomerToEdit] = useState<CustomerData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const fetchCustomers = useCallback(async () => {

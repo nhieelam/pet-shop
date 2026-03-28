@@ -6,6 +6,9 @@ import type {
 import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
 
+import type { PaymentStatus } from "../type/type";
+
+
 function authHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -92,16 +95,16 @@ export const deleteInvoice = async (id: string): Promise<void> => {
     return data;
 };
 
-// export const createInvoiceReview = async (request: ReviewRequest): Promise<ReviewResponse> => {
-//     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.CREATE_REVIEW}`;
-//     const response = await fetch(url, {
-//         method: "POST",
-//         headers: authHeaders(),
-//         body: JSON.stringify(request),
-//     });
-//     if (!response.ok) {
-//         throw new Error("Không thể tạo review");
-//     }
-//     const data = await response.json();
-//     return data;
-// };
+export const updateInvoiceStatus = async (id: string, status: PaymentStatus): Promise<InvoiceResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.UPDATE_STATUS(id)}`;
+    const response = await fetch(url, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể cập nhật trạng thái hóa đơn");
+    }
+    const data = await response.json();
+    return data;
+};

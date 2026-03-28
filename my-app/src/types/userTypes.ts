@@ -1,4 +1,5 @@
 export interface UserCreationRequest {
+    userName: string;
     firstName?: string;   
     lastName?: string;    
     email: string;        
@@ -27,9 +28,9 @@ export interface UserResponseArray {
 
 export interface UserData {
     id: string;
-    username: string;
-    firstName?: string;
-    lastName?: string;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
     email: string;
     phone: string;
     address?: string;

@@ -36,7 +36,6 @@ export interface PurchaseResponse {
   createdAt: string;
 }
 
-/** Wrapper for single-purchase endpoints (create / get by id / delete). */
 export interface PurchaseDetailResponse {
   success: boolean;
   message: string;

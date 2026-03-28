@@ -46,33 +46,33 @@ public class StaffService {
     CustomerRepository customerRepository;
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public StaffResponse createStaff(StaffCreationRequest request) {
-        // find roles
+
         Role staffRole = roleRepository.findById(UserRole.STAFF_ROLE)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
         Role customerRole = roleRepository.findById(UserRole.USER_ROLE)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
 
-        // get user creation request
+
         UserCreationRequest userCreationRequest = request.getUserCreationRequest();
 
-        // map request into entity, set username, role and encode password
+
         User userEntity = userMapper.toEntity(userCreationRequest);
         userEntity.setPassword(passwordEncoder.encode(userCreationRequest.getPassword()));
         userEntity.setRoles(Set.of(staffRole, customerRole));
 
-        // save user
+
         User managedUser = userRepository.save(userEntity);
 
-        // create staff entity
+
         Staff staff = Staff.builder()
                 .user(managedUser)
                 .shift(request.getShift())
                 .build();
 
-        // create and save customer entity
+
         Cart cart = new Cart();
         Customer customer = Customer.builder()
                 .user(userEntity)
@@ -94,7 +94,7 @@ public class StaffService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<StaffResponse> getAllStaff() {
         return staffRepository.findAll()
                 .stream()
@@ -119,7 +119,7 @@ public class StaffService {
     }
 
     @Transactional
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteStaff(UUID staffId) {
 
         Staff staff = staffRepository.findById(staffId)
@@ -130,10 +130,10 @@ public class StaffService {
 
 
     public StaffResponse getInfo() {
-        // get object name from security context
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // find user
+
         Staff staff = staffRepository.findByUser_Username(username)
                 .orElseThrow(() -> new AppException(ErrorType.USER_NOT_FOUND));
 

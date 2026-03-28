@@ -74,7 +74,7 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<CustomerResponse> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 

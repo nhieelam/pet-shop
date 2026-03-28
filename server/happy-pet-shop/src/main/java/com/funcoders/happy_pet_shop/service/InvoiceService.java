@@ -1,6 +1,7 @@
 package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.constant.DiscountType;
+import com.funcoders.happy_pet_shop.dto.request.ChangeInvoiceStatusRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ReviewDetailRequest;
@@ -221,6 +222,16 @@ public class InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND));
 
         invoiceRepository.delete(invoice);
+    }
+
+    @Transactional
+    public InvoiceResponse changeInvoiceStatus(UUID id, ChangeInvoiceStatusRequest request) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND));
+
+        invoice.setStatus(request.getStatus());
+        Invoice saved = invoiceRepository.save(invoice);
+        return invoiceMapper.toResponse(saved);
     }
 
     private BigDecimal calculateDiscountAmount(PromotionDetail promotionDetail, BigDecimal productPrice) {

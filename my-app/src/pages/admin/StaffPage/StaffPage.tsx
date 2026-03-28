@@ -7,7 +7,7 @@ import type {UserUpdateRequest} from "../../../types/userTypes.ts";
 
 function staffDisplayName(s: StaffData): string {
   const u = s.user;
-  if (u?.firstName || u?.lastName) return [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
+  if (u?.firstname || u?.lastname) return [u.firstname, u.lastname].filter(Boolean).join(" ").trim();
   return u?.username ?? "—";
 }
 
@@ -130,6 +130,25 @@ function StaffListRow({
 
 const SHIFT_OPTIONS = [1, 2, 3];
 
+interface FormData {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  email: string;
+  phone: string;
+  address: string;
+  password: string;
+  shift: number;
+}
+
+interface EditFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  shift: number;
+}
 export default function StaffPage() {
   const {
     staff: filteredStaff,
@@ -167,16 +186,17 @@ export default function StaffPage() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [shiftSubmitting, setShiftSubmitting] = useState(false);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
+    userName: "",
     email: "",
     phone: "",
     address: "",
     password: "",
     shift: 1,
   });
-  const [editFormData, setEditFormData] = useState({
+  const [editFormData, setEditFormData] = useState<EditFormData>({
     firstName: "",
     lastName: "",
     email: "",
@@ -190,8 +210,8 @@ export default function StaffPage() {
     if (editModalOpen && staffToEdit) {
       const u = staffToEdit.user;
       setEditFormData({
-        firstName: u?.firstName ?? "",
-        lastName: u?.lastName ?? "",
+        firstName: u?.firstname ?? "",
+        lastName: u?.lastname ?? "",
         email: u?.email ?? "",
         phone: u?.phone ?? "",
         address: u?.address ?? "",
@@ -207,6 +227,7 @@ export default function StaffPage() {
       const payload: StaffCreationRequest = {
         shift: formData.shift,
         userCreationRequest: {
+          userName: formData.userName.trim(),
           firstName: formData.firstName.trim() || undefined,
           lastName: formData.lastName.trim() || undefined,
           email: formData.email.trim(),
@@ -219,6 +240,7 @@ export default function StaffPage() {
       setFormData({
         firstName: "",
         lastName: "",
+        userName: "",
         email: "",
         phone: "",
         address: "",
@@ -240,7 +262,7 @@ export default function StaffPage() {
         lastName: editFormData.lastName.trim() || undefined,
         email: editFormData.email.trim() || undefined,
         phone: editFormData.phone.trim() || undefined,
-        address: editFormData.address.trim() || undefined,
+        address: editFormData.address.trim() || undefined,  
       };
       await handleUpdateStaff(staffToEdit.user.id, payload);
     } finally {
@@ -438,6 +460,8 @@ export default function StaffPage() {
                   ✕
                 </button>
               </div>
+
+
               <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -468,11 +492,22 @@ export default function StaffPage() {
                   <input
                     id="staff-email"
                     type="email"
-                    required
                     value={formData.email}
                     onChange={(e) => setFormData((d) => ({ ...d, email: e.target.value }))}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                     placeholder="staff@example.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="staff-userName" className="block text-sm font-medium text-slate-700 mb-1">Username *</label>
+                  <input
+                    id="staff-userName"
+                    type="text"
+                    required
+                    value={formData.userName}
+                    onChange={(e) => setFormData((d) => ({ ...d, userName: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    placeholder="Username"
                   />
                 </div>
                 <div>
@@ -592,7 +627,7 @@ export default function StaffPage() {
                       id="edit-staff-lastName"
                       type="text"
                       value={editFormData.lastName}
-                      onChange={(e) => setEditFormData((d) => ({ ...d, lastName: e.target.value }))}
+                        onChange={(e) => setEditFormData((d) => ({ ...d, lastName: e.target.value }))}
                       className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                       placeholder="Doe"
                     />
@@ -664,7 +699,7 @@ export default function StaffPage() {
             >
               <div className="p-6">
                 <h2 className="text-xl font-bold text-slate-800 mb-2">Edit shift</h2>
-                <p className="text-sm text-slate-500 mb-4">{staffDisplayName(editingStaff)} ({editingStaff.user?.username})</p>
+                <p className="text-sm text-slate-500 mb-4">{staffDisplayName(editingStaff)} ({editingStaff.user?.username ?? "—"})</p>
                 <form onSubmit={handleShiftSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="edit-shift" className="block text-sm font-medium text-slate-700 mb-1">Shift</label>

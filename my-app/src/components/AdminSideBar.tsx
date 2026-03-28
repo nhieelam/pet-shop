@@ -16,7 +16,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Hóa đơn", href: "/admin/manageOrders" },
   { label: "Khuyến mãi", href: "/admin/promotions" },
   { label: "Danh mục", href: "/admin/manageProductCategory" },
-  { label: "dịch vụ", href: "/admin/manageServices" },
 ];
 
 const AdminSidebar: React.FC = () => {

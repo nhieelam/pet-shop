@@ -40,7 +40,7 @@ public class UserService {
         return userMapper.toResponse(userRepository.save(userEntity));
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    // @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
     public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
@@ -48,7 +48,7 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    // @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
@@ -57,7 +57,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    // @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
     public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {

@@ -1,7 +1,5 @@
 import type { PromotionData } from "./promotionTypes";
-
-export type PaymentMethod = "QR_Scanning" | "COD" ;
-export type PaymentStatus = "PENDING" | "PAID" | "CANCELLED";
+import type { PaymentMethod, PaymentStatus } from "../type/type";
 
 export interface ReviewDetailRequest {
   productId: string;

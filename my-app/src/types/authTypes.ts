@@ -1,9 +1,5 @@
+import type { UserRole } from "../type/type";
 
-export enum UserRole {
-  CUSTOMER = "USER",
-  STAFF = "STAFF",
-  ADMIN = "ADMIN",
-}
 export interface AuthRequest {
   userName: string;
   password: string;
