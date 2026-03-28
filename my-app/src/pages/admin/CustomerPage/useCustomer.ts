@@ -12,8 +12,10 @@ export function useCustomer() {
   const [customers, setCustomers] = useState<CustomerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [pointsModalOpen, setPointsModalOpen] = useState(false);
@@ -46,8 +48,8 @@ export function useCustomer() {
       result = result.filter(
         (c: CustomerData) =>
           c.user.username?.toLowerCase().includes(q) ||
-          c.user.firstName?.toLowerCase().includes(q) ||
-          c.user.lastName?.toLowerCase().includes(q) ||
+          c.user.firstname?.toLowerCase().includes(q) ||
+          c.user.lastname?.toLowerCase().includes(q) ||
           c.user.email?.toLowerCase().includes(q) ||
           c.user.phone?.toLowerCase().includes(q)
       );

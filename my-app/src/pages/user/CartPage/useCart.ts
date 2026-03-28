@@ -160,7 +160,7 @@ export function useCart() {
           name: item.pet.name ?? "Thú cưng",
           price: item.pet.price ?? 0,
           quantity: item.quantity,
-          image: item.pet.image ?? "",
+          image: item.pet.imageUrl ?? "",
           isSelected: true,
         };
       }

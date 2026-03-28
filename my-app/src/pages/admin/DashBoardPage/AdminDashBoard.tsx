@@ -10,14 +10,7 @@ import {
 
 
 
-function unwrapInvoiceList(json: unknown): InvoiceData[] {
-  if (Array.isArray(json)) return json as InvoiceData[];
-  if (json && typeof json === "object" && "data" in json) {
-    const inner = (json as { data?: unknown }).data;
-    if (Array.isArray(inner)) return inner as InvoiceData[];
-  }
-  return [];
-}
+
 
 const AdminDashboard: FC = () => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -27,7 +20,7 @@ const AdminDashboard: FC = () => {
     const fetchInvoices = async () => {
       try {
         const json = await getAllInvoices();
-        setInvoices(unwrapInvoiceList(json));
+        setInvoices(json.data);
       } catch {
         setInvoices([]);
       }

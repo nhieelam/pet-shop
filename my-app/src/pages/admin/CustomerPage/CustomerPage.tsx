@@ -422,7 +422,6 @@ export default function CustomerPage() {
         )}
       </main>
 
-      {/* Add Customer Modal */}
       {formModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeFormModal} aria-hidden />
@@ -532,7 +531,6 @@ export default function CustomerPage() {
         </div>
       )}
 
-      {/* Edit Customer Modal */}
       {editModalOpen && editingCustomer && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeEditModal} aria-hidden />
@@ -637,7 +635,6 @@ export default function CustomerPage() {
         </div>
       )}
 
-      {/* Add Points Modal */}
       {pointsModalOpen && editingCustomer && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closePointsModal} aria-hidden />
