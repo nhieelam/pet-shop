@@ -128,6 +128,7 @@ export default function ProductCard({
                 {cartLoading ? "..." : "🛒"}
               </button>
 
+
             </div>
           </div>
         </div>

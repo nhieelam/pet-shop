@@ -7,22 +7,17 @@ import PriceFilter from "@/components/ui/PriceFilter";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 
-import {useProductManager} from "./hooks/useProductManager";
-import {useEffect} from "react";
 import Loader from "@/components/ui/loader";
 
-import { useProducts } from "./hooks/useProducts";
+import { useProductsPage } from "./hooks/useProductsPage";
 
 export default function ProductsPage() {
   const ITEMS_PER_PAGE = 12;
-  const { categories, products, loading, error, fetchProducts, fetchCategories } = useProducts();
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
   const {
+    categories,
+    loading,
+    error,
+    fetchProducts,
     selectedCategories,
     minPrice,
     maxPrice,
@@ -39,12 +34,7 @@ export default function ProductsPage() {
     handleSort,
     handlePageChange,
     resetFilters,
-  } = useProductManager({
-    products: products,
-    itemsPerPage: ITEMS_PER_PAGE,
-  });
-
-  
+  } = useProductsPage(ITEMS_PER_PAGE);
 
   return (
       <div className="min-h-screen bg-[#FFF8F0] font-body">
