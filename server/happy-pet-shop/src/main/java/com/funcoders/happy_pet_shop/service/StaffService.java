@@ -1,6 +1,7 @@
 package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.constant.UserRole;
+import com.funcoders.happy_pet_shop.dto.request.ListStaffCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.StaffCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.UserCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.StaffResponse;
@@ -24,10 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,18 @@ public class StaffService {
     @Transactional
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public StaffResponse createStaff(StaffCreationRequest request) {
+        return persistStaff(request);
+    }
+
+    @Transactional
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public List<StaffResponse> createStaffList(ListStaffCreationRequest request) {
+        return request.getStaff().stream()
+                .map(this::persistStaff)
+                .collect(Collectors.toList());
+    }
+
+    private StaffResponse persistStaff(StaffCreationRequest request) {
 
         Role staffRole = roleRepository.findById(UserRole.STAFF_ROLE)
                 .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));

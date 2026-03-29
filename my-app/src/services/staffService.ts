@@ -1,4 +1,4 @@
-import type { StaffData, StaffResponse, StaffCreationRequest } from "../types/staffTypes";
+import type { StaffData, StaffResponse, StaffCreationRequest, StaffResponseArray } from "../types/staffTypes";
 import { API_CONFIG } from "../config/apiConfig";
 
 function unwrapStaffList(json: unknown): StaffData[] {
@@ -107,4 +107,20 @@ export const getInfo = async (): Promise<StaffResponse> => {
     return data;
 };
 
-
+export const createListStaff = async (
+    request: StaffCreationRequest[]
+): Promise<StaffResponseArray> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.CREATE_LIST}`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể tạo danh sách staff");
+    }
+    const data = await response.json();
+    return data;
+};

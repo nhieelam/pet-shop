@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.controller;
 
+import com.funcoders.happy_pet_shop.dto.request.ListStaffCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.StaffCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.StaffResponse;
@@ -24,6 +25,12 @@ public class StaffController {
     @PostMapping
     public ApiResponse<StaffResponse> createStaff(@RequestBody @Valid StaffCreationRequest request) {
         StaffResponse response = staffService.createStaff(request);
+        return new ApiResponse<>(response, "create staff successfully");
+    }
+
+    @PostMapping("/batch")
+    public ApiResponse<List<StaffResponse>> createStaffList(@Valid @RequestBody ListStaffCreationRequest request) {
+        List<StaffResponse> response = staffService.createStaffList(request);
         return new ApiResponse<>(response, "create staff successfully");
     }
 
