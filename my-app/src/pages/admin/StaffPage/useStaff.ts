@@ -18,36 +18,6 @@ export type ViewMode = "grid" | "list";
 
 export const SHIFT_OPTIONS = [1, 2, 3] as const;
 
-const STAFF_IMPORT_SYNONYMS: Record<string, string[]> = {
-  userName: ["username", "user name", "user", "login"],
-  firstName: ["first name", "firstname", "first"],
-  lastName: ["last name", "lastname", "last"],
-  email: ["email", "e-mail"],
-  phone: ["phone", "mobile", "số điện thoại"],
-  address: ["address", "địa chỉ"],
-  password: ["password", "passwd", "mật khẩu"],
-  shift: ["shift", "ca"],
-};
-
-const STAFF_IMPORT_REQUIRED = ["userName", "email", "phone", "password"] as const;
-
-
-function buildColumnMapFromHeaders(
-  headerRow: unknown[],
-  synonyms: Record<string, string[]>
-): Record<string, number> {
-  const map: Record<string, number> = {};
-  return map;
-}
-
-function cellToIntInRange(cell: unknown, min: number, max: number, fallback: number): number {
-  const s = cellToString(cell);
-  if (!s) return fallback;
-  const n = parseInt(s, 10);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.min(max, Math.max(min, n));
-}
-
 export interface StaffFormData {
   firstName: string;
   lastName: string;
@@ -353,22 +323,12 @@ export function useStaff() {
         if (!rows.length) {
           throw new Error("File is empty");
         }
-
-        const columnMap = buildColumnMapFromHeaders(rows[0], STAFF_IMPORT_SYNONYMS);
-        const missingHint =
-          "Required: Username, Email, Phone, Password. Optional: First name, Last name, Address, Shift.";
-        for (const key of STAFF_IMPORT_REQUIRED) {
-          if (columnMap[key] === undefined) {
-            throw new Error(missingHint);
-          }
-        }
+        const headerRow = rows[0];
 
         const list: StaffCreationRequest[] = [];
-        const rowErrors: string[] = [];
-        const maxRowWarningsLogged = 5;
 
         const get = (key: string, row: unknown[]) => {
-          const idx = columnMap[key];
+          const idx = headerRow.indexOf(key);
           if (idx === undefined) return "";
           return cellToString(row[idx]);
         };
@@ -384,24 +344,12 @@ export function useStaff() {
             const phone = get("phone", row);
             const password = get("password", row);
 
-            if (!userName && !email && !phone && !password) {
-              throw new Error("missing Username, Email, Phone, or Password");
-            }
-
-            if (!userName || !email || !phone || !password) {
-              throw new Error("missing Username, Email, Phone, or Password");
-            }
-
             const firstName = get("firstName", row);
             const lastName = get("lastName", row);
             const address = get("address", row);
-            const shift =
-              columnMap.shift !== undefined
-                ? cellToIntInRange(row[columnMap.shift], 1, 3, 1)
-                : 1;
-
+            const shift = get("shift", row);
             list.push({
-              shift,
+              shift: shift ? parseInt(shift, 10) : 1,
               userCreationRequest: {
                 userName,
                 firstName: firstName || undefined,
@@ -413,19 +361,10 @@ export function useStaff() {
               },
             });
           } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            rowErrors.push(`Row ${r + 1}: ${msg}`);
           }
         }
 
-        if (rowErrors.length && !list.length) {
-          throw new Error(
-            rowErrors.slice(0, maxRowWarningsLogged).join("\n") +
-              (rowErrors.length > maxRowWarningsLogged ? "\n…" : "")
-          );
-        }
-
-        await staffService.createListStaff(list);
+        await staffService.createListStaff({staff:list});
         showToast(`Đã nhập ${list.length} nhân viên từ file`, "success");
         await fetchStaff();
       } catch (e) {

@@ -79,4 +79,5 @@ public class PetController {
         petService.markAsSold(id);
         return new ApiResponse<>(null, "Mark pet as sold successfully");
     }
+
 }

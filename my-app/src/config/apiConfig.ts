@@ -36,7 +36,7 @@ export const API_CONFIG = {
             UPDATE_SHIFT: (id: string, shift: number) => `/staffs/${id}/shift?shift=${shift}`,
             DELETE: (id: string) => `/staffs/${id}`,
             GET_INFO: "/staffs/info",
-            CREATE_LIST: "/staffs/list",
+            CREATE_LIST: "/staffs/batch",
         },
 
         CUSTOMER: {

@@ -108,7 +108,7 @@ export const getInfo = async (): Promise<StaffResponse> => {
 };
 
 export const createListStaff = async (
-    request: StaffCreationRequest[]
+    request: { staff: StaffCreationRequest[] }
 ): Promise<StaffResponseArray> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STAFF.CREATE_LIST}`;
     const response = await fetch(url, {

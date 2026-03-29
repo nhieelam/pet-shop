@@ -30,8 +30,6 @@ public class Staff {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
 
-    @Min(1)
-    @Max(3)
     @Column(nullable = false)
     int shift;
 }

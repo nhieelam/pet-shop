@@ -16,7 +16,5 @@ public class StaffCreationRequest {
     @Valid
     UserCreationRequest userCreationRequest;
 
-    @Min(value = 1, message = "INVALID_SHIFT")
-    @Max(value = 3, message = "INVALID_SHIFT")
     int shift;
 }
