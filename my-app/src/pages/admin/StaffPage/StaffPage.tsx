@@ -1,15 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useStaff } from "./useStaff";
-import type { StaffData, StaffCreationRequest } from "../../../types/staffTypes";
-import type {UserUpdateRequest} from "../../../types/userTypes.ts";
+import { useStaff, staffDisplayName, SHIFT_OPTIONS } from "./useStaff";
+import type { StaffData } from "../../../types/staffTypes";
 
-function staffDisplayName(s: StaffData): string {
-  const u = s.user;
-  if (u?.firstname || u?.lastname) return [u.firstname, u.lastname].filter(Boolean).join(" ").trim();
-  return u?.username ?? "—";
-}
+
 
 function StaffGridCard({
   staff,
@@ -128,27 +122,6 @@ function StaffListRow({
   );
 }
 
-const SHIFT_OPTIONS = [1, 2, 3];
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  email: string;
-  phone: string;
-  address: string;
-  password: string;
-  shift: number;
-}
-
-interface EditFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  shift: number;
-}
 export default function StaffPage() {
   const {
     staff: filteredStaff,
@@ -176,124 +149,23 @@ export default function StaffPage() {
     closeShiftModal,
     openDeleteModal,
     closeDeleteModal,
-    handleCreateStaff,
-    handleUpdateStaff,
-    handleUpdateShift,
-    handleDeleteStaff,
+    handleExportStaff,
+    formSubmitting,
+    editSubmitting,
+    shiftSubmitting,
+    deleteSubmitting,
+    formData,
+    setFormData,
+    editFormData,
+    setEditFormData,
+    shiftValue,
+    setShiftValue,
+    handleFormSubmit,
+    handleEditSubmit,
+    openShiftModalFor,
+    handleShiftSubmit,
+    confirmDelete,
   } = useStaff();
-
-  const [formSubmitting, setFormSubmitting] = useState(false);
-  const [editSubmitting, setEditSubmitting] = useState(false);
-  const [shiftSubmitting, setShiftSubmitting] = useState(false);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    userName: "",
-    email: "",
-    phone: "",
-    address: "",
-    password: "",
-    shift: 1,
-  });
-  const [editFormData, setEditFormData] = useState<EditFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    shift: 1,
-  });
-  const [shiftValue, setShiftValue] = useState(1);
-
-  useEffect(() => {
-    if (editModalOpen && staffToEdit) {
-      const u = staffToEdit.user;
-      setEditFormData({
-        firstName: u?.firstname ?? "",
-        lastName: u?.lastname ?? "",
-        email: u?.email ?? "",
-        phone: u?.phone ?? "",
-        address: u?.address ?? "",
-        shift: staffToEdit.shift ?? 1,
-      });
-    }
-  }, [editModalOpen, staffToEdit]);
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    try {
-      const payload: StaffCreationRequest = {
-        shift: formData.shift,
-        userCreationRequest: {
-          userName: formData.userName.trim(),
-          firstName: formData.firstName.trim() || undefined,
-          lastName: formData.lastName.trim() || undefined,
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          address: formData.address.trim() || undefined,
-          password: formData.password,
-        },
-      };
-      await handleCreateStaff(payload);
-      setFormData({
-        firstName: "",
-        lastName: "",
-        userName: "",
-        email: "",
-        phone: "",
-        address: "",
-        password: "",
-        shift: 1,
-      });
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!staffToEdit?.id) return;
-    setEditSubmitting(true);
-    try {
-      const payload: UserUpdateRequest = {
-        firstName: editFormData.firstName.trim() || undefined,
-        lastName: editFormData.lastName.trim() || undefined,
-        email: editFormData.email.trim() || undefined,
-        phone: editFormData.phone.trim() || undefined,
-        address: editFormData.address.trim() || undefined,  
-      };
-      await handleUpdateStaff(staffToEdit.user.id, payload);
-    } finally {
-      setEditSubmitting(false);
-    }
-  };
-
-  const openShiftModalFor = (s: StaffData) => {
-    setShiftValue(s.shift ?? 1);
-    openShiftModal(s);
-  };
-
-  const handleShiftSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingStaff?.id) return;
-    setShiftSubmitting(true);
-    try {
-      await handleUpdateShift(editingStaff.id, shiftValue);
-    } finally {
-      setShiftSubmitting(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    setDeleteSubmitting(true);
-    try {
-      await handleDeleteStaff();
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
 
   return (
     <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
@@ -366,11 +238,21 @@ export default function StaffPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <p className="text-sm text-slate-500">
             Showing {filteredStaff.length} of {allStaff.length} staff
           </p>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportStaff}
+              disabled={loading || filteredStaff.length === 0}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              title="Export current table to Excel"
+            >
+              <span aria-hidden>📥</span>
+              <span className="hidden sm:inline">Export Excel</span>
+            </button>
             <button
               type="button"
               onClick={() => setViewMode("grid")}

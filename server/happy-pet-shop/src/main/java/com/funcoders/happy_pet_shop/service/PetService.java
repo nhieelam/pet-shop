@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.service;
 
+import com.funcoders.happy_pet_shop.dto.request.ListPetCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.PetCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.PetUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.PetResponse;
@@ -37,6 +38,13 @@ public class PetService {
         return petMapper.toResponse(
                 petRepository.save(petEntity)
         );
+    }
+
+    @Transactional
+    public List<PetResponse> createPetList(ListPetCreationRequest request) {
+        return request.getPets().stream()
+                .map(this::createPet)
+                .collect(Collectors.toList());
     }
 
     public PetResponse getPetById(UUID id) {

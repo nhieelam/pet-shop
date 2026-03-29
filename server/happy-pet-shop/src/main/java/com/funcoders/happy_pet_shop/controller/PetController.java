@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.controller;
 
+import com.funcoders.happy_pet_shop.dto.request.ListPetCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.PetCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.PetUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
@@ -26,6 +27,12 @@ public class PetController {
     public ApiResponse<PetResponse> createPet(@Valid @RequestBody PetCreationRequest request) {
         PetResponse response = petService.createPet(request);
         return new ApiResponse<>(response, "Create pet successfully");
+    }
+
+    @PostMapping("/batch")
+    public ApiResponse<List<PetResponse>> createPetList(@Valid @RequestBody ListPetCreationRequest request) {
+        List<PetResponse> response = petService.createPetList(request);
+        return new ApiResponse<>(response, "Create pets successfully");
     }
 
     @GetMapping("/{id}")

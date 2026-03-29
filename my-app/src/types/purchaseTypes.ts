@@ -1,3 +1,4 @@
+import type { PaymentStatus } from "@/type/type";
 export interface PurchaseDetailCreationRequest {
   productId: string;
   quantity: number;
@@ -10,7 +11,6 @@ export interface PurchaseCreationRequest {
   purchaseDetails: PurchaseDetailCreationRequest[];
 }
 
-/** Line item on a purchase (maps to PurchaseDetailResponse in the API). */
 export interface PurchaseLineItem {
   id: string;
   productId: string;
@@ -20,7 +20,6 @@ export interface PurchaseLineItem {
   totalPrice: number;
 }
 
-/** Purchase entity returned by GET /purchases and nested in ApiResponse.data. */
 export interface PurchaseResponse {
   id: string;
   supplier?: {
@@ -31,7 +30,7 @@ export interface PurchaseResponse {
     address?: string;
   };
   totalAmount: number;
-  status: string;
+  status: PaymentStatus;
   purchaseDetails?: PurchaseLineItem[];
   createdAt: string;
 }

@@ -4,31 +4,9 @@ import {useState} from "react";
 import {Link} from "react-router-dom";
 import {usePurchase} from "./usePurchase";
 import type {PurchaseLineItem, PurchaseResponse} from "../../../types/purchaseTypes";
+import { formatCurrency, formatDate } from "@/utils/format";
+import { statusSelectClass } from "@/utils/paymentStatusUtil";
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value);
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function statusClass(status: string): string {
-  const s = (status ?? "").toLowerCase();
-  if (s.includes("paid") || s.includes("completed") || s.includes("delivered")) return "bg-emerald-100 text-emerald-700";
-  if (s.includes("cancel") || s.includes("refund")) return "bg-rose-100 text-rose-700";
-  if (s.includes("pending") || s.includes("processing")) return "bg-amber-100 text-amber-700";
-  return "bg-slate-100 text-slate-700";
-}
 
 function PurchaseGridCard({
                             purchase,
@@ -55,7 +33,7 @@ function PurchaseGridCard({
       >
         <div className="relative h-24 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
           <span className="text-4xl">{emoji}</span>
-          <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusClass(status)}`}>
+          <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusSelectClass(status)}`}>
           {status}
         </span>
         </div>
@@ -119,7 +97,7 @@ function PurchaseListRow({
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-bold text-emerald-600">{formatCurrency(Number(purchase.totalAmount ?? 0))}</p>
-            <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
+            <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusSelectClass(status)}`}>
             {status}
           </span>
           </div>
@@ -165,18 +143,11 @@ export default function PurchasePage() {
     closeDeleteModal,
     handleDeletePurchase,
     clearFilters,
+    deleteSubmitting,
+    confirmDelete,
   } = usePurchase();
 
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  const confirmDelete = async () => {
-    setDeleteSubmitting(true);
-    try {
-      await handleDeletePurchase();
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
 
   return (
       <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
@@ -411,7 +382,7 @@ export default function PurchasePage() {
                         <div>
                           <p className="text-slate-500">Status</p>
                           <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(selectedPurchase.status ?? "")}`}
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusSelectClass(selectedPurchase.status ?? "")}`}
                           >
                         {selectedPurchase.status ?? "—"}
                       </span>

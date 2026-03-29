@@ -19,6 +19,17 @@ export function usePurchase() {
   const [purchaseToDelete, setPurchaseToDelete] = useState<PurchaseResponse | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeletePurchase();
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
+
   const fetchPurchases = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -139,5 +150,7 @@ export function usePurchase() {
     clearFilters,
     fetchPurchases,
     showToast,
+    deleteSubmitting,
+    confirmDelete,
   };
 }

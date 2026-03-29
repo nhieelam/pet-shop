@@ -26,6 +26,76 @@ export function useSupplier() {
   const [supplierToEdit, setSupplierToEdit] = useState<SupplierData | null>(null);
   const [supplierToDelete, setSupplierToDelete] = useState<SupplierData | null>(null);
 
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [formData, setFormData] = useState<SupplierCreationRequest>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+  const [editFormData, setEditFormData] = useState<SupplierUpdateRequest>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    if (editModalOpen && supplierToEdit) {
+      setEditFormData({
+        name: supplierToEdit.name ?? "",
+        email: supplierToEdit.email ?? "",
+        phone: supplierToEdit.phone ?? "",
+        address: supplierToEdit.address ?? "",
+      });
+    }
+  }, [editModalOpen, supplierToEdit]);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const payload: SupplierCreationRequest = {
+        name: formData.name.trim(),
+        email: formData.email?.trim() || undefined,
+        phone: formData.phone.trim(),
+        address: formData.address?.trim() || undefined,
+      };
+      await handleCreateSupplier(payload);
+      setFormData({ name: "", email: "", phone: "", address: "" });
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supplierToEdit?.id) return;
+    setEditSubmitting(true);
+    try {
+      const payload: SupplierUpdateRequest = {
+        name: editFormData.name?.trim() || undefined,
+        email: editFormData.email?.trim() || undefined,
+        phone: editFormData.phone?.trim() || undefined,
+        address: editFormData.address?.trim() || undefined,
+      };
+      await handleUpdateSupplier(supplierToEdit.id, payload);
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeleteSupplier();
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
+
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -201,5 +271,16 @@ export function useSupplier() {
     handleDeleteSupplier,
 
     fetchSuppliers,
+    handleFormSubmit,
+    handleEditSubmit,
+    confirmDelete,
+    showToast,
+    formSubmitting,
+    editSubmitting,
+    deleteSubmitting,
+    formData,
+    setFormData,
+    editFormData,
+    setEditFormData,
   };
 }
