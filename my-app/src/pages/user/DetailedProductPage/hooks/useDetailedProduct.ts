@@ -2,6 +2,7 @@ import { getProductById } from "@/services/productService";
 import type { ProductData } from "@/types/productTypes";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { formatPrice, formatDate } from "@/utils/format";
 
 
 export const useDetailedProduct = () => {
@@ -22,25 +23,11 @@ export const useDetailedProduct = () => {
             setLoading(false);
         }
     };
-    const formatPrice = (price: number) => {
-      return price.toLocaleString("vi-VN");
-    };
-  
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
 
     const handlePayment = () => {
         console.log("Payment");
     };
 
 
-    return { product, loading, error, fetchProduct, formatPrice, formatDate, quantity, setQuantity, handlePayment };
+    return { product, loading, error, fetchProduct, quantity, setQuantity, handlePayment };
 }

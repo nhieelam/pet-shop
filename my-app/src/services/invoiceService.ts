@@ -1,6 +1,7 @@
 import type {
     InvoiceResponse,
     InvoiceCreationRequest,
+    InvoiceArrayResponse,
 } from "../types/invoiceTypes";
 
 import { API_CONFIG } from "../config/apiConfig";
@@ -38,7 +39,7 @@ export const createInvoice = async (
     return data;
 };
 
-export const getAllInvoices = async (): Promise<InvoiceResponse> => {
+export const getAllInvoices = async (): Promise<InvoiceArrayResponse> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_ALL}`;
     const response = await fetch(url, {
         method: "GET",
@@ -70,7 +71,7 @@ export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
 
 export const getInvoicesByCustomerId = async (
     customerId: string
-): Promise<InvoiceResponse> => {
+): Promise<InvoiceArrayResponse> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_BY_CUSTOMER(customerId)}`;
     const response = await fetch(url, {
         method: "GET",

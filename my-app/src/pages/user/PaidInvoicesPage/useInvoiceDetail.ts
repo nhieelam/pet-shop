@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../../context/authContext";
 import { getInvoiceById } from "../../../services/invoiceService";
-import type { InvoiceResponse } from "../../../types/invoiceTypes";
+import type { InvoiceData } from "../../../types/invoiceTypes";
 
 export function useInvoiceDetail(invoiceId: string | undefined) {
   const { customer, isAuthenticated } = useAuth();
-  const [invoice, setInvoice] = useState<InvoiceResponse | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +26,7 @@ export function useInvoiceDetail(invoiceId: string | undefined) {
     setError(null);
     try {
       const data = await getInvoiceById(invoiceId);
-      setInvoice(data);
+      setInvoice(data.data);
     } catch (e) {
       setInvoice(null);
       setError(e instanceof Error ? e.message : "Không tải được hóa đơn");

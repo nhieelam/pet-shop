@@ -5,9 +5,11 @@ import { Link } from "react-router-dom";
 import { usePaidInvoices } from "./usePaidInvoices";
 import type { InvoiceData } from "../../../types/invoiceTypes";
 import { useInvoiceHistory } from "../ProfilePage/hooks/useInvoiceHistory";
-import type { Invoice, SortOption } from "../ProfilePage/hooks/useInvoiceHistory";
+import type { Invoice } from "@/pages/user/ProfilePage/type";
+import type { SortOption } from "@/type/type";
 import Pagination from "../ProfilePage/components/Pagination";
 import StatusBadge from "../ProfilePage/components/StatusBadge";
+import { formatDate, formatCurrency } from "@/utils/format";
 
 function mapToRows(invoices: InvoiceData[]): Invoice[] {
   return invoices.map((inv) => ({
@@ -17,23 +19,6 @@ function mapToRows(invoices: InvoiceData[]): Invoice[] {
     totalAmount: Number(inv.realAmount ?? inv.totalAmount ?? 0),
     items: inv.invoiceDetails?.length ?? 0,
   }));
-}
-
-function formatMoney(n: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(n);
-}
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export default function PaidInvoicesPage() {
@@ -155,7 +140,7 @@ export default function PaidInvoicesPage() {
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(invoice.date)}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{invoice.items} mục</td>
                       <td className="px-6 py-4 text-sm font-semibold text-blue-600">
-                        {formatMoney(invoice.totalAmount)}
+                        {formatCurrency(invoice.totalAmount)}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <StatusBadge status={statusById.get(invoice.id) || "PAID"} />
@@ -194,7 +179,7 @@ export default function PaidInvoicesPage() {
                     <p>
                       <span className="font-semibold text-gray-700">Tổng tiền:</span>
                       <span className="text-lg font-bold text-blue-600 ml-2">
-                        {formatMoney(invoice.totalAmount)}
+                        {formatCurrency(invoice.totalAmount)}
                       </span>
                     </p>
                   </div>

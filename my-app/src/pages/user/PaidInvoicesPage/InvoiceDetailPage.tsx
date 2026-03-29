@@ -2,25 +2,9 @@
 
 import { Link, useParams } from "react-router-dom";
 import { useInvoiceDetail } from "./useInvoiceDetail";
-import { PAYMENT_STATUS_ENTRIES, normalizePaymentStatus } from "./paymentStatusMeta";
+import { PAYMENT_STATUS_ENTRIES, normalizePaymentStatus } from "@/utils/paymentStatusMeta";
 import StatusBadge from "../ProfilePage/components/StatusBadge";
-
-function formatMoney(n: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(n);
-}
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatDate, formatCurrency } from "@/utils/format";
 
 function paymentMethodLabel(method: string | undefined) {
   if (!method) return "—";
@@ -145,12 +129,12 @@ export default function InvoiceDetailPage() {
                 <div className="flex flex-wrap gap-6 pt-2 border-t border-gray-100">
                   <div>
                     <dt className="text-gray-500">Tạm tính</dt>
-                    <dd className="font-semibold">{formatMoney(Number(invoice.totalAmount ?? 0))}</dd>
+                    <dd className="font-semibold">{formatCurrency(Number(invoice.totalAmount ?? 0))}</dd>
                   </div>
                   <div>
                     <dt className="text-gray-500">Thực thanh toán</dt>
                     <dd className="text-lg font-bold text-emerald-700">
-                      {formatMoney(Number(invoice.realAmount ?? invoice.totalAmount ?? 0))}
+                      {formatCurrency(Number(invoice.realAmount ?? invoice.totalAmount ?? 0))}
                     </dd>
                   </div>
                 </div>
@@ -183,11 +167,11 @@ export default function InvoiceDetailPage() {
                                 : "Mục"}
                           </td>
                           <td className="px-6 py-3 text-right tabular-nums">
-                            {formatMoney(d.unitPrice)}
+                            {formatCurrency(d.unitPrice)}
                           </td>
                           <td className="px-6 py-3 text-right">{d.quantity}</td>
                           <td className="px-6 py-3 text-right font-medium tabular-nums">
-                            {formatMoney(d.totalPrice ?? d.unitPrice * d.quantity)}
+                            {formatCurrency(d.totalPrice ?? d.unitPrice * d.quantity)}
                           </td>
                         </tr>
                       ))}

@@ -2,24 +2,8 @@
 
 import { Link } from "react-router-dom";
 import { useReview } from "./useReview";
-import type { PaymentMethod } from "@/types/invoiceTypes";
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value ?? 0);
-}
-
-function formatDate(d: string): string {
-  return new Date(d).toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import type { PaymentMethod } from "@/type/type";
+import { formatDate, formatCurrency } from "@/utils/format";
 
 function paymentMethodLabel(method: string | undefined): string {
   if (!method) return "—";

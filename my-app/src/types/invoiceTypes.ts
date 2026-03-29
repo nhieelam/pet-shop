@@ -36,6 +36,16 @@ export interface InvoiceResponse {
 }
 
 
+export interface InvoiceArrayResponse {
+  success: boolean;
+  message: string;
+  data: InvoiceData[];
+  errorCode: number;
+  status: number;
+  timestamp: string;
+}
+
+
 
 export interface InvoiceData {
   id: string;
@@ -55,7 +65,8 @@ export interface InvoiceData {
 
 export interface InvoiceDetail {
   id: string;
-  productId: string;
+  productId?: string;
+  petId?: string;
   productName: string;
   quantity: number;
   unitPrice: number;

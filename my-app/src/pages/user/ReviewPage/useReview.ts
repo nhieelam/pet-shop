@@ -50,7 +50,8 @@ export function useReview() {
       return;
     }
 
-    const invoiceDetails: InvoiceDetailCreationRequest[] = checkoutItems.map((item) => {
+    const invoiceDetails: InvoiceDetailCreationRequest[] = 
+    checkoutItems.map((item) => {
       const q = Number(item.quantity);
       if (item.petId) {
         return { petId: item.petId, quantity: q };
