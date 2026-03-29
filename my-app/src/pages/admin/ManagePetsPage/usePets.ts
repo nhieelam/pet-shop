@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { PetData, PetCreationRequest, PetUpdateRequest } from "../../../types/petTypes";
 import * as petService from "../../../services/petService";
+import { exportTableToXls } from "@/utils/exportFile";
 
 export type ViewMode = "grid" | "list";
 
@@ -154,6 +155,39 @@ export function usePets() {
     }
   }, [petToDelete, closeDeleteModal, fetchPets, showToast]);
 
+  const handleExportPets = useCallback(() => {
+    exportTableToXls({
+      filename: `pets-export-${new Date().toISOString().slice(0, 10)}`,
+      sheetName: "Pets",
+      headers: [
+        "Pet ID",
+        "Name",
+        "Description",
+        "Image URL",
+        "Species",
+        "Breed",
+        "Birth",
+        "Gender",
+        "Price",
+        "Vaccinated",
+      ],
+      data: filteredPets.map((p) => {
+        return [
+          p.id,
+          p.name ?? "",
+          p.description ?? "",
+          p.imageUrl ?? "",
+          p.species ?? "",
+          p.breed ?? "",
+          p.birth ?? "",
+          p.gender ?? "",
+          p.price ?? 0,
+          p.vaccinated ?? false,
+        ];
+        }),
+      });
+  }, [filteredPets]);  
+
   return {
     pets: filteredPets,
     allPets: pets,
@@ -185,5 +219,6 @@ export function usePets() {
     handleMarkAsSold,
     handleDeletePet,
     fetchPets,
+    handleExportPets,
   };
 }

@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useListProducts } from "./useListProducts";
 import type { ProductData } from "../../../types/productTypes";
-import type { ProductCreationRequest, ProductUpdateRequest } from "../../../types/productTypes";
-import { uploadImageToCloudinary, isCloudinaryConfigured } from "../../../services/cloudinaryService";
 
 const SORT_OPTIONS = [
   {value: "newest", label: "Newest First"},
@@ -16,18 +14,6 @@ const SORT_OPTIONS = [
   {value: "quantity-asc", label: "Stock (Low-High)"},
   {value: "quantity-desc", label: "Stock (High-Low)"},
 ] as const;
-
-const UNIT_OPTIONS = [
-  {value: "G", label: "Gram (g)"},
-  {value: "KG", label: "Kilogram (kg)"},
-  {value: "PHAN", label: "Phần"},
-
-  {value: "PIECE", label: "Piece"},
-  {value: "PACK", label: "Pack"},
-  {value: "BAG", label: "Bag"},
-  {value: "BOTTLE", label: "Bottle"},
-  {value: "BOX", label: "Box"}
-];
 
 function ProductGridCard({
                            product,
@@ -46,8 +32,6 @@ function ProductGridCard({
   const stockClass = q === 0 ? "text-rose-500 bg-rose-50" : q <= 10 ? "text-amber-500 bg-amber-50" : "text-emerald-500 bg-emerald-50";
   const stockText = q === 0 ? "Out of Stock" : q <= 10 ? "Low Stock" : "In Stock";
   const availableClass = product.available !== false ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500";
-  const isExpired = product.expiryDate && new Date(product.expiryDate) < new Date();
-  const isExpiringSoon = product.expiryDate && !isExpired && new Date(product.expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   const showImg = product.imageUrl && !imgFailed;
 
   return (
@@ -69,11 +53,6 @@ function ProductGridCard({
             <span
                 className={`${availableClass} px-2 py-1 rounded-full text-xs font-medium`}>{product.available !== false ? "Active" : "Inactive"}</span>
           </div>
-          {isExpired && <div
-              className="absolute top-3 left-3 bg-rose-500 text-white px-2 py-1 rounded-full text-xs font-medium">Expired</div>}
-          {isExpiringSoon && !isExpired && <div
-              className="absolute top-3 left-3 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-medium">Expiring
-            Soon</div>}
         </div>
         <div className="p-4">
           <div className="flex items-start justify-between gap-2 mb-2">
@@ -88,8 +67,6 @@ function ProductGridCard({
                 <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{product.brand}</span> : null}
           </div>
           <div className="flex items-center justify-between">
-            <span
-                className={`${stockClass} text-xs px-2 py-1 rounded-full font-medium`}>{stockText}: {q} {product.unit || "pcs"}</span>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button type="button" onClick={() => onEdit(product)}
                       className="p-2 hover:bg-slate-100 rounded-lg transition-all" title="Edit">✏️
@@ -144,8 +121,6 @@ function ProductListRow({
                   className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{categoryName || "Uncategorized"}</span>
               {product.brand ? <span
                   className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{product.brand}</span> : null}
-              {product.origin ? <span
-                  className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full">{product.origin}</span> : null}
             </div>
           </div>
           <div className="text-right flex-shrink-0">
@@ -182,7 +157,6 @@ export default function ListProductsPage() {
     setViewMode,
     stats,
     uniqueBrands,
-    uniqueOrigins,
     activeFilterCount,
     productModalOpen,
     deleteModalOpen,
@@ -194,120 +168,22 @@ export default function ListProductsPage() {
     closeProductModal,
     openDeleteModal,
     closeDeleteModal,
-    handleCreateOrUpdateProduct,
-    handleDeleteProduct,
+    getCategoryName,
+    handleFormSubmit,
+    confirmDelete,
+    deleteSubmitting,
+    formData,
+    setFormData,
+    cloudinaryEnabled,
+    fileInputRef,
+    imageUploading,
+    imageUploadError,
+    formSubmitting,
+    handleImageFileChange,
+    setImageUploadError,
+    handleExportProduct
   } = useListProducts();
 
-  const [formSubmitting, setFormSubmitting] = useState(false);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    categoryId: "",
-    brand: "",
-    price: "",
-    quantity: "",
-    unit: "piece",
-    origin: "",
-    expiry: "",
-    imageUrl: "",
-    available: true,
-  });
-
-  const cloudinaryEnabled = isCloudinaryConfigured();
-
-  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    setImageUploadError(null);
-    setImageUploading(true);
-    try {
-      const url = await uploadImageToCloudinary(file);
-      setFormData((d) => ({ ...d, imageUrl: url }));
-    } catch (err) {
-      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setImageUploading(false);
-      e.target.value = "";
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  useEffect(() => {
-    if (productModalOpen && editingProduct) {
-      setFormData({
-        name: editingProduct.name ?? "",
-        description: editingProduct.description ?? "",
-        categoryId: editingProduct.categoryId ?? "",
-        brand: editingProduct.brand ?? "",
-        price: String(editingProduct.price ?? ""),
-        quantity: String(editingProduct.quantity ?? ""),
-        unit: editingProduct.unit ?? "piece",
-        origin: editingProduct.origin ?? "",
-        expiry: editingProduct.expiryDate ? editingProduct.expiryDate.slice(0, 10) : "",
-        imageUrl: editingProduct.imageUrl ?? "",
-        available: editingProduct.available !== false,
-      });
-    } else if (productModalOpen && !editingProduct) {
-      setFormData({
-        name: "",
-        description: "",
-        categoryId: "",
-        brand: "",
-        price: "",
-        quantity: "",
-        unit: "piece",
-        origin: "",
-        expiry: "",
-        imageUrl: "",
-        available: true,
-      });
-    }
-  }, [productModalOpen, editingProduct]);
-
-  const getCategoryName = (product: ProductData) => {
-    const id = product.categoryId;
-    if (id) {
-      const cat = categories.find((c) => c.id === id);
-      if (cat) return cat.name;
-    }
-    return product.categoryName ?? "Uncategorized";
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    try {
-      const payload: ProductCreationRequest = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || "",
-        categoryId: formData.categoryId,
-        brand: formData.brand.trim() || "",
-        price: parseFloat(formData.price) || 0,
-        quantity: parseInt(formData.quantity, 10) || 0,
-        unit: formData.unit,
-        origin: formData.origin.trim() || "",
-        imageUrl: formData.imageUrl.trim() || "",
-        expiryDate: formData.expiry,
-      };
-      if (formData.expiry) payload.expiryDate = formData.expiry;
-      await handleCreateOrUpdateProduct(payload);
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    setDeleteSubmitting(true);
-    try {
-      await handleDeleteProduct();
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
 
   return (
       <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
@@ -345,6 +221,16 @@ export default function ListProductsPage() {
                         className="flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-xl font-semibold hover:bg-emerald-50 transition-all shadow-md hover:shadow-lg">
                   <span>➕</span>
                   <span className="hidden sm:inline">Add Product</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportProduct}
+                  disabled={loading || filteredProducts.length === 0}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  title="Export current table to Excel"
+                    >
+                  <span aria-hidden>📥</span>
+                  <span className="hidden sm:inline">Export Excel</span>
                 </button>
               </div>
             </div>
@@ -414,7 +300,7 @@ export default function ListProductsPage() {
                   />
                 </div>
               </div>
-              {/* <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                     type="button"
                     onClick={() => setFiltersVisible((v) => !v)}
@@ -430,7 +316,7 @@ export default function ListProductsPage() {
                         className="flex items-center gap-2 px-4 py-3 border border-slate-200 rounded-xl hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all font-medium text-slate-600">
                   <span>Clear</span>
                 </button>
-              </div> */}
+              </div>
             </div>
 
             {filtersVisible && (
@@ -496,19 +382,6 @@ export default function ListProductsPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Origin</label>
-                      <select
-                          value={filters.origin}
-                          onChange={(e) => updateFilter("origin", e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
-                      >
-                        <option value="">All Origins</option>
-                        {uniqueOrigins.map((o) => (
-                            <option key={o} value={o}>{o}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
                       <select
                           value={filters.sortBy}
@@ -518,19 +391,6 @@ export default function ListProductsPage() {
                         {SORT_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Expiry Status</label>
-                      <select
-                          value={filters.expiry}
-                          onChange={(e) => updateFilter("expiry", e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
-                      >
-                        <option value="">All Products</option>
-                        <option value="expired">Expired</option>
-                        <option value="expiring-soon">Expiring Soon (30 days)</option>
-                        <option value="valid">Valid</option>
                       </select>
                     </div>
                   </div>
@@ -688,34 +548,7 @@ export default function ListProductsPage() {
                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
                                placeholder="0"/>
                       </div>
-                      <div>
-                        <label htmlFor="product-unit"
-                               className="block text-sm font-medium text-slate-700 mb-1.5">Unit</label>
-                        <select id="product-unit" value={formData.unit}
-                                onChange={(e) => setFormData((d) => ({...d, unit: e.target.value}))}
-                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                          {UNIT_OPTIONS.map((u) => (
-                              <option key={u.value} value={u.value}>
-                                {u.label}
-                              </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="product-origin"
-                               className="block text-sm font-medium text-slate-700 mb-1.5">Origin</label>
-                        <input id="product-origin" type="text" value={formData.origin}
-                               onChange={(e) => setFormData((d) => ({...d, origin: e.target.value}))}
-                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                               placeholder="e.g., USA"/>
-                      </div>
-                      <div>
-                        <label htmlFor="product-expiry" className="block text-sm font-medium text-slate-700 mb-1.5">Expiry
-                          Date</label>
-                        <input id="product-expiry" type="date" value={formData.expiry}
-                               onChange={(e) => setFormData((d) => ({...d, expiry: e.target.value}))}
-                               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"/>
-                      </div>
+
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-slate-700 mb-1.5">Product image</label>
                         <div className="space-y-3">

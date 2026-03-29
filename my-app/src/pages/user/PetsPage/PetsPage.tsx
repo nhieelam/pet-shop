@@ -41,7 +41,7 @@ export default function PetsPage() {
     return pets.filter(
       (p) =>
         (p.name ?? "").toLowerCase().includes(q) ||
-        (p.speciesName ?? "").toLowerCase().includes(q) ||
+        (p.species ?? "").toLowerCase().includes(q) ||
         (p.breed ?? "").toLowerCase().includes(q)
     );
   }, [pets, search]);

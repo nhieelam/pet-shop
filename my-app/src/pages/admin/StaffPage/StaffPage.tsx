@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useStaff, staffDisplayName, SHIFT_OPTIONS } from "./useStaff";
 import type { StaffData } from "../../../types/staffTypes";
 
@@ -150,6 +151,8 @@ export default function StaffPage() {
     openDeleteModal,
     closeDeleteModal,
     handleExportStaff,
+    handleImportStaffFile,
+    importSubmitting,
     formSubmitting,
     editSubmitting,
     shiftSubmitting,
@@ -166,6 +169,8 @@ export default function StaffPage() {
     handleShiftSubmit,
     confirmDelete,
   } = useStaff();
+
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
@@ -243,6 +248,28 @@ export default function StaffPage() {
             Showing {filteredStaff.length} of {allStaff.length} staff
           </p>
           <div className="flex items-center gap-2">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                await handleImportStaffFile(file);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              disabled={loading || importSubmitting}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              title="Import staff from Excel: columns Username, Email, Phone, Password; optional First name, Last name, Address, Shift (1–3)"
+            >
+              <span aria-hidden>{importSubmitting ? "⏳" : "📤"}</span>
+              <span className="hidden sm:inline">{importSubmitting ? "Importing…" : "Import Excel"}</span>
+            </button>
             <button
               type="button"
               onClick={handleExportStaff}

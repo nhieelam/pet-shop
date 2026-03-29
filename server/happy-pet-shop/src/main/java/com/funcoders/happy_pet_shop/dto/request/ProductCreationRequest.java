@@ -1,7 +1,5 @@
 package com.funcoders.happy_pet_shop.dto.request;
 
-import com.funcoders.happy_pet_shop.constant.Unit;
-import com.funcoders.happy_pet_shop.validation.CategoryConstraint;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -34,20 +32,12 @@ public class ProductCreationRequest {
     @Max(value = 99999, message = "Số lượng không vượt quá 99,999")
     Integer quantity;
 
-    @NotNull(message = "Đơn vị tính không được để trống")
-    Unit unit;
-
     @NotNull(message = "Danh mục không được để trống")
     UUID categoryId;
 
     @Size(max = 100, message = "Brand không quá 100 ký tự")
     String brand;
-
-    @Size(max = 100, message = "Xuất xứ không quá 100 ký tự")
-    String origin;
-
-    LocalDate expiryDate;
-
+    
     String imageUrl;
 }
 

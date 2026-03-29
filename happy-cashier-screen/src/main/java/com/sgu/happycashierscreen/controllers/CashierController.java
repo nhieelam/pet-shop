@@ -92,7 +92,6 @@ public class CashierController implements Initializable {
         if (contains(p.getCategoryName(), needle)) return true;
         if (contains(p.getCategoryId(), needle)) return true;
         if (contains(p.getBrand(), needle)) return true;
-        if (contains(p.getOrigin(), needle)) return true;
         if (contains(p.getUnit(), needle)) return true;
         if (p.getPrice() != null && p.getPrice().toPlainString().toLowerCase(Locale.ROOT).contains(needle)) {
             return true;

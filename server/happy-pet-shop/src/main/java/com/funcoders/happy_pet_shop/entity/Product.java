@@ -1,6 +1,5 @@
 package com.funcoders.happy_pet_shop.entity;
 
-import com.funcoders.happy_pet_shop.constant.Unit;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -42,21 +41,11 @@ public class Product {
     @Column(length = 100)
     String brand;
 
-    @Column(length = 100)
-    String origin;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    Unit unit;
-
     @Column(nullable = false)
     int quantity;
 
     @Column(name = "image_url")
     String imageUrl;
-
-    @Column(name = "expiry_date")
-    LocalDate expiryDate;
 
     @Column(name = "available", nullable = false)
     boolean available;

@@ -12,8 +12,6 @@ export function matchesProduct(p: ProductData, q: string) {
     p.brand,
     p.categoryName,
     p.id,
-    p.unit,
-    p.origin,
     p.price != null ? String(p.price) : "",
     p.quantity != null ? String(p.quantity) : "",
   ]
@@ -128,7 +126,6 @@ export default function ProductSearchBoard({
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-sm text-slate-600">
                       {p.brand && <span>Brand: {p.brand}</span>}
                       {p.categoryName && <span>Category: {p.categoryName}</span>}
-                      {p.unit && <span>Unit: {p.unit}</span>}
                     </div>
                     <p className="text-sm font-medium text-emerald-700 mt-1">
                       {formatMoney(p.price ?? 0)} · Stock: {p.quantity ?? 0}

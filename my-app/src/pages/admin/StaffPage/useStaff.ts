@@ -12,6 +12,7 @@ import * as staffService from "../../../services/staffService";
 import type { UserUpdateRequest } from "../../../types/userTypes.ts";
 import * as userService from "../../../services/userService";
 import { exportTableToXls } from "@/utils/exportFile.ts";
+import { parseStaffXls } from "@/utils/importFile.ts";
 
 export type ViewMode = "grid" | "list";
 
@@ -84,6 +85,7 @@ export function useStaff() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [shiftSubmitting, setShiftSubmitting] = useState(false);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [importSubmitting, setImportSubmitting] = useState(false);
   const [formData, setFormData] = useState<StaffFormData>(emptyForm);
   const [editFormData, setEditFormData] = useState<StaffEditFormData>(emptyEditForm);
   const [shiftValue, setShiftValue] = useState(1);
@@ -313,6 +315,23 @@ export function useStaff() {
     }
   };
 
+  const handleImportStaffFile = useCallback(
+    async (file: File) => {
+      setImportSubmitting(true);
+      try {
+        const list = await parseStaffXls(file);
+        await staffService.createListStaff(list);
+        showToast(`Đã nhập ${list.length} nhân viên từ file`, "success");
+        await fetchStaff();
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : "Nhập file thất bại", "error");
+      } finally {
+        setImportSubmitting(false);
+      }
+    },
+    [fetchStaff, showToast]
+  );
+
   const handleExportStaff = useCallback(() => {
     exportTableToXls({
       filename: `staff-export-${new Date().toISOString().slice(0, 10)}`,
@@ -373,6 +392,8 @@ export function useStaff() {
     handleDeleteStaff,
     fetchStaff,
     handleExportStaff,
+    handleImportStaffFile,
+    importSubmitting,
     formSubmitting,
     editSubmitting,
     shiftSubmitting,

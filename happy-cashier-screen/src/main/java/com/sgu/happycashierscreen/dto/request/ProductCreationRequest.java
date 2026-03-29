@@ -28,10 +28,6 @@ public class ProductCreationRequest {
 
     String brand;
 
-    String origin;
-
-    LocalDate expiryDate;
-
     String imageUrl;
 }
 

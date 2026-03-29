@@ -7,9 +7,6 @@ import type { PromotionData, PromotionDetail } from "../../../types/promotionTyp
 import { formatCurrency, formatDate, formatDateOnly, discountLabel } from "@/utils/format";
 import { statusSelectClass } from "@/utils/paymentStatusUtil";
 
-
-
-
 function PromotionGridCard({
   promotion,
   isSelected,

@@ -3,7 +3,7 @@ export interface ExportTableToXlsOptions {
   filename: string;
   sheetName?: string;
   headers: string[];
-  data: (string | number)[][];
+  data: (string | number | boolean)[][];
 }
 
 
@@ -14,7 +14,7 @@ export function exportTableToXls(options: ExportTableToXlsOptions): void {
     filename = `${filename}.xlsx`;
   }
 
-  const aoa: (string | number)[][] = [headers, ...data];
+  const aoa: (string | number | boolean)[][] = [headers, ...data];
 
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   const wb = XLSX.utils.book_new();

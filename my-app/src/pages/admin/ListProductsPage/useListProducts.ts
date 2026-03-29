@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { ProductCreationRequest, ProductUpdateRequest } from "../../../types/productTypes";
-import type { CategoryData, CategoryResponse } from "../../../types/categoryTypes";
+import type { CategoryData } from "../../../types/categoryTypes";
 import type { ProductData } from "../../../types/productTypes";
 import * as productService from "../../../services/productService";
 import * as categoryService from "../../../services/categoryService";
+import { isCloudinaryConfigured } from "../../../services/cloudinaryService";
+import { uploadImageToCloudinary } from "../../../services/cloudinaryService";
+import { exportTableToXls } from "@/utils/exportFile";
 
 export type ViewMode = "grid" | "list";
 export type SortOption =
@@ -25,8 +28,6 @@ export interface FilterState {
   availability: string;
   priceMin: string;
   priceMax: string;
-  origin: string;
-  expiry: string;
   sortBy: SortOption;
 }
 
@@ -37,8 +38,6 @@ const defaultFilters: FilterState = {
   availability: "",
   priceMin: "",
   priceMax: "",
-  origin: "",
-  expiry: "",
   sortBy: "newest",
 };
 
@@ -103,8 +102,6 @@ export function useListProducts() {
       availability,
       priceMin,
       priceMax,
-      origin,
-      expiry,
       sortBy,
     } = filters;
 
@@ -119,7 +116,6 @@ export function useListProducts() {
     }
     if (categoryId) result = result.filter((p) => (p.categoryId ?? p.categoryName) === categoryId);
     if (brand) result = result.filter((p) => p.brand === brand);
-    if (origin) result = result.filter((p) => p.origin === origin);
 
     const priceMinNum = parseFloat(priceMin);
     const priceMaxNum = parseFloat(priceMax);
@@ -131,19 +127,6 @@ export function useListProducts() {
       if (availability === "unavailable") result = result.filter((p) => p.available === false);
       if (availability === "lowstock") result = result.filter((p) => (p.quantity ?? 0) > 0 && (p.quantity ?? 0) <= 10);
       if (availability === "outofstock") result = result.filter((p) => (p.quantity ?? 0) === 0);
-    }
-
-    if (expiry && result.length > 0) {
-      const today = new Date();
-      const thirtyDays = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-      result = result.filter((p) => {
-        const exp = p.expiryDate ? new Date(p.expiryDate) : null;
-        if (!exp) return expiry === "valid";
-        if (expiry === "expired") return exp < today;
-        if (expiry === "expiring-soon") return exp >= today && exp <= thirtyDays;
-        if (expiry === "valid") return exp > today;
-        return true;
-      });
     }
 
     result.sort((a, b) => {
@@ -180,20 +163,17 @@ export function useListProducts() {
     return { total, available, lowStock, outOfStock };
   }, [products]);
 
-  // const uniqueBrands = useMemo(() => [...new Set(products.map((p) => p.brand).filter(Boolean))].sort() as string[], [products]);
-  // const uniqueOrigins = useMemo(() => [...new Set(products.map((p) => p.origin).filter(Boolean))].sort() as string[], [products]);
+  const uniqueBrands = useMemo(() => [...new Set(products.map((p) => p.brand).filter(Boolean))].sort() as string[], [products]);
 
-  // const activeFilterCount = useMemo(() => {
-  //   let c = 0;
-  //   if (filters.search.trim()) c++;
-  //   if (filters.categoryId) c++;
-  //   if (filters.brand) c++;
-  //   if (filters.availability) c++;
-  //   if (filters.priceMin || filters.priceMax) c++;
-  //   if (filters.origin) c++;
-  //   if (filters.expiry) c++;
-  //   return c;
-  // }, [filters]);
+  const activeFilterCount = useMemo(() => {
+    let c = 0;
+    if (filters.search.trim()) c++;
+    if (filters.categoryId) c++;
+    if (filters.brand) c++;
+    if (filters.availability) c++;
+    if (filters.priceMin || filters.priceMax) c++;
+    return c;
+  }, [filters]);
 
   const showToast = useCallback((message: string, type: "success" | "error" | "info" = "info") => {
     setToast({ message, type });
@@ -259,6 +239,133 @@ export function useListProducts() {
     }
   }, [productToDelete, closeDeleteModal, fetchProducts, showToast]);
 
+  
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    categoryId: "",
+    brand: "",
+    price: "",
+    quantity: "",
+    imageUrl: "",
+    available: true,
+  });
+
+  const cloudinaryEnabled = isCloudinaryConfigured();
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setImageUploadError(null);
+    setImageUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setFormData((d) => ({ ...d, imageUrl: url }));
+    } catch (err) {
+      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  useEffect(() => {
+    if (productModalOpen && editingProduct) {
+      setFormData({
+        name: editingProduct.name ?? "",
+        description: editingProduct.description ?? "",
+        categoryId: editingProduct.categoryId ?? "",
+        brand: editingProduct.brand ?? "",
+        price: String(editingProduct.price ?? ""),
+        quantity: String(editingProduct.quantity ?? ""),
+        imageUrl: editingProduct.imageUrl ?? "",
+        available: editingProduct.available !== false,
+      });
+    } else if (productModalOpen && !editingProduct) {
+      setFormData({
+        name: "",
+        description: "",
+        categoryId: "",
+        brand: "",
+        price: "",
+        quantity: "",
+        imageUrl: "",
+        available: true,
+      });
+    }
+  }, [productModalOpen, editingProduct]);
+
+  const getCategoryName = (product: ProductData) => {
+    const id = product.categoryId;
+    if (id) {
+      const cat = categories.find((c) => c.id === id);
+      if (cat) return cat.name;
+    }
+    return product.categoryName ?? "Uncategorized";
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const payload: ProductCreationRequest = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || "",
+        categoryId: formData.categoryId,
+        brand: formData.brand.trim() || "",
+        price: parseFloat(formData.price) || 0,
+        quantity: parseInt(formData.quantity, 10) || 0,
+        imageUrl: formData.imageUrl.trim() || "",
+      };
+      await handleCreateOrUpdateProduct(payload);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeleteProduct();
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
+
+  
+  const handleExportProduct = useCallback(() => {
+    exportTableToXls({
+      filename: `product-export-${new Date().toISOString().slice(0, 10)}`,
+      sheetName: "Product",
+      headers: [
+        "Product ID",
+        "Product Name",
+        "Product Description",
+        "Product Category",
+        "Product Brand",
+        "Product Price",
+        "Product Quantity",
+      ],
+      data: filteredProducts.map((p) => {
+        return [
+          p.id,
+          p.name ?? "",
+          p.description ?? "",
+          p.categoryName ?? "",
+          p.brand ?? "",
+          p.price ?? 0,
+          p.quantity ?? 0,
+        ];
+      }),
+    });
+  }, [filteredProducts]);
+
   return {
     products: filteredProducts,
     allProducts: products,
@@ -273,9 +380,8 @@ export function useListProducts() {
     viewMode,
     setViewMode,
     stats,
-    // uniqueBrands,
-    // uniqueOrigins,
-    // activeFilterCount,
+    uniqueBrands,
+    activeFilterCount,
     productModalOpen,
     deleteModalOpen,
     editingProduct,
@@ -290,5 +396,19 @@ export function useListProducts() {
     handleDeleteProduct,
     showToast,
     fetchProducts,
+    formSubmitting,
+    deleteSubmitting,
+    imageUploading,
+    imageUploadError,
+    fileInputRef,
+    formData,
+    setFormData,
+    cloudinaryEnabled,
+    handleImageFileChange,
+    handleFormSubmit,
+    confirmDelete,
+    getCategoryName,
+    setImageUploadError,
+    handleExportProduct
   };
 }

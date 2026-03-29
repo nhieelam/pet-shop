@@ -28,10 +28,6 @@ public class ProductUpdateRequest {
 
     String brand;
 
-    String origin;
-
-    LocalDate expiryDate;
-
     String imageUrl;
 
     boolean available;

@@ -181,6 +181,7 @@ export default function ManagePetsPage() {
     handleUpdatePet,
     handleMarkAsSold,
     handleDeletePet,
+    handleExportPets,
   } = usePets();
 
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -351,6 +352,16 @@ export default function ManagePetsPage() {
               >
                 <span>➕</span>
                 <span className="hidden sm:inline">Thêm thú cưng</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPets}
+                disabled={loading || filteredPets.length === 0}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                title="Export current table to Excel"
+                  >
+                <span aria-hidden>📥</span>
+                <span className="hidden sm:inline">Export Excel</span>
               </button>
             </div>
           </div>

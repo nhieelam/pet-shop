@@ -30,13 +30,7 @@ public class ProductResponse {
 
     String brand;
 
-    String origin;
-
-    String unit;
-
     int quantity;
-
-    LocalDate expiryDate;
 
     String imageUrl;
 
