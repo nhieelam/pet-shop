@@ -4,43 +4,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePromotions } from "./usePromotions";
 import type { PromotionData, PromotionDetail } from "../../../types/promotionTypes";
+import { formatCurrency, formatDate, formatDateOnly, discountLabel } from "@/utils/format";
+import { statusSelectClass } from "@/utils/paymentStatusUtil";
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value);
-}
 
-function formatDate(dateString: string | undefined): string {
-  if (!dateString) return "—";
-  return new Date(dateString).toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
-function formatDateOnly(dateString: string | undefined): string {
-  if (!dateString) return "—";
-  return new Date(dateString).toLocaleDateString("vi-VN");
-}
-
-function statusClass(status: string): string {
-  const s = (status ?? "").toUpperCase();
-  if (s.includes("ACTIVE")) return "bg-emerald-100 text-emerald-700";
-  if (s.includes("EXPIRED") || s.includes("INACTIVE")) return "bg-slate-200 text-slate-700";
-  return "bg-amber-100 text-amber-800";
-}
-
-function discountLabel(p: PromotionData): string {
-  const t = (p.discountType).toUpperCase();
-  const v = p.discountValue;
-  if (t === "PERCENT") return `${v}%`;
-  return formatCurrency(v);
-}
 
 function PromotionGridCard({
   promotion,
@@ -66,14 +34,14 @@ function PromotionGridCard({
     >
       <div className="relative h-24 bg-gradient-to-br from-violet-100 to-indigo-50 flex items-center justify-center">
         <span className="text-4xl">🏷️</span>
-        <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusClass(status)}`}>
+        <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusSelectClass(status)}`}>
           {status}
         </span>
       </div>
       <div className="p-4">
         <p className="text-xs text-slate-500 font-mono mb-1">{promotion.id}</p>
         <h3 className="font-semibold text-slate-800 line-clamp-1 mb-2">{promotion.code}</h3>
-        <p className="text-sm text-violet-700 font-medium mb-2">{discountLabel(promotion)}</p>
+        <p className="text-sm text-violet-700 font-medium mb-2">{discountLabel(promotion as PromotionData)}</p>
         <p className="text-xs text-slate-500 mb-3">{formatDateOnly(promotion.startDate)} → {formatDateOnly(promotion.endDate)}</p>
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -127,8 +95,8 @@ function PromotionListRow({
           </p>
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="font-bold text-violet-600">{discountLabel(promotion)}</p>
-          <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
+          <p className="font-bold text-violet-600">{discountLabel(promotion as PromotionData)}</p>
+          <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusSelectClass(status)}`}>
             {status}
           </span>
         </div>
@@ -415,13 +383,13 @@ export default function PromotionManagementPage() {
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <p className="text-slate-500">Discount</p>
-                      <p className="font-semibold text-violet-700">{discountLabel(detailPromotion)}</p>
+                      <p className="font-semibold text-violet-700">{discountLabel(detailPromotion as PromotionData)}</p>
                       <p className="text-xs text-slate-400 mt-0.5">{detailPromotion.discountType}</p>
                     </div>
                     <div>
                       <p className="text-slate-500">Status</p>
                       <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(detailPromotion.status ?? "")}`}
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusSelectClass(detailPromotion.status ?? "")}`}
                       >
                         {detailPromotion.status ?? "—"}
                       </span>

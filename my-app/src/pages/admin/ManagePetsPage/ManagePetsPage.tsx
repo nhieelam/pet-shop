@@ -2,24 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePets } from "./usePets";
-import type { PetResponse, PetCreationRequest, PetUpdateRequest, PetData } from "../../../types/petTypes";
+import type { PetCreationRequest, PetUpdateRequest, PetData } from "../../../types/petTypes";
 import { uploadImageToCloudinary, isCloudinaryConfigured } from "../../../services/cloudinaryService";
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value ?? 0);
-}
-
-function formatDate(s: string): string {
-  if (!s) return "—";
-  try {
-    return new Date(s).toLocaleDateString("vi-VN");
-  } catch {
-    return s;
-  }
-}
+import { formatCurrency, formatDate } from "@/utils/format"; 
 
 function PetGridCard({
   pet,

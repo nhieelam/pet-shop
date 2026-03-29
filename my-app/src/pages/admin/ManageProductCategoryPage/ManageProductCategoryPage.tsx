@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useManageProductCategory } from "./useManageProductCategory.ts";
 import type {
-  CategoryCreationRequest,
-  CategoryUpdateRequest,
   CategoryData,
 } from "../../../types/categoryTypes";
 
@@ -113,47 +110,15 @@ export default function ManageProductCategoryPage() {
     closeCategoryModal,
     openDeleteModal,
     closeDeleteModal,
-    handleCreateOrUpdateCategory,
-    handleDeleteCategory,
+    handleFormSubmit,
+    confirmDelete,
+    formSubmitting,
+    deleteSubmitting,
+    formData,
+    setFormData,
   } = useManageProductCategory();
 
-  const [formSubmitting, setFormSubmitting] = useState(false);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "" });
 
-  useEffect(() => {
-    if (categoryModalOpen && editingCategory) {
-      setFormData({
-        name: editingCategory.name,
-        description: editingCategory.description,
-      });
-    } else if (categoryModalOpen && !editingCategory) {
-      setFormData({ name: "", description: "" });
-    }
-  }, [categoryModalOpen, editingCategory]);
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    try {
-      const payload: CategoryCreationRequest & CategoryUpdateRequest = {
-        name: formData.name.trim(),
-        description: formData.description.trim() || "",
-      };
-      await handleCreateOrUpdateCategory(payload);
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    setDeleteSubmitting(true);
-    try {
-      await handleDeleteCategory();
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
 
   return (
     <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">

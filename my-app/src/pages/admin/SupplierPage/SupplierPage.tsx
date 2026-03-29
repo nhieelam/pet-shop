@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSupplier } from "./useSupplier";
 import type {
-  SupplierResponse,
-  SupplierCreationRequest,
-  SupplierUpdateRequest,
   SupplierData,
 } from "../../../types/supplierTypes";
 

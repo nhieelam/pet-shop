@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { CategoryResponse, CategoryCreationRequest, CategoryUpdateRequest, CategoryData } from "../../../types/categoryTypes.ts";
+import type { CategoryCreationRequest, CategoryUpdateRequest, CategoryData } from "../../../types/categoryTypes.ts";
 import * as categoryService from "../../../services/categoryService.ts";
 
 export type ViewMode = "grid" | "list";
@@ -17,6 +17,44 @@ export function useManageProductCategory() {
   const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: "", description: "" });
+
+  useEffect(() => {
+    if (categoryModalOpen && editingCategory) {
+      setFormData({
+        name: editingCategory.name,
+        description: editingCategory.description,
+      });
+    } else if (categoryModalOpen && !editingCategory) {
+      setFormData({ name: "", description: "" });
+    }
+  }, [categoryModalOpen, editingCategory]);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const payload: CategoryCreationRequest & CategoryUpdateRequest = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || "",
+      };
+      await handleCreateOrUpdateCategory(payload);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeleteCategory();
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -136,5 +174,12 @@ export function useManageProductCategory() {
     handleCreateOrUpdateCategory,
     handleDeleteCategory,
     fetchCategories,
+    showToast,
+    formSubmitting,
+    deleteSubmitting,
+    formData,
+    setFormData,
+    confirmDelete,
+    handleFormSubmit,
   };
 }

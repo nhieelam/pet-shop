@@ -1,4 +1,4 @@
-import type { DiscountType } from "../type/type";
+import type { DiscountType, PaymentStatus } from "../type/type";
 
 export interface PromotionDetailCreationRequest {
     productId: string;
@@ -43,7 +43,7 @@ export interface PromotionData {
     startDate: string;
     endDate: string;
     promotionDetails: PromotionDetail[];
-    status: string;
+    status: PaymentStatus;
     createdAt: string;
     updatedAt: string;
 }
