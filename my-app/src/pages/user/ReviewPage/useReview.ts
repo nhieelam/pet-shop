@@ -6,14 +6,12 @@ import type {
   InvoiceData,
   InvoiceDetailCreationRequest,
   InvoiceResponse,
-  PaymentMethod,
 } from "@/types/invoiceTypes";
+import type { PaymentMethod } from "@/type/type";
 
 export interface CheckoutItem {
   id: string;
-  /** Set for product lines */
   productId?: string;
-  /** Set for pet lines */
   petId?: string;
   name: string;
   price: number;
@@ -22,42 +20,7 @@ export interface CheckoutItem {
   isSelected: boolean;
 }
 
-export interface UseReviewReturn {
-  placingOrder: boolean;
-  error: string | null;
-  createdInvoice: InvoiceData | null;
-  checkoutItems: CheckoutItem[];
-  subtotal: number;
-  totalAmount: number;
-  shippingAddress: string;
-  newAddress: string;
-  useDefaultAddress: boolean;
-  paymentMethod: PaymentMethod;
-  setPaymentMethod: (value: PaymentMethod) => void;
-  setUseDefaultAddress: (value: boolean) => void;
-  setNewAddress: (value: string) => void;
-  placeOrder: () => Promise<void>;
-}
-
-function invoiceFromCreateResponse(res: InvoiceResponse): InvoiceData | null {
-  const d = res.data;
-  if (!d) return null;
-  if (Array.isArray(d)) return d[0] ?? null;
-  return d as unknown as InvoiceData;
-}
-
-function parseCheckoutState(state: unknown): CheckoutItem[] {
-  if (!state || typeof state !== "object") return [];
-  const items = (state as { checkoutItems?: unknown }).checkoutItems;
-  if (!Array.isArray(items)) return [];
-  return items.filter(
-    (item) =>
-      Number(item?.quantity) > 0 &&
-      ((item?.productId && String(item.productId).length > 0) || (item?.petId && String(item.petId).length > 0))
-  );
-}
-
-export function useReview(): UseReviewReturn {
+export function useReview() {
   const { customer, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,7 +33,7 @@ export function useReview(): UseReviewReturn {
   const [newAddress, setNewAddress] = useState("");
 
   const defaultAddress = customer?.user?.address ?? "";
-  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>(() => parseCheckoutState(location.state));
+  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>(() => location.state);
   const shippingAddress = useDefaultAddress ? defaultAddress : newAddress;
 
   const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * Number(item.quantity), 0);
@@ -105,9 +68,9 @@ export function useReview(): UseReviewReturn {
         invoiceDetails,
       });
 
-      const invoice = invoiceFromCreateResponse(res);
+      const invoice =res;
       if (invoice) {
-        setCreatedInvoice(invoice);
+        setCreatedInvoice(invoice.data);
       }
 
       setCheckoutItems([]);

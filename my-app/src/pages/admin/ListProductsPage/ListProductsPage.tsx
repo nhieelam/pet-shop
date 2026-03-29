@@ -414,7 +414,7 @@ export default function ListProductsPage() {
                   />
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+              {/* <div className="flex flex-wrap gap-2">
                 <button
                     type="button"
                     onClick={() => setFiltersVisible((v) => !v)}
@@ -430,7 +430,7 @@ export default function ListProductsPage() {
                         className="flex items-center gap-2 px-4 py-3 border border-slate-200 rounded-xl hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all font-medium text-slate-600">
                   <span>Clear</span>
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {filtersVisible && (

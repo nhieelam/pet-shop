@@ -5,16 +5,21 @@ import type { CategoryData } from "@/types/categoryTypes";
 import type { ProductData } from "@/types/productTypes";
 import * as categoryService from "@/services/categoryService";
 import * as productService from "@/services/productService";
+import { addCartItem } from "@/services/cartService";
+import { useAuth } from "@/context/authContext";
+import type { CustomerData } from "@/types/customerTypes";
+import type { CartResponse } from "@/types/cartTypes";
 
 const DEFAULT_MIN_PRICE = 0;
 const DEFAULT_MAX_PRICE = 10_000_000;
 const DEFAULT_SORT = "price-asc";
 
 export function useProductsPage(itemsPerPage = 12) {
+  const { customer, setCustomer } = useAuth();
   const [products, setProducts] = useState<ProductData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string >("");
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(DEFAULT_MIN_PRICE);
@@ -22,27 +27,60 @@ export function useProductsPage(itemsPerPage = 12) {
   const [sortBy, setSortBy] = useState(DEFAULT_SORT);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
+  function mergeCartIntoCustomer(
+    customer: CustomerData,
+    cartRes: CartResponse
+  ): CustomerData {
+    return {
+      ...customer,
+      cart: cartRes.data,
+    };
+  }
+  const handleAddToCart = async (productId: string) => {
+    if (!customer?.id) {
+      setCartMessage("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      return;
+    }
+    setCartLoading(true);
+    setCartMessage(null);
+    try {
+      const cartRes = await addCartItem(customer.id,{ productId: productId, quantity: 1 });
+      setCustomer(mergeCartIntoCustomer(customer, cartRes));
+
+      setCartMessage("Đã thêm vào giỏ hàng!");
+      setTimeout(() => setCartMessage(null), 2000);
+    } catch {
+      setCartMessage("Không thể thêm vào giỏ hàng");
+    } finally {
+      setCartLoading(false);
+    }
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    setError("");
     try {
       const data = await productService.getAllProducts();
       setProducts(data.data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Không thể tải sản phẩm");
-      setProducts([]);
+      setError( "Không thể tải sản phẩm");
     } finally {
       setLoading(false);
     }
   }, []);
 
   const fetchCategories = useCallback(async () => {
+    setError("");
+    setLoading(true);
     try {
       const data = await categoryService.getAllCategories();
       setCategories(data.data);
     } catch {
-      setCategories([]);
+      setError("Không thể tải danh mục");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -141,6 +179,7 @@ export function useProductsPage(itemsPerPage = 12) {
     setCurrentPage(1);
   }, []);
 
+
   return {
     categories,
     loading,
@@ -162,5 +201,9 @@ export function useProductsPage(itemsPerPage = 12) {
     handleSort,
     handlePageChange,
     resetFilters,
+    handleAddToCart,
+    cartLoading,
+    cartMessage,
+
   };
 }

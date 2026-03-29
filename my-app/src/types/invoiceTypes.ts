@@ -29,7 +29,7 @@ export interface InvoiceCreationRequest {
 export interface InvoiceResponse {
   success: boolean;
   message: string;
-  data: InvoiceData[];
+  data: InvoiceData;
   errorCode: number;
   status: number;
   timestamp: string;

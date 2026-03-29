@@ -7,24 +7,24 @@ import {
   addPetToCart,
   deleteCartItem,
 } from "@/services/cartService";
-import type { CartItemResponse, CartResponse } from "@/types/cartTypes";
+import type { CartItem, CartData } from "@/types/cartTypes";
 import type { CustomerData } from "@/types/customerTypes";
 
 function mergeCartIntoCustomer(
   customer: CustomerData,
-  cartRes: CartResponse
+  cart: CartData
 ): CustomerData {
   return {
     ...customer,
-    cart: cartRes.data,
+    cart: cart,
   } as CustomerData;
 }
 
-export function getProductId(item: CartItemResponse): string {
+export function getProductId(item: CartItem): string {
   return item.product!.id;
 }
 
-export function getPetId(item: CartItemResponse): string {
+export function getPetId(item: CartItem): string {
   return item.pet!.id;
 }
 
@@ -35,14 +35,15 @@ export function useCart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const items: CartItemResponse[] = (
-    customer?.cart?.cartItems ?? []
+  const items: CartItem[] = (
+    customer?.cart.cartItems ?? []
   ).filter((item) => item.quantity > 0);
 
   const productItems = useMemo(
-    () => items.filter((i) => i.product?.id),
+    () => items.filter((i) => i.product),
     [items]
   );
+
   const petItems = useMemo(
     () => items.filter((i) => i.pet?.id),
     [items]
@@ -84,13 +85,13 @@ export function useCart() {
           const line = items.find((i) => i.product?.id === productId);
           if (!line) return;
           const cartRes = await deleteCartItem(line.id);
-          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         } else {
           const cartRes = await addCartItemToCart(customer.id, {
             productId,
             quantity: newQuantity,
           });
-          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         }
       } catch (e) {
         setError("Cập nhật thất bại");
@@ -111,13 +112,13 @@ export function useCart() {
           const line = items.find((i) => i.pet?.id === petId);
           if (!line) return;
           const cartRes = await deleteCartItem(line.id);
-          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         } else {
           const cartRes = await addPetToCart(customer.id, {
             petId,
             quantity: newQuantity,
           });
-          setCustomer(mergeCartIntoCustomer(customer, cartRes));
+          setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         }
       } catch (e) {
         setError("Cập nhật thất bại");
@@ -135,7 +136,7 @@ export function useCart() {
       setError("");
       try {
         const cartRes = await deleteCartItem(cartItemId);
-        setCustomer(mergeCartIntoCustomer(customer, cartRes));
+        setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
       } catch (e) {
         setError("Không thể xóa sản phẩm");
       } finally {
@@ -153,7 +154,7 @@ export function useCart() {
     }
     setError("");
     const payload = selected.map((item) => {
-      if (item.pet?.id) {
+      if (item.pet) {
         return {
           id: item.id,
           petId: item.pet.id,

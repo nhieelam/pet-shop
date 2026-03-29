@@ -7,7 +7,7 @@ import * as promotionService from "../../../services/promotionService";
 export type ViewMode = "grid" | "list";
 
 export function usePromotions() {
-    const [promotions, setPromotions] = useState<PromotionData[]>([]);
+  const [promotions, setPromotions] = useState<PromotionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");

@@ -47,14 +47,16 @@ export function useListProducts() {
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [filtersVisible, setFiltersVisible] = useState(false);
+
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
   const [productToDelete, setProductToDelete] = useState<ProductData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [filtersVisible, setFiltersVisible] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -121,8 +123,8 @@ export function useListProducts() {
 
     const priceMinNum = parseFloat(priceMin);
     const priceMaxNum = parseFloat(priceMax);
-    if (!Number.isNaN(priceMinNum) && priceMinNum > 0) result = result.filter((p) => (p.price ?? 0) >= priceMinNum);
-    if (!Number.isNaN(priceMaxNum) && priceMaxNum > 0) result = result.filter((p) => (p.price ?? 0) <= priceMaxNum);
+    if (priceMinNum > 0) result = result.filter((p) => (p.price ?? 0) >= priceMinNum);
+    if (priceMaxNum > 0) result = result.filter((p) => (p.price ?? 0) <= priceMaxNum);
 
     if (availability) {
       if (availability === "available") result = result.filter((p) => p.available !== false);
@@ -178,20 +180,20 @@ export function useListProducts() {
     return { total, available, lowStock, outOfStock };
   }, [products]);
 
-  const uniqueBrands = useMemo(() => [...new Set(products.map((p) => p.brand).filter(Boolean))].sort() as string[], [products]);
-  const uniqueOrigins = useMemo(() => [...new Set(products.map((p) => p.origin).filter(Boolean))].sort() as string[], [products]);
+  // const uniqueBrands = useMemo(() => [...new Set(products.map((p) => p.brand).filter(Boolean))].sort() as string[], [products]);
+  // const uniqueOrigins = useMemo(() => [...new Set(products.map((p) => p.origin).filter(Boolean))].sort() as string[], [products]);
 
-  const activeFilterCount = useMemo(() => {
-    let c = 0;
-    if (filters.search.trim()) c++;
-    if (filters.categoryId) c++;
-    if (filters.brand) c++;
-    if (filters.availability) c++;
-    if (filters.priceMin || filters.priceMax) c++;
-    if (filters.origin) c++;
-    if (filters.expiry) c++;
-    return c;
-  }, [filters]);
+  // const activeFilterCount = useMemo(() => {
+  //   let c = 0;
+  //   if (filters.search.trim()) c++;
+  //   if (filters.categoryId) c++;
+  //   if (filters.brand) c++;
+  //   if (filters.availability) c++;
+  //   if (filters.priceMin || filters.priceMax) c++;
+  //   if (filters.origin) c++;
+  //   if (filters.expiry) c++;
+  //   return c;
+  // }, [filters]);
 
   const showToast = useCallback((message: string, type: "success" | "error" | "info" = "info") => {
     setToast({ message, type });
@@ -271,9 +273,9 @@ export function useListProducts() {
     viewMode,
     setViewMode,
     stats,
-    uniqueBrands,
-    uniqueOrigins,
-    activeFilterCount,
+    // uniqueBrands,
+    // uniqueOrigins,
+    // activeFilterCount,
     productModalOpen,
     deleteModalOpen,
     editingProduct,

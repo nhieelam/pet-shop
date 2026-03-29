@@ -6,16 +6,8 @@ import { useAuth } from "@/context/authContext";
 import { addCartItem } from "@/services/cartService";
 import type { CustomerData } from "@/types/customerTypes";
 import type { CartResponse } from "@/types/cartTypes";
+import { useProductsPage } from "../hooks/useProductsPage";
 
-function mergeCartIntoCustomer(
-  customer: CustomerData,
-  cartRes: CartResponse
-): CustomerData {
-  return {
-    ...customer,
-    cart: cartRes.data,
-  };
-}
 
 interface ProductCardProps {
   id: string;
@@ -36,32 +28,7 @@ export default function ProductCard({
   availableAmount,
 }: ProductCardProps) {
   const navigate = useNavigate();
-  const { customer, setCustomer } = useAuth();
-  const [cartLoading, setCartLoading] = useState(false);
-  const [cartMessage, setCartMessage] = useState<string | null>(null);
-
-  const handleAddToCart = async () => {
-    if (availableAmount === 0) return;
-    if (!customer?.id) {
-      setCartMessage("Vui lòng đăng nhập để thêm vào giỏ hàng");
-      return;
-    }
-    setCartLoading(true);
-    setCartMessage(null);
-    try {
-      const cartRes = await addCartItem(customer.id,{ productId: id, quantity: 1 });
-      setCustomer(mergeCartIntoCustomer(customer, cartRes));
-
-      setCartMessage("Đã thêm vào giỏ hàng!");
-      setTimeout(() => setCartMessage(null), 2000);
-    } catch {
-      setCartMessage("Không thể thêm vào giỏ hàng");
-    } finally {
-      setCartLoading(false);
-    }
-  };
-
-
+  const { handleAddToCart, cartLoading, cartMessage } = useProductsPage();
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
@@ -118,7 +85,7 @@ export default function ProductCard({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleAddToCart();
+                    handleAddToCart(id);
                   }}
                   disabled={availableAmount === 0 || cartLoading}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
