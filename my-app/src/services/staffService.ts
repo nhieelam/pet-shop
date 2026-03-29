@@ -106,3 +106,5 @@ export const getInfo = async (): Promise<StaffResponse> => {
     const data = await response.json();
     return data;
 };
+
+

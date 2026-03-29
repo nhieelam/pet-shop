@@ -2,17 +2,11 @@
 
 import { Link, useParams } from "react-router-dom";
 import { useInvoiceDetail } from "./useInvoiceDetail";
-import { PAYMENT_STATUS_ENTRIES, normalizePaymentStatus } from "@/utils/paymentStatusMeta";
+import { PAYMENT_STATUS_ENTRIES, normalizePaymentStatus, paymentMethodLabel } from "@/utils/paymentStatusUtil";
 import StatusBadge from "../ProfilePage/components/StatusBadge";
 import { formatDate, formatCurrency } from "@/utils/format";
 
-function paymentMethodLabel(method: string | undefined) {
-  if (!method) return "—";
-  const u = method.toUpperCase().replace(/-/g, "_");
-  if (u === "COD") return "Thanh toán khi nhận hàng (COD)";
-  if (u === "QR_SCANNING") return "Quét mã QR";
-  return method;
-}
+
 
 export default function InvoiceDetailPage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();

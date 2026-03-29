@@ -51,3 +51,43 @@ export function statusSelectClass(status: PaymentStatus): string {
       return `${base} bg-slate-50 border-slate-200 text-slate-800`;
   }
 }
+
+export function paymentMethodLabel(method: string | undefined) {
+  if (!method) return "—";
+  const u = method.toUpperCase().replace(/-/g, "_");
+  if (u === "COD") return "Thanh toán khi nhận hàng (COD)";
+  if (u === "QR_SCANNING") return "Quét mã QR";
+  return method;
+}
+
+export const PAYMENT_STATUS_ENTRIES = [
+  {
+    code: "PENDING",
+    title: "Chờ thanh toán",
+    description: "Đơn vừa được tạo, chưa ghi nhận thanh toán.",
+  },
+  {
+    code: "PAID",
+    title: "Đã thanh toán",
+    description: "Thanh toán đã được xác nhận.",
+  },
+  {
+    code: "CANCELLED",
+    title: "Đã hủy",
+    description: "Đơn bị hủy bởi khách hoặc hệ thống.",
+  },
+  {
+    code: "FAILED",
+    title: "Thanh toán thất bại",
+    description: "Giao dịch không thành công.",
+  },
+  {
+    code: "REFUNDED",
+    title: "Đã hoàn tiền",
+    description: "Số tiền đã được hoàn lại cho khách.",
+  },
+] as const;
+
+export function normalizePaymentStatus(status: string | undefined): string {
+  return (status ?? "").trim().toUpperCase();
+}

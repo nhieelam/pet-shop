@@ -1,5 +1,6 @@
 package com.funcoders.happy_pet_shop.service;
 
+import com.funcoders.happy_pet_shop.dto.request.ListProductCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ProductCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ProductUpdateRequest;
 import com.funcoders.happy_pet_shop.dto.response.ProductResponse;
@@ -35,6 +36,18 @@ public class ProductService {
     @Transactional
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ProductResponse createProduct(ProductCreationRequest request) {
+        return persistProduct(request);
+    }
+
+    @Transactional
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public List<ProductResponse> createProducts(ListProductCreationRequest request) {
+        return request.getProducts().stream()
+                .map(this::persistProduct)
+                .collect(Collectors.toList());
+    }
+
+    private ProductResponse persistProduct(ProductCreationRequest request) {
         Product productEntity = productMapper.toEntity(request);
 
         Category category = categoryRepository.findById(request.getCategoryId())
