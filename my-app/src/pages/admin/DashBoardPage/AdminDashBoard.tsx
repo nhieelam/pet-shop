@@ -71,7 +71,6 @@ const AdminDashboard: FC = () => {
         <p className="text-gray-500 mt-2">Chào mừng bạn quay trở lại 👋</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
         {stats.map((item, index) => (
           <div

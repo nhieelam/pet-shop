@@ -1,8 +1,4 @@
-/**
- * Upload an image file to Cloudinary (unsigned upload).
- * Requires env: VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.
- * Create an "unsigned" upload preset in Cloudinary Dashboard → Settings → Upload.
- */
+
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string | undefined;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
 

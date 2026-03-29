@@ -3,6 +3,9 @@
 import { useRef, useState } from "react";
 import { useListProducts } from "./useListProducts";
 import type { ProductData } from "../../../types/productTypes";
+import { useXLS } from "./useXLS";
+import { useFilterdProducts } from "./useFilterdProducts";
+
 
 const SORT_OPTIONS = [
   {value: "newest", label: "Newest First"},
@@ -60,6 +63,9 @@ function ProductGridCard({
             <span className="text-lg font-bold text-emerald-600">${(product.price ?? 0).toFixed(2)}</span>
           </div>
           <p className="text-sm text-slate-500 mb-3 line-clamp-2">{product.description || "No description"}</p>
+          <div className="mb-3">
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${stockClass}`}>{stockText}</span>
+          </div>
           <div className="flex flex-wrap gap-2 mb-3">
             <span
                 className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{categoryName || "Uncategorized"}</span>
@@ -92,7 +98,6 @@ function ProductListRow({
   onEdit: (p: ProductData) => void;
   onDelete: (p: ProductData) => void;
 }) {
-  const [importSubmitting, setImportSubmitting] = useState(false);
   const emoji = "📦";
   const q = product.quantity ?? 0;
   const stockClass = q === 0 ? "text-rose-500 bg-rose-50" : q <= 10 ? "text-amber-500 bg-amber-50" : "text-emerald-500 bg-emerald-50";
@@ -144,21 +149,12 @@ function ProductListRow({
 
 export default function ListProductsPage() {
   const {
-    products: filteredProducts,
-    allProducts,
+
     categories,
     loading,
     error,
-    filters,
-    updateFilter,
-    clearAllFilters,
-    filtersVisible,
-    setFiltersVisible,
-    viewMode,
-    setViewMode,
     stats,
-    uniqueBrands,
-    activeFilterCount,
+
     productModalOpen,
     deleteModalOpen,
     editingProduct,
@@ -172,23 +168,48 @@ export default function ListProductsPage() {
     getCategoryName,
     handleFormSubmit,
     confirmDelete,
-    deleteSubmitting,
+
     formData,
     setFormData,
     cloudinaryEnabled,
     fileInputRef,
-    imageUploading,
-    imageUploadError,
+    allProducts,
     formSubmitting,
+    deleteSubmitting,
+    fetchProducts,
+    showToast,
+  } = useListProducts();
+
+  const {
+    filteredProducts,
+    filters,
+    updateFilter,
+    clearAllFilters,
+    filtersVisible,
+    setFiltersVisible,
+    activeFilterCount,
+    uniqueBrands,
+    setViewMode,
+    viewMode,
+  } = useFilterdProducts(allProducts, categories);
+
+  const {
     handleImageFileChange,
-    setImageUploadError,
     handleExportProduct,
     handleImportProductFile,
+    imageUploading,
+    imageUploadError,
+    setImageUploadError,
     importSubmitting,
+  } = useXLS({
+    filteredProducts,
+    fetchProducts,
+    showToast,
+    setFormData,
+    fileInputRef,
+  });
 
-  } = useListProducts();
   const importInputRef = useRef<HTMLInputElement>(null);
-
 
   return (
       <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">
@@ -244,7 +265,7 @@ export default function ListProductsPage() {
               onClick={() => importInputRef.current?.click()}
               disabled={loading || importSubmitting}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
-              title="Import staff from Excel: columns Username, Email, Phone, Password; optional First name, Last name, Address, Shift (1–3)"
+              title="Import products from Excel: columns name, description, categoryId, brand, price, quantity, imageUrl"
             >
               <span aria-hidden>{importSubmitting ? "⏳" : "📤"}</span>
               <span className="hidden sm:inline">{importSubmitting ? "Importing…" : "Import Excel"}</span>
@@ -506,7 +527,6 @@ export default function ListProductsPage() {
           )}
         </main>
 
-        {/* Product Modal */}
         {productModalOpen && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
               <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeProductModal} aria-hidden/>
