@@ -21,6 +21,7 @@ export const API_CONFIG = {
 
         PRODUCT: {
             CREATE: "/products",
+            CREATE_LIST: "/products/batch",
             GET_ALL: "/products",
             GET_BY_ID: (id: string) => `/products/${id}`,
             PAGINATE: "/products/paginate",

@@ -105,3 +105,21 @@ export const getAllProductsPaginated = async (
   const data = await response.json();
   return data;
 };
+
+export const createListProduct = async (
+  request: { products: ProductCreationRequest[] }
+): Promise<ProductResponseArray> => {
+  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT.CREATE_LIST}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+  if (!response.ok) {
+    throw new Error("Không thể tạo danh sách product");
+  }
+  const data = await response.json();
+  return data;
+};

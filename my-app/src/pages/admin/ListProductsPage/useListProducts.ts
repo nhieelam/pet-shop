@@ -9,6 +9,8 @@ import * as categoryService from "../../../services/categoryService";
 import { isCloudinaryConfigured } from "../../../services/cloudinaryService";
 import { uploadImageToCloudinary } from "../../../services/cloudinaryService";
 import { exportTableToXls } from "@/utils/exportFile";
+import { readXlsFirstSheetRows } from "@/utils/importFile";
+  import { cellToString } from "@/utils/importFile";
 
 export type ViewMode = "grid" | "list";
 export type SortOption =
@@ -365,6 +367,55 @@ export function useListProducts() {
       }),
     });
   }, [filteredProducts]);
+  const handleImportProductFile = useCallback(async (file: File) => {
+    setImportSubmitting(true);
+    try {
+      const rows = await readXlsFirstSheetRows(file);
+      if (!rows.length) {
+        throw new Error("File is empty");
+      }
+      const headerRow = rows[0];
+      const list: ProductCreationRequest[] = [];
+      const get = (key: string, row: unknown[]) => {
+        const idx = headerRow.indexOf(key);
+        if (idx === undefined) return "";
+        return cellToString(row[idx]);
+      };
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r] as unknown[];
+        try {
+          const name = get("name", row);
+          const description = get("description", row);
+          const categoryId = get("categoryId", row);
+          const brand = get("brand", row);
+          const price = get("price", row);
+          const quantity = get("quantity", row);
+          const imageUrl = get("imageUrl", row);
+          list.push({
+            name,
+            description,
+            categoryId,
+            brand,
+            price: parseFloat(price) || 0,
+            quantity: parseInt(quantity, 10) || 0,
+            imageUrl,
+          });
+        } catch (e) {
+          console.error(`Error processing row ${r + 1}:`, e);
+        }
+      }
+      console.log("list",list);
+
+      await productService.createListProduct({products:list});
+      showToast(`Đã nhập ${list.length} sản phẩm từ file`, "success");
+      await fetchProducts();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Nhập file thất bại", "error");
+    } finally {
+      setImportSubmitting(false);
+    }
+  }, []);
+  const [importSubmitting, setImportSubmitting] = useState(false);
 
   return {
     products: filteredProducts,
@@ -409,6 +460,8 @@ export function useListProducts() {
     confirmDelete,
     getCategoryName,
     setImageUploadError,
-    handleExportProduct
+    handleExportProduct,
+    handleImportProductFile,
+    importSubmitting,
   };
 }

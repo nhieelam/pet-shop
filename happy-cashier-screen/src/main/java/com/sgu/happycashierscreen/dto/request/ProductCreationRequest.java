@@ -22,7 +22,6 @@ public class ProductCreationRequest {
 
     Integer quantity;
 
-    String unit;
 
     UUID categoryId;
 

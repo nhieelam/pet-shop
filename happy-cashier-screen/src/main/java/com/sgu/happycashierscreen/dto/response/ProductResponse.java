@@ -29,8 +29,6 @@ public class ProductResponse {
 
     String brand;
 
-    String unit;
-
     int quantity;
 
     String imageUrl;

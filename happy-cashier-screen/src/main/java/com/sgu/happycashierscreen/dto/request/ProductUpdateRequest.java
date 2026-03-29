@@ -22,8 +22,6 @@ public class ProductUpdateRequest {
 
     Integer quantity;
 
-    String unit;
-
     UUID categoryId;
 
     String brand;

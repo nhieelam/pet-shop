@@ -38,7 +38,7 @@ export interface ProductCreationRequest {
   quantity: number;
   categoryId: string;
   brand: string;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 export interface ProductUpdateRequest {

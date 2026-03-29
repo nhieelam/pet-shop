@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useListProducts } from "./useListProducts";
 import type { ProductData } from "../../../types/productTypes";
 
@@ -92,6 +92,7 @@ function ProductListRow({
   onEdit: (p: ProductData) => void;
   onDelete: (p: ProductData) => void;
 }) {
+  const [importSubmitting, setImportSubmitting] = useState(false);
   const emoji = "📦";
   const q = product.quantity ?? 0;
   const stockClass = q === 0 ? "text-rose-500 bg-rose-50" : q <= 10 ? "text-amber-500 bg-amber-50" : "text-emerald-500 bg-emerald-50";
@@ -181,8 +182,12 @@ export default function ListProductsPage() {
     formSubmitting,
     handleImageFileChange,
     setImageUploadError,
-    handleExportProduct
+    handleExportProduct,
+    handleImportProductFile,
+    importSubmitting,
+
   } = useListProducts();
+  const importInputRef = useRef<HTMLInputElement>(null);
 
 
   return (
@@ -222,6 +227,28 @@ export default function ListProductsPage() {
                   <span>➕</span>
                   <span className="hidden sm:inline">Add Product</span>
                 </button>
+                <input
+              ref={importInputRef}
+              type="file"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                await handleImportProductFile(file);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              disabled={loading || importSubmitting}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-indigo-200 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              title="Import staff from Excel: columns Username, Email, Phone, Password; optional First name, Last name, Address, Shift (1–3)"
+            >
+              <span aria-hidden>{importSubmitting ? "⏳" : "📤"}</span>
+              <span className="hidden sm:inline">{importSubmitting ? "Importing…" : "Import Excel"}</span>
+            </button>
                 <button
                   type="button"
                   onClick={handleExportProduct}
