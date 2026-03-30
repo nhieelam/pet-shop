@@ -108,23 +108,6 @@ export function useStaff() {
     fetchStaff();
   }, [fetchStaff]);
 
-  const filteredStaff = useMemo(() => {
-    let result = [...staffList];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (s) =>
-          (s.user?.username ?? "").toLowerCase().includes(q) ||
-          (s.user?.firstname ?? "").toLowerCase().includes(q) ||
-          (s.user?.lastname ?? "").toLowerCase().includes(q) ||
-          (s.user?.email ?? "").toLowerCase().includes(q) ||
-          (s.user?.phone ?? "").toLowerCase().includes(q)
-      );
-    }
-    result.sort((a, b) => (a.user?.username ?? "").localeCompare(b.user?.username ?? ""));
-    return result;
-  }, [staffList, search]);
-
   const stats = useMemo(
     () => ({
       total: staffList.length,
@@ -376,6 +359,24 @@ export function useStaff() {
     [fetchStaff, showToast]
   );
 
+  
+  const filteredStaff = useMemo(() => {
+    let result = [...staffList];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (s) =>
+          (s.user?.username ?? "").toLowerCase().includes(q) ||
+          (s.user?.firstname ?? "").toLowerCase().includes(q) ||
+          (s.user?.lastname ?? "").toLowerCase().includes(q) ||
+          (s.user?.email ?? "").toLowerCase().includes(q) ||
+          (s.user?.phone ?? "").toLowerCase().includes(q)
+      );
+    }
+    result.sort((a, b) => (a.user?.username ?? "").localeCompare(b.user?.username ?? ""));
+    return result;
+  }, [staffList, search]);
+
   const handleExportStaff = useCallback(() => {
     exportTableToXls({
       filename: `staff-export-${new Date().toISOString().slice(0, 10)}`,
@@ -403,6 +404,8 @@ export function useStaff() {
       }),
     });
   }, [filteredStaff]);
+
+
 
   return {
     staff: filteredStaff,

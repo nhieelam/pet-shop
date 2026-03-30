@@ -77,7 +77,7 @@ export function useXLS({
           p.id,
           p.name ?? "",
           p.description ?? "",
-          p.categoryName ?? "",
+          p.categoryId ?? "",
           p.brand ?? "",
           p.price ?? 0,
           p.quantity ?? 0,
@@ -94,7 +94,7 @@ export function useXLS({
         if (!rows.length) {
           throw new Error("File is empty");
         }
-        const headerRow = rows[0] as unknown[];
+        const headerRow = rows[0] 
         const get = (key: string, row: unknown[]) => {
           const idx = headerColumnIndex(headerRow, key);
           if (idx < 0) return "";

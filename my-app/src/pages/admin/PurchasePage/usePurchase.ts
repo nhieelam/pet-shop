@@ -48,24 +48,6 @@ export function usePurchase() {
     fetchPurchases();
   }, [fetchPurchases]);
 
-  const filteredPurchases = useMemo(() => {
-    let result = [...purchases];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-          (p) =>
-              (p.id ?? "").toLowerCase().includes(q) ||
-              (p.supplier?.name ?? "").toLowerCase().includes(q) ||
-              (p.supplier?.address ?? "").toLowerCase().includes(q)
-      );
-    }
-    if (statusFilter) {
-      result = result.filter((p) => (p.status ?? "") === statusFilter);
-    }
-    result.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
-    return result;
-  }, [purchases, search, statusFilter]);
-
   const stats = useMemo(() => {
     const total = purchases.length;
     const statusCounts: Record<string, number> = {};
@@ -123,6 +105,24 @@ export function usePurchase() {
     setSearch("");
     setStatusFilter("");
   }, []);
+
+  const filteredPurchases = useMemo(() => {
+    let result = [...purchases];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+          (p) =>
+              (p.id ?? "").toLowerCase().includes(q) ||
+              (p.supplier?.name ?? "").toLowerCase().includes(q) ||
+              (p.supplier?.address ?? "").toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter) {
+      result = result.filter((p) => (p.status ?? "") === statusFilter);
+    }
+    result.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+    return result;
+  }, [purchases, search, statusFilter]);
 
   return {
     purchases: filteredPurchases,

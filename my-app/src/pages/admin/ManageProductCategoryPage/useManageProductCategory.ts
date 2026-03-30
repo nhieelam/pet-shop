@@ -74,16 +74,6 @@ export function useManageProductCategory() {
     fetchCategories();
   }, [fetchCategories]);
 
-  const filteredCategories = useMemo(() => {
-    if (!search.trim()) return categories;
-    const q = search.toLowerCase();
-    return categories.filter(
-      (c) =>
-        (c.name ?? "").toLowerCase().includes(q) ||
-        (c.description ?? "").toLowerCase().includes(q)
-    );
-  }, [categories, search]);
-
   const stats = useMemo(() => ({
     total: categories.length,
   }), [categories.length]);
@@ -151,6 +141,16 @@ export function useManageProductCategory() {
     }
   }, [categoryToDelete, closeDeleteModal, fetchCategories, showToast]);
 
+  const filteredCategories = useMemo(() => {
+    if (!search.trim()) return categories;
+    const q = search.toLowerCase();
+    return categories.filter(
+      (c) =>
+        (c.name ?? "").toLowerCase().includes(q) ||
+        (c.description ?? "").toLowerCase().includes(q)
+    );
+  }, [categories, search]);
+  
   return {
     categories: filteredCategories,
     allCategories: categories,

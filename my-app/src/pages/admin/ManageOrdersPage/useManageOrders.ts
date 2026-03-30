@@ -37,24 +37,6 @@ export function useManageOrders() {
     fetchInvoices();
   }, [fetchInvoices]);
 
-  const filteredInvoices = useMemo(() => {
-    let result = [...invoices];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (inv) =>
-          (inv.id).toLowerCase().includes(q) ||
-          (inv.customerName).toLowerCase().includes(q) ||
-          (inv.shippingAddress).toLowerCase().includes(q)
-      );
-    }
-    if (statusFilter) {
-      result = result.filter((inv) => (inv.status) === statusFilter);
-    }
-    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return result;
-  }, [invoices, search, statusFilter]);
-
   const stats = useMemo(() => {
     const total = invoices.length;
     const statusCounts: Record<string, number> = {};
@@ -112,6 +94,24 @@ export function useManageOrders() {
     setSearch("");
     setStatusFilter("");
   }, []);
+
+  const filteredInvoices = useMemo(() => {
+    let result = [...invoices];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (inv) =>
+          (inv.id).toLowerCase().includes(q) ||
+          (inv.customerName).toLowerCase().includes(q) ||
+          (inv.shippingAddress).toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter) {
+      result = result.filter((inv) => (inv.status) === statusFilter);
+    }
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return result;
+  }, [invoices, search, statusFilter]);
 
   return {
     invoices: filteredInvoices,

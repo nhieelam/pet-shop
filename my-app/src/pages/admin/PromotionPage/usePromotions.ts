@@ -38,24 +38,6 @@ export function usePromotions() {
     void fetchPromotions();
   }, [fetchPromotions]);
 
-  const filteredPromotions = useMemo(() => {
-    let result = [...promotions];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          (p.code ?? "").toLowerCase().includes(q) ||
-          (p.description ?? "").toLowerCase().includes(q) ||
-          (p.id ?? "").toLowerCase().includes(q)
-      );
-    }
-    if (statusFilter) {
-      result = result.filter((p) => (p.status ?? "") === statusFilter);
-    }
-    result.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
-    return result;
-  }, [promotions, search, statusFilter]);
-
   const stats = useMemo(() => {
     const total = promotions.length;
     const statusCounts: Record<string, number> = {};
@@ -123,6 +105,25 @@ export function usePromotions() {
     setSearch("");
     setStatusFilter("");
   }, []);
+
+  const filteredPromotions = useMemo(() => {
+    let result = [...promotions];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (p) =>
+          (p.code ?? "").toLowerCase().includes(q) ||
+          (p.description ?? "").toLowerCase().includes(q) ||
+          (p.id ?? "").toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter) {
+      result = result.filter((p) => (p.status ?? "") === statusFilter);
+    }
+    result.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+    return result;
+  }, [promotions, search, statusFilter]);
+
 
   return {
     promotions: filteredPromotions,

@@ -12,8 +12,8 @@ import { formatPrice } from "@/utils/format";
 
 export default function DetailedProductPage() {
   const { id } = useParams();
-  const { product, loading, error, fetchProduct, quantity, setQuantity, handlePayment  } = useDetailedProduct();
-  const { handleAddToCart, cartLoading, cartMessage } = useProductsPage();
+  const { product, loading, error, fetchProduct, quantity, setQuantity  } = useDetailedProduct();
+  const { handleAddToCart, cartLoading } = useProductsPage();
   
   useEffect(() => {
       fetchProduct();
@@ -154,14 +154,6 @@ export default function DetailedProductPage() {
                   >
                     {cartLoading ? "..." : "🛒"}
                     Thêm vào giỏ hàng
-                  </button>
-                  <button
-                    onClick={handlePayment}
-                    disabled={product.quantity === 0}
-                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-lg transition flex items-center justify-center gap-2 text-lg"
-                  >
-                    <span>💳</span>
-                    Thanh toán ngay
                   </button>
                 </div>
 

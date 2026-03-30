@@ -144,7 +144,6 @@ export default function StaffPage() {
     toast,
     openAddModal,
     openEditModal,
-    openShiftModal,
     closeFormModal,
     closeEditModal,
     closeShiftModal,

@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { PetData, PetCreationRequest, PetUpdateRequest } from "../../../types/petTypes";
 import * as petService from "../../../services/petService";
 import { exportTableToXls } from "@/utils/exportFile";
+import { isCloudinaryConfigured } from "@/services/cloudinaryService";
+import { uploadImageToCloudinary } from "@/services/cloudinaryService";
 
 export type ViewMode = "grid" | "list";
 
@@ -19,6 +21,136 @@ export function usePets() {
   const [petToMarkSold, setPetToMarkSold] = useState<PetData | null>(null);
   const [petToDelete, setPetToDelete] = useState<PetData | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefEdit = useRef<HTMLInputElement>(null);
+  const cloudinaryEnabled = isCloudinaryConfigured();
+
+  const handleImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setImageUrl: (url: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setImageUploadError(null);
+    setImageUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setImageUrl(url);
+    } catch (err) {
+      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRefEdit.current) fileInputRefEdit.current.value = "";
+    }
+  };
+
+  const [formData, setFormData] = useState<PetCreationRequest>({
+    name: "",
+    species: "",
+    breed: "",
+    birth: "",
+    gender: "",
+    price: 0,
+    vaccinated: false,
+    imageUrl: "",
+  });
+  const [editFormData, setEditFormData] = useState<PetUpdateRequest & { birth: string }>({
+    name: "",
+    species: "",
+    breed: "",
+    birth: "",  
+    gender: "",
+    price: 0,
+    vaccinated: false,
+    imageUrl: "",
+    available: true,
+  });
+
+  useEffect(() => {
+    if (formModalOpen || editModalOpen) setImageUploadError(null);
+  }, [formModalOpen, editModalOpen]);
+
+  useEffect(() => {
+    if (editModalOpen && petToEdit) {
+      const b = petToEdit.birth;
+      const birthStr = typeof b === "string" ? b.split("T")[0] ?? "" : "";
+      setEditFormData({
+        name: petToEdit.name ?? "",
+        species: petToEdit.species ?? "",
+        breed: petToEdit.breed ?? "",
+        birth: birthStr,
+        gender: petToEdit.gender ?? "",
+        price: petToEdit.price ?? 0,
+        vaccinated: petToEdit.vaccinated ?? false,
+        imageUrl: petToEdit.imageUrl ?? "",
+        available: petToEdit.available !== false,
+      });
+    }
+  }, [editModalOpen, petToEdit]);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const birthStr = formData.birth.trim();
+      if (!birthStr) {
+        alert("Vui lòng nhập ngày sinh");
+        return;
+      }
+      await handleCreatePet({
+        ...formData,
+        birth: birthStr,
+        price: Number(formData.price) || 0,
+        imageUrl: formData.imageUrl?.trim() || "",
+      });
+      setFormData({ name: "", species: "", breed: "", birth: "", gender: "", price: 0, vaccinated: false, imageUrl: "" });
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!petToEdit?.id) return;
+    setEditSubmitting(true);
+    try {
+      const birthStr = editFormData.birth.trim();
+      if (!birthStr) {
+        alert("Vui lòng nhập ngày sinh");
+        return;
+      }
+      await handleUpdatePet(petToEdit.id, {
+        ...editFormData,
+        birth: birthStr,
+        price: editFormData.price ? Number(editFormData.price) : undefined,
+        imageUrl: editFormData.imageUrl?.trim() || "",
+      });
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const confirmMarkSold = async () => {
+    if (!petToMarkSold?.id) return;
+    await handleMarkAsSold(petToMarkSold.id);
+    closeSoldModal();
+  };
+
+  const confirmDelete = async () => {
+    setDeleteSubmitting(true);
+    try {
+      await handleDeletePet();
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
 
   const fetchPets = useCallback(async () => {
     setLoading(true);
@@ -38,21 +170,7 @@ export function usePets() {
     fetchPets();
   }, [fetchPets]);
 
-  const filteredPets = useMemo(() => {
-    let result = [...pets];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          (p.name).toLowerCase().includes(q) ||
-          (p.species).toLowerCase().includes(q) ||
-          (p.breed).toLowerCase().includes(q) ||
-          (p.gender).toLowerCase().includes(q)
-      );
-    }
-    result.sort((a, b) => (a.name).localeCompare(b.name));
-    return result;
-  }, [pets, search]);
+
 
   const stats = useMemo(
     () => ({
@@ -154,7 +272,21 @@ export function usePets() {
       showToast(e instanceof Error ? e.message : "Xóa thất bại", "error");
     }
   }, [petToDelete, closeDeleteModal, fetchPets, showToast]);
-
+  const filteredPets = useMemo(() => {
+    let result = [...pets];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (p) =>
+          (p.name).toLowerCase().includes(q) ||
+          (p.species).toLowerCase().includes(q) ||
+          (p.breed).toLowerCase().includes(q) ||
+          (p.gender).toLowerCase().includes(q)
+      );
+    }
+    result.sort((a, b) => (a.name).localeCompare(b.name));
+    return result;
+  }, [pets, search]);
   const handleExportPets = useCallback(() => {
     exportTableToXls({
       filename: `pets-export-${new Date().toISOString().slice(0, 10)}`,
@@ -220,5 +352,25 @@ export function usePets() {
     handleDeletePet,
     fetchPets,
     handleExportPets,
+    imageUploading,
+    imageUploadError,
+    fileInputRef,
+    fileInputRefEdit,
+    cloudinaryEnabled,
+    formData,
+    setFormData,
+    editFormData,
+    setEditFormData,
+    handleFormSubmit,
+    handleEditSubmit,
+    handleImageFileChange,
+    setImageUploadError,
+    formSubmitting,
+    editSubmitting,
+    deleteSubmitting,
+    confirmMarkSold,
+    confirmDelete,
+
+    showToast,
   };
 }

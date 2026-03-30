@@ -2,7 +2,6 @@ import { getProductById } from "@/services/productService";
 import type { ProductData } from "@/types/productTypes";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { formatPrice, formatDate } from "@/utils/format";
 
 
 export const useDetailedProduct = () => {
@@ -24,10 +23,7 @@ export const useDetailedProduct = () => {
         }
     };
 
-    const handlePayment = () => {
-        console.log("Payment");
-    };
 
 
-    return { product, loading, error, fetchProduct, quantity, setQuantity, handlePayment };
+    return { product, loading, error, fetchProduct, quantity, setQuantity };
 }

@@ -41,23 +41,6 @@ export function useCustomer() {
     fetchCustomers();
   }, [fetchCustomers]);
 
-  const filteredCustomers = useMemo(() => {
-    let result = [...customers];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (c: CustomerData) =>
-          c.user.username?.toLowerCase().includes(q) ||
-          c.user.firstname?.toLowerCase().includes(q) ||
-          c.user.lastname?.toLowerCase().includes(q) ||
-          c.user.email?.toLowerCase().includes(q) ||
-          c.user.phone?.toLowerCase().includes(q)
-      );
-    }
-    result.sort((a: CustomerData, b: CustomerData) => a.user.username?.localeCompare(b.user.username ?? "") ?? 0);
-    return result;
-  }, [customers, search]);
-
   const stats = useMemo(
     () => ({
       total: customers.length,
@@ -168,6 +151,23 @@ export function useCustomer() {
       showToast(e instanceof Error ? e.message : "Failed to delete customer", "error");
     }
   }, [editingCustomer, closeDeleteModal, fetchCustomers, showToast]);
+
+  const filteredCustomers = useMemo(() => {
+    let result = [...customers];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (c: CustomerData) =>
+          c.user.username?.toLowerCase().includes(q) ||
+          c.user.firstname?.toLowerCase().includes(q) ||
+          c.user.lastname?.toLowerCase().includes(q) ||
+          c.user.email?.toLowerCase().includes(q) ||
+          c.user.phone?.toLowerCase().includes(q)
+      );
+    }
+    result.sort((a: CustomerData, b: CustomerData) => a.user.username?.localeCompare(b.user.username ?? "") ?? 0);
+    return result;
+  }, [customers, search]);
 
   return {
     customers: filteredCustomers,

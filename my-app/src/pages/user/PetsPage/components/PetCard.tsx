@@ -1,26 +1,12 @@
 "use client";
 
-import type { PetData, PetResponse } from "../../../../types/petTypes";
+import type { PetData} from "../../../../types/petTypes";
+import { formatCurrency } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 
 interface PetCardProps {
   pet: PetData;
   onClick?: () => void;
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",  
-  }).format(value ?? 0);
-}
-
-function formatDate(s: string): string {
-  if (!s) return "—";
-  try {
-    return new Date(s).toLocaleDateString("vi-VN");
-  } catch {
-    return s;
-  }
 }
 
 export default function PetCard({ pet, onClick }: PetCardProps) {
@@ -35,9 +21,9 @@ export default function PetCard({ pet, onClick }: PetCardProps) {
       className={`bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col ${onClick ? "cursor-pointer" : ""}`}
     >
       <div className="relative h-64 bg-gray-100 overflow-hidden flex items-center justify-center">
-        {pet.image ? (
+        {pet.imageUrl ? (
           <img
-            src={pet.image}
+            src={pet.imageUrl}
             alt={pet.name}
             className="w-full h-full object-cover"
           />
@@ -60,7 +46,7 @@ export default function PetCard({ pet, onClick }: PetCardProps) {
           {pet.name ?? "—"}
         </h3>
         <p className="text-sm text-gray-600 mb-2">
-          {pet.speciesName ?? "—"} · {pet.breed ?? "—"}
+          {pet.species ?? "—"} · {pet.breed ?? "—"}
         </p>
         <p className="text-xs text-gray-500 mb-2">
           Giới tính: {pet.gender ?? "—"} · Sinh: {formatDate(pet.birth ?? "")}

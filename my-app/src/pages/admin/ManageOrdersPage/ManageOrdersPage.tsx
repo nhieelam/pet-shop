@@ -3,34 +3,10 @@
 import {useState} from "react";
 import {useManageOrders} from "./useManageOrders.ts";
 import type {InvoiceData} from "../../../types/invoiceTypes";
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value);
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function statusClass(status: string): string {
-  const s = (status).toLowerCase();
-  if (s.includes("paid") || s.includes("completed") || s.includes("delivered")) return "bg-emerald-100 text-emerald-700";
-  if (s.includes("cancel") || s.includes("refund")) return "bg-rose-100 text-rose-700";
-  if (s.includes("pending") || s.includes("processing")) return "bg-amber-100 text-amber-700";
-  if (s.includes("refund")) return "bg-blue-100 text-blue-700";
-  if (s.includes("success")) return "bg-purple-100 text-purple-700";
-  if (s.includes("failed")) return "bg-red-100 text-red-700";
-  return "bg-slate-100 text-slate-700";
-}
+import { formatCurrency } from "@/utils/format";
+import { formatDate } from "@/utils/format";
+import { statusSelectClass } from "@/utils/paymentStatusUtil";
+import type { PaymentStatus } from "@/type/type";
 
 function OrderGridCard({
                          invoice,
@@ -57,7 +33,7 @@ function OrderGridCard({
       >
         <div className="relative h-24 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
           <span className="text-4xl">{emoji}</span>
-          <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusClass(status)}`}>
+          <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusSelectClass(status)}`}>
           {status}
         </span>
         </div>
@@ -119,7 +95,7 @@ function OrderListRow({
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-bold text-emerald-600">{formatCurrency(invoice.realAmount ?? invoice.totalAmount)}</p>
-            <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusClass(status)}`}>
+            <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusSelectClass(status)}`}>
             {status}
           </span>
           </div>
@@ -406,8 +382,8 @@ export default function ManageOrdersPage() {
                         <div>
                           <p className="text-slate-500">Status</p>
                           <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(selectedInvoice.status ?? "")}`}>
-                            {selectedInvoice.status ?? "—"}
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusSelectClass(selectedInvoice.status as PaymentStatus)}`}>
+                            {selectedInvoice.status as PaymentStatus}
                         </span>
                         </div>
                         <div>

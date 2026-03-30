@@ -317,17 +317,7 @@ export default function CustomerPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <div>
-                <p className="text-slate-500 text-xs font-medium">Total Points</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.totalPoints}</p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">

@@ -101,8 +101,6 @@ export function useSupplier() {
     type: "success" | "error" | "info";
   } | null>(null);
 
-  // ================= FETCH DATA =================
-
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -122,28 +120,6 @@ export function useSupplier() {
     fetchSuppliers();
   }, [fetchSuppliers]);
 
-  // ================= FILTER =================
-
-  const filteredSuppliers = useMemo(() => {
-    let result = [...supplierList];
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-
-      result = result.filter( (s: SupplierData) =>
-          s.name?.toLowerCase().includes(q) ||
-              s.email?.toLowerCase().includes(q) ||
-              s.phone?.toLowerCase().includes(q) ||
-              s.address?.toLowerCase().includes(q)
-        );
-    }
-
-    result.sort((a: SupplierData, b: SupplierData) => a.name?.localeCompare(b.name ?? "") ?? 0);
-    return result;
-  }, [supplierList, search]);
-
-  // ================= TOAST =================
-
   const showToast = useCallback(
       (message: string, type: "success" | "error" | "info" = "info") => {
         setToast({ message, type });
@@ -153,8 +129,6 @@ export function useSupplier() {
       },
       []
   );
-
-  // ================= MODAL =================
 
   const openAddModal = () => setFormModalOpen(true);
 
@@ -179,8 +153,6 @@ export function useSupplier() {
     setDeleteModalOpen(false);
     setSupplierToDelete(null);
   };
-
-  // ================= CRUD =================
 
   const handleCreateSupplier = useCallback(
       async (payload: SupplierCreationRequest) => {
@@ -234,7 +206,23 @@ export function useSupplier() {
     }
   }, [supplierToDelete, fetchSuppliers, showToast]);
 
-  // ================= RETURN =================
+  const filteredSuppliers = useMemo(() => {
+    let result = [...supplierList];
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+
+      result = result.filter( (s: SupplierData) =>
+          s.name?.toLowerCase().includes(q) ||
+              s.email?.toLowerCase().includes(q) ||
+              s.phone?.toLowerCase().includes(q) ||
+              s.address?.toLowerCase().includes(q)
+        );
+    }
+
+    result.sort((a: SupplierData, b: SupplierData) => a.name?.localeCompare(b.name ?? "") ?? 0);
+    return result;
+  }, [supplierList, search]);
 
   return {
     suppliers: filteredSuppliers,

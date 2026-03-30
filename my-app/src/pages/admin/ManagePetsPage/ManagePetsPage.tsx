@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { usePets } from "./usePets";
-import type { PetCreationRequest, PetUpdateRequest, PetData } from "../../../types/petTypes";
-import { uploadImageToCloudinary, isCloudinaryConfigured } from "../../../services/cloudinaryService";
+import type { PetData } from "../../../types/petTypes";
 import { formatCurrency, formatDate } from "@/utils/format"; 
 
 function PetGridCard({
@@ -177,143 +176,28 @@ export default function ManagePetsPage() {
     closeSoldModal,
     openDeleteModal,
     closeDeleteModal,
-    handleCreatePet,
-    handleUpdatePet,
-    handleMarkAsSold,
-    handleDeletePet,
     handleExportPets,
+    imageUploading,
+    imageUploadError,
+    fileInputRef,
+    fileInputRefEdit,
+    cloudinaryEnabled,
+    formData,
+    setFormData,
+    editFormData,
+    setEditFormData,
+    handleFormSubmit,
+    handleEditSubmit,
+    handleImageFileChange,
+    setImageUploadError,
+    formSubmitting,
+    editSubmitting,
+    deleteSubmitting,
+    confirmMarkSold,
+    confirmDelete,
   } = usePets();
 
-  const [formSubmitting, setFormSubmitting] = useState(false);
-  const [editSubmitting, setEditSubmitting] = useState(false);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRefEdit = useRef<HTMLInputElement>(null);
-  const cloudinaryEnabled = isCloudinaryConfigured();
 
-  const handleImageFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setImageUrl: (url: string) => void
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    setImageUploadError(null);
-    setImageUploading(true);
-    try {
-      const url = await uploadImageToCloudinary(file);
-      setImageUrl(url);
-    } catch (err) {
-      setImageUploadError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setImageUploading(false);
-      e.target.value = "";
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      if (fileInputRefEdit.current) fileInputRefEdit.current.value = "";
-    }
-  };
-
-  const [formData, setFormData] = useState<PetCreationRequest>({
-    name: "",
-    species: "",
-    breed: "",
-    birth: "",
-    gender: "",
-    price: 0,
-    vaccinated: false,
-    imageUrl: "",
-  });
-  const [editFormData, setEditFormData] = useState<PetUpdateRequest & { birth: string }>({
-    name: "",
-    species: "",
-    breed: "",
-    birth: "",  
-    gender: "",
-    price: 0,
-    vaccinated: false,
-    imageUrl: "",
-    available: true,
-  });
-
-  useEffect(() => {
-    if (formModalOpen || editModalOpen) setImageUploadError(null);
-  }, [formModalOpen, editModalOpen]);
-
-  useEffect(() => {
-    if (editModalOpen && petToEdit) {
-      const b = petToEdit.birth;
-      const birthStr = typeof b === "string" ? b.split("T")[0] ?? "" : "";
-      setEditFormData({
-        name: petToEdit.name ?? "",
-        species: petToEdit.species ?? "",
-        breed: petToEdit.breed ?? "",
-        birth: birthStr,
-        gender: petToEdit.gender ?? "",
-        price: petToEdit.price ?? 0,
-        vaccinated: petToEdit.vaccinated ?? false,
-        imageUrl: petToEdit.imageUrl ?? "",
-        available: petToEdit.available !== false,
-      });
-    }
-  }, [editModalOpen, petToEdit]);
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    try {
-      const birthStr = formData.birth.trim();
-      if (!birthStr) {
-        alert("Vui lòng nhập ngày sinh");
-        return;
-      }
-      await handleCreatePet({
-        ...formData,
-        birth: birthStr,
-        price: Number(formData.price) || 0,
-        imageUrl: formData.imageUrl?.trim() || "",
-      });
-      setFormData({ name: "", species: "", breed: "", birth: "", gender: "", price: 0, vaccinated: false, imageUrl: "" });
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!petToEdit?.id) return;
-    setEditSubmitting(true);
-    try {
-      const birthStr = editFormData.birth.trim();
-      if (!birthStr) {
-        alert("Vui lòng nhập ngày sinh");
-        return;
-      }
-      await handleUpdatePet(petToEdit.id, {
-        ...editFormData,
-        birth: birthStr,
-        price: editFormData.price ? Number(editFormData.price) : undefined,
-        imageUrl: editFormData.imageUrl?.trim() || "",
-      });
-    } finally {
-      setEditSubmitting(false);
-    }
-  };
-
-  const confirmMarkSold = async () => {
-    if (!petToMarkSold?.id) return;
-    await handleMarkAsSold(petToMarkSold.id);
-    closeSoldModal();
-  };
-
-  const confirmDelete = async () => {
-    setDeleteSubmitting(true);
-    try {
-      await handleDeletePet();
-    } finally {
-      setDeleteSubmitting(false);
-    }
-  };
 
   return (
     <div className="h-full w-full flex flex-col overflow-auto scrollbar-thin">

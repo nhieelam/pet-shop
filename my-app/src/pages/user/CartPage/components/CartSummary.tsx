@@ -24,7 +24,7 @@ export default function CartSummary({ items, selection, onCheckout }: CartSummar
   const isSelected = (item: CartItemResponse) => selection[item.id] ?? true;
   const selectedItems = items.filter((item) => isSelected(item));
   const subtotal = selectedItems.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
-  const shippingFee = subtotal > 0 ? 30000 : 0; // Free shipping for order > 0
+  const shippingFee = subtotal > 0 ? 30000 : 0;
   const grandTotal = subtotal + shippingFee;
   const selectedCount = selectedItems.length;
   const selectedQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);

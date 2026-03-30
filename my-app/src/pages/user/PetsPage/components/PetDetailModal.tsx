@@ -7,6 +7,8 @@ import { addPetToCart } from "@/services/cartService";
 import type { PetData } from "../../../../types/petTypes";
 import type { CustomerData } from "@/types/customerTypes";
 import type { CartResponse } from "@/types/cartTypes";
+import { formatCurrency } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 
 interface PetDetailModalProps {
   pet: PetData | null;
@@ -19,22 +21,6 @@ function mergeCartIntoCustomer(customer: CustomerData, cartRes: CartResponse): C
     ...customer,
     cart: cartRes.data,
   } as CustomerData;
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value ?? 0);
-}
-
-function formatDate(s: string): string {
-  if (!s) return "—";
-  try {
-    return new Date(s).toLocaleDateString("vi-VN");
-  } catch {
-    return s;
-  }
 }
 
 export default function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalProps) {
@@ -95,9 +81,9 @@ export default function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalP
         <div className="overflow-y-auto p-6">
           <div className="mb-5">
             <div className="relative h-72 rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center">
-              {pet.image ? (
+              {pet.imageUrl ? (
                 <img
-                  src={pet.image}
+                  src={pet.imageUrl}
                   alt={pet.name}
                   className="w-full h-full object-cover"
                 />
@@ -120,7 +106,7 @@ export default function PetDetailModal({ pet, isOpen, onClose }: PetDetailModalP
             <div>
               <h3 className="text-2xl font-bold text-gray-800 mb-1">{pet.name ?? "—"}</h3>
               <p className="text-gray-600">
-                {pet.speciesName ?? "—"} · {pet.breed ?? "—"}
+                {pet.species ?? "—"} · {pet.breed ?? "—"}
               </p>
             </div>
 
