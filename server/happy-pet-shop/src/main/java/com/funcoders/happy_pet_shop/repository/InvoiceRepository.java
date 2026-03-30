@@ -4,6 +4,7 @@ import com.funcoders.happy_pet_shop.entity.Invoice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,4 +12,6 @@ import java.util.UUID;
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     List<Invoice> findAllByCustomer_Id(UUID id);
     List<Invoice> findAllByStaff_Id(UUID id);
+
+    List<Invoice> findAllByCreatedAtBetween(LocalDateTime startInclusive, LocalDateTime endExclusive);
 }

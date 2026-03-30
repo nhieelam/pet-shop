@@ -22,16 +22,31 @@ const AdminDashboard: FC = () => {
         <p className="text-gray-500 mt-2">Chào mừng bạn quay trở lại 👋</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-        {stats.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition duration-300"
-          >
-            <p className="text-gray-500 text-sm">{item.title}</p>
-            <h2 className="text-2xl font-bold mt-2 text-gray-800">{item.value}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl" aria-hidden>📋</span>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs font-medium">Tổng đơn hàng</p>
+              <p className="text-2xl font-bold text-slate-800">{stats.total.toLocaleString("vi-VN")}</p>
+            </div>
           </div>
-        ))}
+        </div>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl" aria-hidden>💰</span>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs font-medium">Doanh thu</p>
+              <p className="text-2xl font-bold text-slate-800">
+                {stats.revenue.toLocaleString("vi-VN")} ₫
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-md p-6">

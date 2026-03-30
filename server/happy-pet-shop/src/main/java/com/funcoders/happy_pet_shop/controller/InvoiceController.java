@@ -4,6 +4,7 @@ import com.funcoders.happy_pet_shop.dto.request.ChangeInvoiceStatusRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
+import com.funcoders.happy_pet_shop.dto.response.InvoiceYearStatisticsResponse;
 import com.funcoders.happy_pet_shop.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -44,6 +45,14 @@ public class InvoiceController {
     public ApiResponse<List<InvoiceResponse>> getAllInvoices() {
         List<InvoiceResponse> responses = invoiceService.getAllInvoices();
         return new ApiResponse<>(responses, "Get all invoices successfully");
+    }
+
+    @GetMapping("/statistics/year/{year}")
+    public ApiResponse<InvoiceYearStatisticsResponse> getInvoiceStatisticsByYear(
+            @PathVariable int year
+    ) {
+        InvoiceYearStatisticsResponse response = invoiceService.getInvoiceStatisticsByYear(year);
+        return new ApiResponse<>(response, "Get invoice statistics by year successfully");
     }
 
     @GetMapping("/customer/{id}")

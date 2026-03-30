@@ -21,18 +21,9 @@ export function useDashBoard() {
     }, []);
   
     const stats = useMemo(() => {
-      const totalOrders = invoices.length;
-      const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.totalAmount ?? 0), 0);
-      return [
-        {
-          title: "Tổng đơn hàng",
-          value: totalOrders.toLocaleString("vi-VN"),
-        },
-        {
-          title: "Doanh thu",
-          value: `${totalRevenue.toLocaleString("vi-VN")} ₫`,
-        },
-      ];
+      const total = invoices.length;
+      const revenue = invoices.reduce((sum, inv) => sum + (inv.totalAmount ?? 0), 0);
+      return { total, revenue };
     }, [invoices]);
   
     const recentOrders = useMemo(() => {

@@ -7,6 +7,7 @@ import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ReviewDetailRequest;
 
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
+import com.funcoders.happy_pet_shop.dto.response.InvoiceYearStatisticsResponse;
 import com.funcoders.happy_pet_shop.dto.response.ReviewDetailResponse;
 import com.funcoders.happy_pet_shop.entity.*;
 import com.funcoders.happy_pet_shop.exception.AppException;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -194,6 +196,33 @@ public class InvoiceService {
         return invoiceRepository.findAll().stream().map(
                 invoiceMapper::toResponse
         ).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public InvoiceYearStatisticsResponse getInvoiceStatisticsByYear(int year) {
+        if (year < 1900 || year > 2100) {
+            throw new AppException(ErrorType.BAD_REQUEST);
+        }
+
+        LocalDateTime start = LocalDate.of(year, 1, 1).atStartOfDay();
+        LocalDateTime end = LocalDate.of(year + 1, 1, 1).atStartOfDay();
+
+        List<Invoice> invoices = invoiceRepository.findAllByCreatedAtBetween(start, end);
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalRealAmount = BigDecimal.ZERO;
+
+        for (Invoice invoice : invoices) {
+            totalAmount = totalAmount.add(invoice.getTotalAmount() != null ? invoice.getTotalAmount() : BigDecimal.ZERO);
+            totalRealAmount = totalRealAmount.add(invoice.getRealAmount() != null ? invoice.getRealAmount() : BigDecimal.ZERO);
+        }
+
+        return InvoiceYearStatisticsResponse.builder()
+                .year(year)
+                .invoiceCount(invoices.size())
+                .totalAmount(totalAmount)
+                .totalRealAmount(totalRealAmount)
+                .build();
     }
 
     @Transactional(readOnly = true)
