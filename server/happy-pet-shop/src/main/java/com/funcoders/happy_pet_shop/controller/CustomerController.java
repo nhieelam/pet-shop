@@ -81,4 +81,13 @@ public class CustomerController {
 
         return new ApiResponse<>(response, "Add product successfully");
     }
+
+    @DeleteMapping("/{customerId}/items/{cartItemId}")
+    public ApiResponse<CartResponse> deleteCartItem(
+            @PathVariable UUID customerId,
+            @PathVariable UUID cartItemId
+    ) {
+        CartResponse response = cartService.deleteCartItem(customerId, cartItemId);
+        return new ApiResponse<>(response, "Remove cart item successfully");
+    }
 }

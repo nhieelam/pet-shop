@@ -4,6 +4,7 @@ import com.funcoders.happy_pet_shop.dto.request.ChangeInvoiceStatusRequest;
 import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
 import com.funcoders.happy_pet_shop.dto.response.ApiResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
+import com.funcoders.happy_pet_shop.dto.response.InvoiceTopCustomerResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceYearStatisticsResponse;
 import com.funcoders.happy_pet_shop.service.InvoiceService;
 import jakarta.validation.Valid;
@@ -53,6 +54,12 @@ public class InvoiceController {
     ) {
         InvoiceYearStatisticsResponse response = invoiceService.getInvoiceStatisticsByYear(year);
         return new ApiResponse<>(response, "Get invoice statistics by year successfully");
+    }
+
+    @GetMapping("/statistics/top-customers")
+    public ApiResponse<List<InvoiceTopCustomerResponse>> getTop5CustomersInvoiceStatistics() {
+        List<InvoiceTopCustomerResponse> response = invoiceService.getTop5CustomersInvoiceStatistics();
+        return new ApiResponse<>(response, "Get top 5 customers invoice statistics successfully");
     }
 
     @GetMapping("/customer/{id}")

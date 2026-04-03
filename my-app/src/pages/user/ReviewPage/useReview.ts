@@ -20,6 +20,17 @@ export interface CheckoutItem {
   isSelected: boolean;
 }
 
+/** Cart navigates with `{ checkoutItems: CheckoutItem[] }`; tolerate legacy array-only state. */
+function checkoutItemsFromLocationState(state: unknown): CheckoutItem[] {
+  if (state == null) return [];
+  if (Array.isArray(state)) return state as CheckoutItem[];
+  if (typeof state === "object" && "checkoutItems" in state) {
+    const raw = (state as { checkoutItems?: unknown }).checkoutItems;
+    return Array.isArray(raw) ? (raw as CheckoutItem[]) : [];
+  }
+  return [];
+}
+
 export function useReview() {
   const { customer, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -33,8 +44,14 @@ export function useReview() {
   const [newAddress, setNewAddress] = useState("");
 
   const defaultAddress = customer?.user?.address ?? "";
-  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>(() => location.state);
+  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>(() =>
+    checkoutItemsFromLocationState(location.state)
+  );
   const shippingAddress = useDefaultAddress ? defaultAddress : newAddress;
+
+  useEffect(() => {
+    setCheckoutItems(checkoutItemsFromLocationState(location.state));
+  }, [location.state]);
 
   const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * Number(item.quantity), 0);
   const totalAmount = subtotal;

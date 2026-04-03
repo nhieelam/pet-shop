@@ -41,8 +41,14 @@ export const addCartItemToCart = async (customerId: string, request: CartRequest
     return data as CartResponse;
 };
 
-export const deleteCartItem = async (cartItemId: string): Promise<CartResponse> => {
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CART.DELETE_CART_ITEM}/${cartItemId}`;
+export const deleteCartItem = async (
+    customerId: string,
+    cartItemId: string
+): Promise<CartResponse> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CUSTOMER.DELETE_CART_ITEM(
+        customerId,
+        cartItemId
+    )}`;
     const response = await fetch(url, {
         method: "DELETE",
         headers: authHeaders(),
@@ -52,7 +58,7 @@ export const deleteCartItem = async (cartItemId: string): Promise<CartResponse> 
     }
     const data = await response.json();
     return data as CartResponse;
-}
+};
 
 export const createCartForUser = async (): Promise<CartResponse> => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CART.CREATE_CART_FOR_USER}`;

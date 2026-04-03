@@ -6,9 +6,9 @@ import UserFooter from "../components/UserFooter.tsx";
 
 export default function UserLayout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen min-h-dvh flex-col">
       <UserHeader />
-      <main className="flex-grow">
+      <main className="min-w-0 flex-1">
         <Outlet />
       </main>
       <UserFooter />

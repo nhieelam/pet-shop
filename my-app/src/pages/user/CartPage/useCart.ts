@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/authContext";
 import { getInfo } from "@/services/customerService";
+import { getAllPromotions } from "@/services/promotionService";
 import {
   addCartItemToCart,
   addPetToCart,
@@ -9,6 +10,7 @@ import {
 } from "@/services/cartService";
 import type { CartItem, CartData } from "@/types/cartTypes";
 import type { CustomerData } from "@/types/customerTypes";
+import type { PromotionData } from "@/types/promotionTypes";
 
 function mergeCartIntoCustomer(
   customer: CustomerData,
@@ -34,6 +36,26 @@ export function useCart() {
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [promotions, setPromotions] = useState<PromotionData[]>([]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPromotions([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const list = await getAllPromotions();
+        if (!cancelled) setPromotions(Array.isArray(list) ? list : []);
+      } catch {
+        if (!cancelled) setPromotions([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   const items: CartItem[] = (
     customer?.cart.cartItems ?? []
@@ -84,7 +106,7 @@ export function useCart() {
         if (newQuantity <= 0) {
           const line = items.find((i) => i.product?.id === productId);
           if (!line) return;
-          const cartRes = await deleteCartItem(line.id);
+          const cartRes = await deleteCartItem(customer.id, line.id);
           setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         } else {
           const cartRes = await addCartItemToCart(customer.id, {
@@ -111,7 +133,7 @@ export function useCart() {
         if (newQuantity <= 0) {
           const line = items.find((i) => i.pet?.id === petId);
           if (!line) return;
-          const cartRes = await deleteCartItem(line.id);
+          const cartRes = await deleteCartItem(customer.id, line.id);
           setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
         } else {
           const cartRes = await addPetToCart(customer.id, {
@@ -135,7 +157,7 @@ export function useCart() {
       setLoading(true);
       setError("");
       try {
-        const cartRes = await deleteCartItem(cartItemId);
+        const cartRes = await deleteCartItem(customer.id, cartItemId);
         setCustomer(mergeCartIntoCustomer(customer, cartRes.data));
       } catch (e) {
         setError("Không thể xóa sản phẩm");
@@ -192,6 +214,7 @@ export function useCart() {
     loading,
     error,
     isAuthenticated,
+    promotions,
     toggleSelect,
     selectAll,
     updateQuantity,

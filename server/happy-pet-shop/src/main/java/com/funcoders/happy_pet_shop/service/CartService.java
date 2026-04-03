@@ -10,6 +10,7 @@ import com.funcoders.happy_pet_shop.entity.Product;
 import com.funcoders.happy_pet_shop.exception.AppException;
 import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.mapper.CartMapper;
+import com.funcoders.happy_pet_shop.repository.CartItemRepository;
 import com.funcoders.happy_pet_shop.repository.CartRepository;
 import com.funcoders.happy_pet_shop.repository.CustomerRepository;
 import com.funcoders.happy_pet_shop.repository.PetRepository;
@@ -33,7 +34,24 @@ public class CartService {
     PetRepository petRepository;
 
     CartRepository cartRepository;
+    CartItemRepository cartItemRepository;
     CartMapper cartMapper;
+
+    @Transactional
+    public CartResponse deleteCartItem(UUID customerId, UUID cartItemId) {
+        Cart cart = cartRepository.findByCustomer_Id(customerId)
+                .orElseThrow(() -> new AppException(ErrorType.CART_NOT_FOUND));
+
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(ErrorType.NOT_FOUND));
+
+        if (!item.getCart().getId().equals(cart.getId())) {
+            throw new AppException(ErrorType.NOT_FOUND);
+        }
+
+        cart.getCartItems().remove(item);
+        return cartMapper.toResponse(cartRepository.save(cart));
+    }
 
     @Transactional
     public CartResponse addProduct(UUID customerId, CartRequest request) {

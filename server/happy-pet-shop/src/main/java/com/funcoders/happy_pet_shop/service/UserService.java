@@ -88,7 +88,7 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    // @PreAuthorize("isAuthenticated()")
     @Transactional
     public void updatePassword(UUID userId, ChangePasswordRequest request) {
 

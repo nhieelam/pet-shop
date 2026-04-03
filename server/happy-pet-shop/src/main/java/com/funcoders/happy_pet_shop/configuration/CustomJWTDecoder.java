@@ -2,13 +2,12 @@ package com.funcoders.happy_pet_shop.configuration;
 
 import com.funcoders.happy_pet_shop.dto.request.IntrospectRequest;
 import com.funcoders.happy_pet_shop.dto.response.IntrospectResponse;
-import com.funcoders.happy_pet_shop.exception.AppException;
-import com.funcoders.happy_pet_shop.exception.ErrorType;
 import com.funcoders.happy_pet_shop.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -38,10 +37,11 @@ public class CustomJWTDecoder implements JwtDecoder {
                             .build()
             );
 
-            if (!response.isValid())
-                throw new AppException(ErrorType.UNAUTHORIZED);
+            if (!response.isValid()) {
+                throw new BadJwtException("Invalid or expired token");
+            }
         } catch (ParseException | JOSEException e) {
-            throw new JwtException(e.getMessage());
+            throw new BadJwtException(e.getMessage(), e);
         }
 
         if (Objects.isNull(nimbusJwtDecoder)) {

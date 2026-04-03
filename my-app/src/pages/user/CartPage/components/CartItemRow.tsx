@@ -1,7 +1,19 @@
 "use client";
 
-import type {CartItemResponse} from "../../../../types/cartTypes";
-import {useEffect, useRef, useState} from "react";
+import type { CartItemResponse } from "@/types/cartTypes";
+import type { PromotionData } from "@/types/promotionTypes";
+import { discountLabel } from "@/utils/format";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+function promotionsForProduct(
+  productId: string | undefined,
+  promotions: PromotionData[]
+): PromotionData[] {
+  if (!productId) return [];
+  return promotions.filter((p) =>
+    (p.promotionDetails ?? []).some((d) => d.productId === productId)
+  );
+}
 
 interface CartItemRowProps {
   item: CartItemResponse;
@@ -9,6 +21,7 @@ interface CartItemRowProps {
   onToggleSelect: (id: string) => void;
   onRemove: (id: string) => void;
   updateQuantity: (productId: string, newQuantity: number) => void;
+  promotions?: PromotionData[];
 }
 
 function getProduct(item: CartItemResponse) {
@@ -21,6 +34,7 @@ export default function CartItemRow({
                                       onToggleSelect,
                                       updateQuantity,
                                       onRemove,
+                                      promotions = [],
                                     }: CartItemRowProps) {
   const product = getProduct(item);
   const price = product?.price ?? 0;
@@ -50,6 +64,11 @@ export default function CartItemRow({
     }, 500);
     return () => clearTimeout(timer);
   }, [quantity, product?.id, item.quantity]);
+
+  const matchingPromotions = useMemo(
+    () => promotionsForProduct(product?.id, promotions),
+    [product?.id, promotions]
+  );
 
   return (
       <div
@@ -87,6 +106,20 @@ export default function CartItemRow({
             <p className="text-sm text-gray-600 mt-1">
               Giá: <span className="font-semibold text-gray-800">{formatCurrency(price)}</span>
             </p>
+            {matchingPromotions.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Khuyến mãi áp dụng">
+                {matchingPromotions.map((p) => (
+                  <span
+                    key={p.id}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-violet-800 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full"
+                    title={p.description || p.code}
+                  >
+                    <span>{p.code}</span>
+                    <span className="text-violet-600">· {discountLabel(p)}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <p className="text-sm font-bold text-gray-800 mt-2 sm:hidden">
               {formatCurrency(lineTotal)}
             </p>

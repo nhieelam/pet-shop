@@ -10,7 +10,6 @@ import type { PurchaseDetailCreationRequest } from "../../../types/purchaseTypes
 import type { StaffData} from "../../../types/staffTypes";
 import type { SupplierData } from "../../../types/supplierTypes";
 import type { ProductData } from "../../../types/productTypes";
-import ProductSearchBoard from "../../../components/admin/ProductSearchBoard";
 
 type LineDraft = {
   productId: string;
@@ -29,112 +28,9 @@ function emptyLine(): LineDraft {
   return { productId: "", quantity: "1", unitPrice: "" };
 }
 
-function productLabel(p: ProductData) {
-  return p.name;
-}
-
-function matchesSupplier(sup: SupplierData, q: string) {
-  if (!q.trim()) return true;
-  const s = q.toLowerCase();
-  const hay = [sup.name, sup.email, sup.phone, sup.address, sup.id, sup.status]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  return hay.includes(s);
-}
-
-function SupplierSearchBoard({
-  open,
-  onClose,
-  suppliers,
-  loading,
-  onPick,
-}: {
-  open: boolean;
-  onClose: () => void;
-  suppliers: SupplierData[];
-  loading: boolean;
-  onPick: (s: SupplierData) => void;
-}) {
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    if (open) setQuery("");
-  }, [open]);
-
-  const filtered = useMemo(
-    () => suppliers.filter((s) => matchesSupplier(s, query)),
-    [suppliers, query]
-  );
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-[60] flex">
-      <button
-        type="button"
-        className="flex-1 bg-black/45 backdrop-blur-[2px]"
-        aria-label="Close panel"
-        onClick={onClose}
-      />
-      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-slate-200 animate-[slideFromRight_0.2s_ease-out]">
-        <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-emerald-600 text-white">
-          <h2 className="font-bold text-lg">Find supplier</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/15 text-xl leading-none"
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="p-3 border-b border-slate-100">
-          <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-            Search by name, phone, email, address, ID…
-          </label>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type to filter…"
-            className="mt-1 w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
-            autoFocus
-          />
-        </div>
-        <div className="flex-1 overflow-y-auto p-2">
-          {loading ? (
-            <p className="text-sm text-slate-500 p-4">Loading suppliers…</p>
-          ) : filtered.length === 0 ? (
-            <p className="text-sm text-slate-500 p-4">No suppliers match your search.</p>
-          ) : (
-            <ul className="space-y-1">
-              {filtered.map((s) => (
-                <li key={s.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onPick(s);
-                      onClose();
-                    }}
-                    className="w-full text-left px-3 py-3 rounded-xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/60 transition-all"
-                  >
-                    <p className="font-semibold text-slate-800">{s.name}</p>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">{s.id}</p>
-                    {s.phone && <p className="text-sm text-slate-600 mt-1">📞 {s.phone}</p>}
-                    {s.email && <p className="text-sm text-slate-600">{s.email}</p>}
-                    {s.address && (
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.address}</p>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+function supplierLabel(s: SupplierData): string {
+  const bits = [s.name, s.phone].filter(Boolean);
+  return bits.join(" · ") || s.id;
 }
 
 export default function AddPurchasePage() {
@@ -148,9 +44,6 @@ export default function AddPurchasePage() {
   const [lines, setLines] = useState<LineDraft[]>([emptyLine()]);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const [supplierBoardOpen, setSupplierBoardOpen] = useState(false);
-  const [productLineForPicker, setProductLineForPicker] = useState<number | null>(null);
 
   const loadRefs = useCallback(async () => {
     setRefsLoading(true);
@@ -174,15 +67,6 @@ export default function AddPurchasePage() {
   useEffect(() => {
     void loadRefs();
   }, [loadRefs]);
-
-  const selectedSupplier = useMemo(
-    () => supplierList.find((s) => s.id === supplierId) ?? null,
-    [supplierList, supplierId]
-  );
-
-  const supplierSummary = selectedSupplier
-    ? `${selectedSupplier.name}${selectedSupplier.phone ? ` · ${selectedSupplier.phone}` : ""}`
-    : "";
 
   const productById = useMemo(() => {
     const m = new Map<string, ProductData>();
@@ -259,12 +143,6 @@ export default function AddPurchasePage() {
 
   return (
     <div className="min-h-full w-full flex flex-col bg-slate-50">
-      <style>{`
-        @keyframes slideFromRight {
-          from { transform: translateX(100%); opacity: 0.9; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
       <header className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-lg sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -316,32 +194,20 @@ export default function AddPurchasePage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
-            <div className="flex gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm text-slate-800 min-h-[42px] flex items-center">
-                  {selectedSupplier ? (
-                    <span className="truncate" title={supplierSummary}>
-                      {supplierSummary}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400">— Choose supplier —</span>
-                  )}
-                </div>
-                {selectedSupplier && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono truncate">{selectedSupplier.id}</p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setSupplierBoardOpen(true)}
-                disabled={refsLoading}
-                className="shrink-0 px-3.5 py-2 border border-slate-300 rounded-xl font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-                title="Search supplier by detail"
-                aria-label="Open supplier search"
-              >
-                …
-              </button>
-            </div>
+            <select
+              value={supplierId}
+              onChange={(e) => setSupplierId(e.target.value)}
+              required
+              disabled={refsLoading}
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+            >
+              <option value="">— Select supplier —</option>
+              {supplierList.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {supplierLabel(s)}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -375,31 +241,37 @@ export default function AddPurchasePage() {
                         </button>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="w-full px-2 py-2 border border-slate-200 rounded-lg bg-white text-sm min-h-[38px] flex items-center">
-                          {picked ? (
-                            <span className="truncate" title={productLabel(picked)}>
-                              {productLabel(picked)}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400">— Product —</span>
-                          )}
-                        </div>
-                        {picked && (
-                          <p className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">{picked.id}</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setProductLineForPicker(i)}
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Product</label>
+                      <select
+                        value={row.productId}
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          const p = id ? productById.get(id) : undefined;
+                          updateLine(i, {
+                            productId: id,
+                            unitPrice:
+                              p?.price != null && p.price > 0
+                                ? String(p.price)
+                                : row.unitPrice,
+                          });
+                        }}
+                        required
                         disabled={refsLoading}
-                        className="shrink-0 px-3 py-2 border border-slate-300 rounded-lg font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 self-start"
-                        title="Search product by detail"
-                        aria-label="Open product search"
+                        className="w-full px-2 py-2 border border-slate-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                       >
-                        …
-                      </button>
+                        <option value="">— Select product —</option>
+                        {productList.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                      {picked && (
+                        <p className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
+                          {picked.id}
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -449,39 +321,6 @@ export default function AddPurchasePage() {
           </div>
         </form>
       </div>
-
-      <SupplierSearchBoard
-        open={supplierBoardOpen}
-        onClose={() => setSupplierBoardOpen(false)}
-        suppliers={supplierList}
-        loading={refsLoading}
-        onPick={(s) => setSupplierId(s.id)}
-      />
- 
-      <ProductSearchBoard
-        open={productLineForPicker !== null}
-        onClose={() => setProductLineForPicker(null)}
-        products={productList}
-        loading={refsLoading}
-        onPick={(p) => {
-          const idx = productLineForPicker;
-          if (idx === null) return;
-          setLines((prev) =>
-            prev.map((row, i) =>
-              i === idx
-                ? {
-                    ...row,
-                    productId: p.id,
-                    unitPrice:
-                      p.price != null && p.price > 0
-                        ? String(p.price)
-                        : row.unitPrice,
-                  }
-                : row
-            )
-          );
-        }}
-      />
     </div>
   );
 }

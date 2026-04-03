@@ -18,20 +18,14 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         ErrorType errorType = ErrorType.UNAUTHORIZED;
 
-        ApiResponse apiRespond = ApiResponse.builder()
-                .message("unauthorized")
-                .build();
+        ApiResponse<Void> apiResponse = new ApiResponse<>(errorType);
 
-        response.setStatus(errorType.getErrorCode());
+        response.setStatus(errorType.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        response.getWriter().write(
-                objectMapper.writeValueAsString(
-                        apiRespond
-                )
-        );
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
 
         response.flushBuffer();
     }

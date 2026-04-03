@@ -17,6 +17,7 @@ export default function CartPage() {
     loading,
     error,
     isAuthenticated,
+    promotions,
     toggleSelect,
     selectAll,
     updateQuantity,
@@ -150,6 +151,7 @@ export default function CartPage() {
                           onToggleSelect={toggleSelect}
                           onRemove={removeItem}
                           updateQuantity={updateQuantity}
+                          promotions={promotions}
                         />
                       ))}
                   </div>

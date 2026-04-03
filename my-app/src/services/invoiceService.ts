@@ -8,6 +8,8 @@ import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
 
 import type { PaymentStatus } from "../type/type";
+import type { CustomerData } from "@/types/customerTypes";
+import type { statisticCustomerData, StatisticsData } from "@/types/statisticTypes";
 
 
 function authHeaders(): Record<string, string> {
@@ -108,4 +110,30 @@ export const updateInvoiceStatus = async (id: string, status: PaymentStatus): Pr
     }
     const data = await response.json();
     return data;
+};
+
+export const getTop5Customers = async (): Promise<statisticCustomerData[]> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.GET_CUSTOMERS}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy top 5 khách hàng");
+    }
+    const data = await response.json();
+    return data.data;
+};
+
+export const statisticsByYear = async (year: number): Promise<StatisticsData> => {
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.INVOICE.STATISTICS_BY_YEAR(year)}`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error("Không thể lấy statistics");
+    }
+    const data = await response.json();
+    return data.data;
 };

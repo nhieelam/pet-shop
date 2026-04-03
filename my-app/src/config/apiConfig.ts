@@ -48,6 +48,8 @@ export const API_CONFIG = {
             UPDATE: (id: string) => `/customers/${id}`,
             ADD_POINTS: (id: string) => `/customers/${id}/points`,
             ADD_CART_ITEM: (customerId: string) => `/customers/${customerId}/items`,
+            DELETE_CART_ITEM: (customerId: string, cartItemId: string) =>
+                `/customers/${customerId}/items/${cartItemId}`,
             DELETE: (id: string) => `/customers/${id}`,
             ADD_PET_TO_CART: (customerId: string) => `/customers/${customerId}/items`,
         },
@@ -60,6 +62,8 @@ export const API_CONFIG = {
             GET_BY_CUSTOMER: (customerId: string) => `/invoices/customer/${customerId}`,
             DELETE: (id: string) => `/invoices/${id}`,
             UPDATE_STATUS: (id: string) => `/invoices/${id}/status`,
+            GET_CUSTOMERS: "/invoices/statistics/top-customers",
+            STATISTICS_BY_YEAR:(year: number) => `/invoices/statistics/year/${year}`,
         },
 
         PET: {
@@ -109,9 +113,9 @@ export const API_CONFIG = {
         CART: {
             GET_CART_ITEMS: "/cart",
             ADD_CART_ITEM_TO_CART: "/cart/items",
-            DELETE_CART_ITEM: "/cart/items",
             CREATE_CART_FOR_USER: "/cart",
             ADD_CART_ITEM: (userId: string) => `/cart/items/${userId}`,
+            
         },
     },
 } as const;

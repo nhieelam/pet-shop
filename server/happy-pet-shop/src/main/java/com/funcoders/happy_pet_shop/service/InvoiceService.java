@@ -7,6 +7,7 @@ import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
 import com.funcoders.happy_pet_shop.dto.request.ReviewDetailRequest;
 
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
+import com.funcoders.happy_pet_shop.dto.response.InvoiceTopCustomerResponse;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceYearStatisticsResponse;
 import com.funcoders.happy_pet_shop.dto.response.ReviewDetailResponse;
 import com.funcoders.happy_pet_shop.entity.*;
@@ -159,7 +160,6 @@ public class InvoiceService {
                 realAmount = realAmount.add(lineTotal.subtract(discount));
             }
 
-            // ===== PET =====
             if (detailRequest.getPetId() != null) {
 
                 Pet pet = petRepository.findById(detailRequest.getPetId())
@@ -226,6 +226,42 @@ public class InvoiceService {
     }
 
     @Transactional(readOnly = true)
+    public List<InvoiceTopCustomerResponse> getTop5CustomersInvoiceStatistics() {
+        return invoiceRepository.findTop5CustomersByRealAmountRaw().stream()
+                .map(this::mapTopCustomerRow)
+                .toList();
+    }
+
+    private InvoiceTopCustomerResponse mapTopCustomerRow(Object[] row) {
+        UUID customerId = (UUID) row[0];
+        String customerName = row[1] != null ? row[1].toString() : "";
+        BigDecimal totalAmount = toBigDecimal(row[2]);
+        BigDecimal totalRealAmount = toBigDecimal(row[3]);
+        long invoiceCount = row[4] instanceof Number n ? n.longValue() : 0L;
+
+        return InvoiceTopCustomerResponse.builder()
+                .customerId(customerId)
+                .customerName(customerName)
+                .invoiceCount(invoiceCount)
+                .totalAmount(totalAmount)
+                .totalRealAmount(totalRealAmount)
+                .build();
+    }
+
+    private static BigDecimal toBigDecimal(Object value) {
+        if (value == null) {
+            return BigDecimal.ZERO;
+        }
+        if (value instanceof BigDecimal bd) {
+            return bd;
+        }
+        if (value instanceof Number n) {
+            return BigDecimal.valueOf(n.doubleValue());
+        }
+        return new BigDecimal(value.toString());
+    }
+
+    @Transactional(readOnly = true)
     public InvoiceResponse getInvoiceById(UUID id) {
         return invoiceMapper.toResponse(invoiceRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND)));
@@ -276,7 +312,6 @@ public class InvoiceService {
             return percentDiscount;
         }
 
-        // FIXED
         return promotionDetail.getPromotion().getDiscountValue();
     }
 }
