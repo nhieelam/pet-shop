@@ -227,47 +227,6 @@ public class AuthService {
                 .build();
 
         return response;
-
-//        String username = req.getUsername().trim();
-//        if (userRepository.existsByUsername(username)) {
-//            throw new AppException(ErrorType.USERNAME_ALREADY_EXISTS);
-//        }
-//
-//        Role role = roleRepository.findByRoleName(req.getRole())
-//                .orElseThrow(() -> new AppException(ErrorType.ROLE_NOT_FOUND));
-//
-//
-//        User user = User.builder()
-//                .username(username)
-//                .password(passwordEncoder.encode(req.getPassword()))
-//                .phone(req.getPhone())
-//                .address(req.getAddress())
-//                .roles(Set.of(role))
-//                .status(UserStatus.ACTIVATED)
-//                .build();
-//
-//        User savedUser;
-//        if (UserRole.USER_ROLE.equals(role.getRoleName())) {
-//            Cart cart = new Cart();
-//            Customer customer = Customer.builder()
-//                    .user(user)
-//                    .points(BigDecimal.ZERO)
-//                    .cart(cart)
-//                    .build();
-//            cart.setCustomer(customer);
-//            Customer savedCustomer = customerRepository.save(customer);
-//            savedUser = savedCustomer.getUser();
-//        } else if (UserRole.STAFF_ROLE.equals(role.getRoleName())) {
-//            Staff staff = Staff.builder()
-//                    .user(user)
-//                    .build();
-//            Staff savedStaff = staffRepository.save(staff);
-//            savedUser = savedStaff.getUser();
-//        } else {
-//            savedUser = userRepository.save(user);
-//        }
-//
-//        return toUserResponse(savedUser);
     }
 
     private UserResponse toUserResponse(User user) {
