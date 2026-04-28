@@ -66,7 +66,7 @@ export default function ProductCard({
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
-      <Link to={`user/detailedProduct/${id}`} className="block">
+      <Link to={`/user/detailedProduct/${id}`} className="block">
         <div className="relative h-64 bg-gray-200 overflow-hidden cursor-pointer flex items-center justify-center">
           {image ? (
             <img

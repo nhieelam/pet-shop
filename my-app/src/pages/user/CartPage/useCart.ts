@@ -63,7 +63,6 @@ export function useCart(): UseCartReturn {
   const updateQuantity = useCallback(
     async (productId: string, newQuantity: number) => {
       if (!user?.id) return;
-      setLoading(true);
       setError(null);
       try {
         const updatedCart = await addOrUpdateCartItem(user.id, {
@@ -80,7 +79,6 @@ export function useCart(): UseCartReturn {
       } catch (e) {
         setError(e instanceof Error ? e.message : "Cập nhật thất bại");
       } finally {
-        setLoading(false);
       }
     },
     [user, setUser]
@@ -149,8 +147,6 @@ export function useCart(): UseCartReturn {
     isAuthenticated,
     toggleSelect,
     selectAll,
-    // incrementQuantity,
-    // decrementQuantity,
     updateQuantity,
     removeItem,
     checkout,

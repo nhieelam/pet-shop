@@ -45,7 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // for swagger
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll() //for login and log up
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll() //for showing products to customers
-                        .anyRequest().permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll() //for showing products to customers
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
