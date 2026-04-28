@@ -49,6 +49,7 @@ export interface ReviewResponse {
 export interface InvoiceDetailResponse {
     id: string;
     productId?: string;
+    productName?: string;
     petId?: string;
     unitPrice: number;
     quantity: number;

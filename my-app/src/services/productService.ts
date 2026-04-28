@@ -31,7 +31,8 @@ export const getAllProducts = async (): Promise<ProductResponse[]> => {
 
 export const getProductById = async (productId: string): Promise<ProductResponse> => {
   const res = await apiClient.get<ApiResponse<ProductResponse>>(
-      API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId)
+      API_CONFIG.ENDPOINTS.PRODUCT.GET_BY_ID(productId),
+      {skipAuth: true}
   );
   const api = res.data;
   if (!api.success || api.data == null) {

@@ -177,7 +177,7 @@ export default function InvoiceDetailPage() {
                         <tr key={d.id} className="border-t border-gray-100">
                           <td className="px-6 py-3 text-gray-800">
                             {d.productId
-                              ? `Sản phẩm (${d.productId})`
+                              ? `(${d.productName})`
                               : d.petId
                                 ? `Thú cưng (${d.petId})`
                                 : "Mục"}

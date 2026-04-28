@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface InvoiceDetailMapper {
 
     @Mapping(target = "productId", expression = "java(invoiceDetail.getProduct() != null ? invoiceDetail.getProduct().getId() : null)")
+    @Mapping(target = "productName", expression = "java(invoiceDetail.getProduct() != null ? invoiceDetail.getProduct().getName() : null)")
     @Mapping(target = "petId", expression = "java(invoiceDetail.getPet() != null ? invoiceDetail.getPet().getId() : null)")
     InvoiceDetailResponse toResponse(InvoiceDetail invoiceDetail);
 }

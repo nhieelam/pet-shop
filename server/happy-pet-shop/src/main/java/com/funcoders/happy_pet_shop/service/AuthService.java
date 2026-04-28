@@ -54,7 +54,6 @@ public class AuthService {
     UserRepository userRepository;
     UserMapper userMapper;
     CustomerRepository customerRepository;
-    CustomerMapper customerMapper;
 
     RoleRepository roleRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
