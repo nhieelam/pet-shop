@@ -3,9 +3,9 @@ spring:
         name: happy-pet-shop
 
     datasource:
-        url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
-        username: root
-        password: root
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
     jpa:
         hibernate:
             ddl-auto: update
@@ -13,6 +13,17 @@ spring:
         properties:
             hibernate:
                 format_sql: true
+    security:
+        oauth2:
+            client:
+                registration:
+                    google:
+                        client-id: YOUR_CLIENT_ID
+                        client-secret: YOUR_CLIENT_SECRET
+                        scope:
+                            - email
+                            - profile
+                            - https://www.googleapis.com/auth/user.phonenumbers.read
 
 server:
     port: 8080
@@ -20,6 +31,6 @@ server:
         context-path: /happy-pet-shop
 
 jwt:
-    key: "ZXZlbnR0aHJlYWRvbGRub25lZmVuY2VmYWlybHl0b3dlcmFiaWxpdHlmaW5kYmFsbHM="
+    key: ${JWT_KEY}
     expiration-time: 3600 #seconds
     refreshExpiration-time: 604800 #seconds

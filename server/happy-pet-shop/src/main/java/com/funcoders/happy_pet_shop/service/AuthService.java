@@ -147,7 +147,10 @@ public class AuthService {
                 .issuer("domainname")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(EXPIRATION_TIME, ChronoUnit.SECONDS).toEpochMilli()
+                        Instant
+                                .now()
+                                .plus(EXPIRATION_TIME, ChronoUnit.SECONDS)
+                                .toEpochMilli()
                 ))
                 .build();
         Payload payload = new Payload(claimSet.toJSONObject());
