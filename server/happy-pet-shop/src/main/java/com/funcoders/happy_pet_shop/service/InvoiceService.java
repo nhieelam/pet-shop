@@ -1,10 +1,8 @@
 package com.funcoders.happy_pet_shop.service;
 
 import com.funcoders.happy_pet_shop.constant.DiscountType;
-import com.funcoders.happy_pet_shop.dto.request.InvoiceCreationRequest;
-import com.funcoders.happy_pet_shop.dto.request.InvoiceDetailCreationRequest;
-import com.funcoders.happy_pet_shop.dto.request.ReviewDetailRequest;
-import com.funcoders.happy_pet_shop.dto.request.ReviewRequest;
+import com.funcoders.happy_pet_shop.constant.PaymentStatus;
+import com.funcoders.happy_pet_shop.dto.request.*;
 import com.funcoders.happy_pet_shop.dto.response.InvoiceResponse;
 import com.funcoders.happy_pet_shop.dto.response.ReviewDetailResponse;
 import com.funcoders.happy_pet_shop.dto.response.ReviewResponse;
@@ -16,6 +14,7 @@ import com.funcoders.happy_pet_shop.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -337,6 +336,19 @@ public class InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND));
 
         invoiceRepository.delete(invoice);
+    }
+
+    @Transactional()
+    @PreAuthorize("hasRole('ADMIN')")
+    public InvoiceResponse updateInvoiceStatus(UUID id, InvoiceStatusUpdateRequest request) {
+        PaymentStatus paymentStatus = request.getPaymentStatus();
+
+        Invoice managedInvoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorType.INVOICE_NOT_FOUND));
+
+        managedInvoice.setStatus(paymentStatus);
+
+        return invoiceMapper.toResponse(invoiceRepository.save(managedInvoice));
     }
 
     private BigDecimal calculateDiscountAmount(PromotionDetail promotionDetail, BigDecimal productPrice) {
