@@ -1,1 +1,3 @@
-# pet-shop
+Happy Pet Shop is a modern, full-stack e-commerce platform designed to bridge the gap between passionate pet lovers and premium pet care solutions. The platform serves as a one-stop digital destination, offering an extensive catalog that includes live pet adoptions (dogs, cats, birds, and small animals), high-quality nutritious pet food, professional grooming and care tools, toys, and essential accessories.
+
+Built with scalability and user experience in mind, the application features an intuitive interface for pet owners to discover products tailored to their pets' specific breeds and lifestyle needs. Beyond customer-facing retail, the project integrates a comprehensive back-office management system, allowing administrators to seamlessly track live pet inventory, manage product stock levels, process orders, and ensure a streamlined supply chain from store to doorstep.
