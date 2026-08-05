@@ -1,14 +1,16 @@
 spring:
     application:
-        name: happy-pet-shop
+        name: pet-shop
 
     datasource:
-        url: "jdbc:postgresql://localhost:5432/happy_pet_shop"
-        username: postgres
-        password: postgres
+        url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
     jpa:
         hibernate:
             ddl-auto: update
+        open-in-view: false
         show-sql: true
         properties:
             hibernate:
