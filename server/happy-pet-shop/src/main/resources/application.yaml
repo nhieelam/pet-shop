@@ -1,27 +1,19 @@
 spring:
-    application:
-        name: pet-shop
-
-    datasource:
-        url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
-        username: ${DB_USERNAME}
-        password: ${DB_PASSWORD}
-        driver-class-name: com.mysql.cj.jdbc.Driver
-    jpa:
-        hibernate:
-            ddl-auto: update
-        open-in-view: false
-        show-sql: true
-        properties:
-            hibernate:
-                format_sql: true
+  application:
+    name: pet-shop-backend
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
-    port: 8080
-    servlet:
-        context-path: /happy-pet-shop
+  port: ${SERVER_PORT:8080}
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  servlet:
+    context-path: /happy-pet-shop
 
 jwt:
-    key: "ZXZlbnR0aHJlYWRvbGRub25lZmVuY2VmYWlybHl0b3dlcmFiaWxpdHlmaW5kYmFsbHM="
-    expiration-time: 3600 #seconds
-    refreshExpiration-time: 604800 #seconds
+  key: "ZXZlbnR0aHJlYWRvbGRub25lZmVuY2VmYWlybHl0b3dlcmFiaWxpdHlmaW5kYmFsbHM="
+  expiration-time: 3600 #seconds
+  refreshExpiration-time: 604800 #seconds
