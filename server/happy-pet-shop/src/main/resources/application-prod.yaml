@@ -16,11 +16,25 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
     user: ${DB_MIGRATION_USERNAME}
     password: ${DB_MIGRATION_PASSWORD}
+    locations: classpath:db/migration
 
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
     show-sql: false
 
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
