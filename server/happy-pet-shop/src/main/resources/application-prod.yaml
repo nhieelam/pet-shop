@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: ${DB_APP_USERNAME}
+    password: ${DB_APP_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: ${DB_MAX_POOL_SIZE:10}
@@ -10,6 +10,12 @@ spring:
       connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:30000}
       idle-timeout: ${DB_IDLE_TIMEOUT_MS:600000}
       max-lifetime: ${DB_MAX_LIFETIME_MS:1800000}
+
+  flyway:
+    enabled: true
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
+    user: ${DB_MIGRATION_USERNAME}
+    password: ${DB_MIGRATION_PASSWORD}
 
   jpa:
     hibernate:
