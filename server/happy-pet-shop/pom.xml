@@ -141,6 +141,7 @@
     </dependencies>
 
     <build>
+        <finalName>pet-shop</finalName>
         <plugins>
             <!-- Compiler plugin (MapStruct + Lombok) -->
             <plugin>
@@ -170,6 +171,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <excludes>
                         <exclude>

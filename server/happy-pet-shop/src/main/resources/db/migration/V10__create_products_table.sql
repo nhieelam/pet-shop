@@ -11,6 +11,5 @@ CREATE TABLE products (
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6),
     PRIMARY KEY (id),
-    KEY fk_products_category (category_id),
     CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
