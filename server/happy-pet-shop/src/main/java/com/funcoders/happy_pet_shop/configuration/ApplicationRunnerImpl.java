@@ -77,7 +77,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         seedCategoriesIfEmpty();
 
         log.info("Application init successfully");
-        log.info("localhost:8080/happy-pet-shop/swagger-ui/index.html");
+        log.info("localhost:8080/swagger-ui/index.html");
     }
 
     private void seedCategoriesIfEmpty() {

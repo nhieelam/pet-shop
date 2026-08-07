@@ -10,8 +10,15 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
   address: ${SERVER_ADDRESS:127.0.0.1}
-  servlet:
-    context-path: /happy-pet-shop
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
 
 jwt:
   key: "ZXZlbnR0aHJlYWRvbGRub25lZmVuY2VmYWlybHl0b3dlcmFiaWxpdHlmaW5kYmFsbHM="

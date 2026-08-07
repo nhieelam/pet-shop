@@ -1,4 +1,3 @@
-import type { PromotionData } from "./promotionTypes";
 import type { PaymentMethod, PaymentStatus } from "../type/type";
 
 export interface ReviewDetailRequest {

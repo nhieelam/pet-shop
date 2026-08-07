@@ -1,6 +1,5 @@
 import {API_CONFIG} from "../config/apiConfig";
 import type {
-  AuthRequest,
   AuthResponse,
   IntrospectRequest,
   IntrospectResponse,

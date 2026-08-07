@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPromotion } from "../../../services/promotionService";
 import { getAllProducts } from "../../../services/productService";
 import type { PromotionCreationRequest } from "../../../types/promotionTypes";
-import type { ProductData, ProductResponse } from "../../../types/productTypes";
+import type { ProductData } from "../../../types/productTypes";
 import ProductSearchBoard from "@/components/admin/ProductSearchBoard";
 
 function productLabel(p: ProductData) {

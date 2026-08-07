@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { InvoiceData, InvoiceResponse } from "../../../types/invoiceTypes.ts";
+import type { InvoiceData } from "../../../types/invoiceTypes.ts";
 import * as invoiceService from "../../../services/invoiceService.ts";
 
 export type ViewMode = "grid" | "list";

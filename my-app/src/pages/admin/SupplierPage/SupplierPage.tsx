@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSupplier } from "./useSupplier";
 import type {
   SupplierData,
@@ -125,13 +124,9 @@ export default function SupplierPage() {
     closeFormModal,
     closeEditModal,
     closeDeleteModal,
-    handleCreateSupplier,
-    handleUpdateSupplier,
-    handleDeleteSupplier,
     handleFormSubmit,
     handleEditSubmit,
     confirmDelete,
-    showToast,
     formSubmitting,
     editSubmitting,
     deleteSubmitting,

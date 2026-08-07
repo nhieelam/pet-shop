@@ -1,11 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/authContext";
-import { addCartItem } from "@/services/cartService";
-import type { CustomerData } from "@/types/customerTypes";
-import type { CartResponse } from "@/types/cartTypes";
+import { Link } from "react-router-dom";
 import { useProductsPage } from "../hooks/useProductsPage";
 
 
@@ -27,7 +22,6 @@ export default function ProductCard({
   image,
   availableAmount,
 }: ProductCardProps) {
-  const navigate = useNavigate();
   const { handleAddToCart, cartLoading, cartMessage } = useProductsPage();
 
   return (

@@ -3,7 +3,6 @@ import type { PaymentStatus } from "@/type/type";
 export const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
   { value: "PENDING", label: "Đang xử lý" },
   { value: "PAID", label: "Hoàn thành" },
-  { value: "SUCCESS", label: "Đã thành công" },
   { value: "CANCELLED", label: "Đã huỷ" },
   { value: "REFUNDED", label: "Đã hoàn" },
   { value: "FAILED", label: "Thất bại" },

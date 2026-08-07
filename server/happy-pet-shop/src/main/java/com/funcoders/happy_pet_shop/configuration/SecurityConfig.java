@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //for swagger
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // for swagger
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll() //for login and log up

@@ -21,7 +21,7 @@ type Props = {
 
 export default function OverviewTab({ user, customer }: Props) {
   const { updateProfile } = useProfile();
-  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username;
+  const displayName = [user.firstname, user.lastname].filter(Boolean).join(" ") || user.username;
   const totalOrders = customer.invoices?.length ?? 0;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -34,8 +34,8 @@ export default function OverviewTab({ user, customer }: Props) {
   const [editAddress, setEditAddress] = useState("");
 
   const syncFormFromUser = useCallback(() => {
-    setEditFirstName(user.firstName ?? "");
-    setEditLastName(user.lastName ?? "");
+    setEditFirstName(user.firstname ?? "");
+    setEditLastName(user.lastname ?? "");
     setEditEmail(user.email ?? "");
     setEditPhone(user.phone ?? "");
     setEditAddress(user.address ?? "");

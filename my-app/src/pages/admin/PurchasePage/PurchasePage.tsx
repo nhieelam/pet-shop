@@ -1,6 +1,5 @@
 "use client";
 
-import {useState} from "react";
 import {Link} from "react-router-dom";
 import {usePurchase} from "./usePurchase";
 import type {PurchaseLineItem, PurchaseResponse} from "../../../types/purchaseTypes";
@@ -141,7 +140,6 @@ export default function PurchasePage() {
     closeDetailModal,
     openDeleteModal,
     closeDeleteModal,
-    handleDeletePurchase,
     clearFilters,
     deleteSubmitting,
     confirmDelete,

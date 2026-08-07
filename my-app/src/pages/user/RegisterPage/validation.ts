@@ -1,14 +1,5 @@
 import type {RegisterFormData, RegisterFormErrors} from "./types";
 
-const initialFormData: RegisterFormData = {
-  userName: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  address : "",
-};
-
-
 export const validateForm = (
   formData: RegisterFormData
 ): RegisterFormErrors => {

@@ -1,13 +1,13 @@
-export enum UserRole {
-    CUSTOMER = "USER",
-    STAFF = "STAFF",
-    ADMIN = "ADMIN",
-}
+export const UserRole = {
+  CUSTOMER: "USER",
+  STAFF: "STAFF",
+  ADMIN: "ADMIN",
+} as const;
 
-export type PaymentMethod = "QR_Scanning" | "COD" ;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export type PaymentMethod = "QR_Scanning" | "COD";
 export type PaymentStatus = "PENDING" | "PAID" | "CANCELLED" | "REFUNDED" | "FAILED";
 export type DiscountType = "PERCENT" | "FIXED";
 
 export type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
-
-

@@ -22,8 +22,8 @@ export default function ProfileHeader() {
   useEffect(() => {
     if (customer?.user) {
       const u = customer.user;
-      setEditFirstName(u.firstName ?? "");
-      setEditLastName(u.lastName ?? "");
+      setEditFirstName(u.firstname ?? "");
+      setEditLastName(u.lastname ?? "");
       setEditEmail(u.email ?? "");
       setEditPhone(u.phone ?? "");
       setEditAddress(u.address ?? "");
@@ -33,7 +33,7 @@ export default function ProfileHeader() {
   if (!customer?.user) return null;
 
   const u = customer.user;
-  const name = displayName(u.firstName, u.lastName, u.username);
+  const name = displayName(u.firstname, u.lastname, u.username);
   const joinDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "—";
 
   const handleEditSubmit = async (e: React.FormEvent) => {

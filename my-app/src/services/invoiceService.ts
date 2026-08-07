@@ -8,7 +8,6 @@ import { API_CONFIG } from "../config/apiConfig";
 import { getAuthToken } from "../utils/storageUtils";
 
 import type { PaymentStatus } from "../type/type";
-import type { CustomerData } from "@/types/customerTypes";
 import type { statisticCustomerData, StatisticsData } from "@/types/statisticTypes";
 
 

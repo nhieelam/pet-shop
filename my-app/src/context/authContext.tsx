@@ -8,7 +8,7 @@ import {
 
 import {login as loginService, verifyToken} from "@/services/authService";
 
-import type {AuthRequest, IntrospectRequest, LoginRequest} from "@/types/authTypes";
+import type {IntrospectRequest, LoginRequest} from "@/types/authTypes";
 import type {CustomerData, CustomerResponse} from "@/types/customerTypes";
 import {getAuthToken, storeAuthToken} from "@/utils/storageUtils.ts";
 import {useLocation} from "react-router-dom";

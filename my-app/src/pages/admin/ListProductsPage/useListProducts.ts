@@ -7,7 +7,6 @@ import type { ProductData } from "../../../types/productTypes";
 import * as productService from "../../../services/productService";
 import * as categoryService from "../../../services/categoryService";
 import { isCloudinaryConfigured } from "../../../services/cloudinaryService";
-import { uploadImageToCloudinary } from "../../../services/cloudinaryService";
 export function useListProducts() {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);

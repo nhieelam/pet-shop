@@ -2,7 +2,8 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { useInvoiceHistory } from "../hooks/useInvoiceHistory";
-import type { Invoice, SortOption } from "../hooks/useInvoiceHistory";
+import type { Invoice } from "../hooks/useInvoiceHistory";
+import type { SortOption } from "../../../../type/type";
 import { useProfile } from "../hooks/useProfile";
 import type { InvoiceData } from "@/types/invoiceTypes";
 import Pagination from "./Pagination";

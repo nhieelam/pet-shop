@@ -5,7 +5,6 @@ import { createInvoice } from "@/services/invoiceService";
 import type {
   InvoiceData,
   InvoiceDetailCreationRequest,
-  InvoiceResponse,
 } from "@/types/invoiceTypes";
 import type { PaymentMethod } from "@/type/type";
 
