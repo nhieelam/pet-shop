@@ -1,5 +1,9 @@
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL
+)
+
 export const API_CONFIG = {
-    BASE_URL: "http://localhost:8080/happy-pet-shop",
+    BASE_URL: API_BASE_URL,
     ENDPOINTS: {
         AUTH: {
             LOGIN: "/auth/login",
