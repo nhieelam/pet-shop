@@ -17,7 +17,7 @@ public class CorsConfig {
         // Origins must not include a trailing slash
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://new-main.d213ba06r4edsz.amplifyapp.com"
+                "http://pet-shop-frontend.s3-website-ap-southeast-1.amazonaws.com/"
         ));
         configuration.setAllowedMethods(List.of(
                 "GET",
