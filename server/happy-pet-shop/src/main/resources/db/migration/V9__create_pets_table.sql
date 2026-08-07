@@ -1,0 +1,20 @@
+CREATE TABLE pets (
+    id CHAR(36) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    species VARCHAR(100) NOT NULL,
+    breed VARCHAR(100) NOT NULL,
+    birth DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    price DECIMAL(15, 2) NOT NULL,
+    vaccinated BIT(1) NOT NULL,
+    image_url VARCHAR(500),
+    available BIT(1) NOT NULL DEFAULT 1,
+    sold BIT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6),
+    PRIMARY KEY (id),
+    KEY idx_pet_species (species),
+    KEY idx_pet_breed (breed),
+    KEY idx_pet_available (available),
+    KEY idx_pet_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
